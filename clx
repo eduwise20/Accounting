@@ -1,0 +1,29 @@
+#!/usr/bin/env php
+<?php
+if (PHP_SAPI !== "cli") {
+    exit;
+}
+define('APP_START', microtime(true));
+require __DIR__.'/vendor/autoload.php';
+use Symfony\Component\Console\Application;
+
+$application = new Application();
+foreach (glob('console/commands/*.php') as $file)
+{
+    require_once $file;
+
+    // get the file name of the current file without the extension
+    // which is essentially the class name
+    $class = basename($file, '.php');
+
+    if (class_exists($class))
+    {
+        $application->add(new $class);
+    }
+}
+
+require 'console/Kernel.php';
+
+$application->add(new Kernel());
+
+$application->run();

@@ -1,0 +1,2 @@
+
+<?php echo $__env->make('layouts.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Users/razib/Documents/valet/business-suite/ui/theme/default/hello.blade.php ENDPATH**/ ?>
