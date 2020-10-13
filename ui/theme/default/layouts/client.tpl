@@ -16,7 +16,7 @@
                 {if isset($config['logo_text'])}
                     <span class="page-logo-text mr-1">{$config['logo_text']}</span>
                 {else}
-                    <span class="page-logo-text mr-1">CloudOnex</span>
+                    <span class="page-logo-text mr-1">Eduwise Accounting</span>
                 {/if}
 
 
@@ -273,7 +273,7 @@
                     {if isset($config['logo_text'])}
                         <span class="page-logo-text mr-1">{{$config['logo_text']}}</span>
                     {else}
-                        <span class="page-logo-text mr-1">CloudOnex</span>
+                        <span class="page-logo-text mr-1">Eduwise Accounting</span>
                     {/if}
 
 
