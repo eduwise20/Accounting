@@ -84,7 +84,7 @@ echo $_prefixVariable5;?>
                             <span class="page-logo-text mr-1"><?php echo $_smarty_tpl->tpl_vars['config']->value['logo_text'];?>
 </span>
                         <?php } else { ?>
-                            <span class="page-logo-text mr-1">CloudOnex</span>
+                            <span class="page-logo-text mr-1">Eduwise Accounting</span>
                         <?php }?>
                     </a>
                 </div>
