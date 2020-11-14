@@ -31,10 +31,10 @@ switch ($action){
 
         $msg = '';
         if($name == '') {
-            $msg .= 'Category Name is required <br>';
+            $msg .= 'Category Name is required. <br>';
         }
         if($remarks == '') {
-            $msg .= 'Remarks is required <br>';
+            $msg .= 'Remarks is required. <br>';
         }
         if($name != '' && $remarks != '') {
             $category = new Category;
@@ -72,10 +72,10 @@ switch ($action){
 
         $msg = '';
         if($name == '') {
-            $msg .= 'Category Name is required <br>';
+            $msg .= 'Category Name is required. <br>';
         }
         if($remarks == '') {
-            $msg .= 'Remarks is required <br>';
+            $msg .= 'Remarks is required. <br>';
         }
         $category = Category::find($id);
         if(!$category)
@@ -94,18 +94,11 @@ switch ($action){
     case 'delete':
         $id = route(3);
         $category = Category::find($id);
-        $subcategory = Subcategory::where('category_id', $id)->first();
-        if($subcategory) {
-            $msg = "Delete Unsuccessful. There are subcategories inside ".$category->name." category.";
-            $alert = 'e';
-        } 
-        else {
-            if($category){
-                $category->delete();
-                $msg = "Category successfully deleted.";
-                $alert = 's';
-            }
+        if($category){
+            $category->delete();
+            Subcategory::where('category_id', $id)->delete();
+            $msg = "Category and it's subcategories successfully deleted.";
         }
-        r2(U.'categories/main/list',$alert,$msg);
+        r2(U.'categories/main/list','s',$msg);
         break;
 }

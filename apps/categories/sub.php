@@ -47,7 +47,7 @@ switch ($action){
         if($category == 0) {
             $msg .= 'Please Select a Category <br>';
         }
-        if($name != '' && $remarks != '') {
+        if($name != '' && $remarks != '' && $category != 0) {
             $subcategory = new Subcategory;
             $subcategory->name     = $name;
             $subcategory->remarks  = $remarks;
