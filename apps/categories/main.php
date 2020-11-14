@@ -1,6 +1,7 @@
 <?php
 
 require 'apps/categories/models/Category.php';
+require 'apps/categories/models/Subcategory.php';
 
 $action = route(2,'list');
 _auth();
@@ -93,9 +94,18 @@ switch ($action){
     case 'delete':
         $id = route(3);
         $category = Category::find($id);
-        if($category){
-            $category->delete();
+        $subcategory = Subcategory::where('category_id', $id)->first();
+        if($subcategory) {
+            $msg = "Delete Unsuccessful. There are subcategories inside ".$category->name." category.";
+            $alert = 'e';
+        } 
+        else {
+            if($category){
+                $category->delete();
+                $msg = "Category successfully deleted.";
+                $alert = 's';
+            }
         }
-        r2(U.'categories/main/list','s','Deleted successfully');
+        r2(U.'categories/main/list',$alert,$msg);
         break;
 }
