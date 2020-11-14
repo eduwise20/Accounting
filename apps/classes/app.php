@@ -2,22 +2,22 @@
 
 require 'apps/classes/models/AppCLass.php';
 
-$action = route(2,'list');
+$action = route(2, 'list');
 _auth();
 $ui->assign('_application_menu', 'classes');
-$ui->assign('_title', 'Classes '.'- '. $config['CompanyName']);
+$ui->assign('_title', 'Classes ' . '- ' . $config['CompanyName']);
 $user = User::_info();
 $ui->assign('user', $user);
 
-switch ($action){
+switch ($action) {
 
 
     case 'list':
 
 
-        $classes = AppCLass::orderBy('id','desc')->get();
+        $classes = AppCLass::orderBy('id', 'desc')->get();
 
-        view('app_wrapper',[
+        view('app_wrapper', [
             '_include' => 'list', # This is the template file without extension inside views folder
             'classes' => $classes
         ]);
@@ -27,7 +27,7 @@ switch ($action){
 
     case 'add':
 
-        view('app_wrapper',[
+        view('app_wrapper', [
             '_include' => 'add' # This is the template file without extension inside views folder
         ]);
 
@@ -37,41 +37,46 @@ switch ($action){
     case 'save':
 
         // This route will handle form post for adding new notes and editing existing notes
-
         $name = _post('name');
         $code = _post('code');
         $id = _post('id');
 
-        if($name == '' || $code == ''){
-            r2(U.'classes/app/add','e','All fields are required.');
-        }
+        $validator = new Validator();
+        $data = $request->all();
 
+        $validation = $validator->validate($data, [
+            'name' => 'required',
+            'code' => 'required|numeric',
+        ]);
 
-        // Check the id exist, if id not exist we assume we are creating new note
-        if($id == '')
-        {
-            // Create New Note
-            $class = new AppClass;
-        }
-        else{
-            // Find the Note by Id
-            $class = AppClass::find($id);
+        if ($validation->fails()) {
+            $errors = $validation->errors();
+            $errorMessage = $errors->firstOfAll()[0];
+            responseWithError($errorMessage);
+        } else {
+            // Check the id exist, if id not exist we assume we are creating new note
+            if ($id == '') {
+                $class = new AppClass;
+            } else {
+                $class = AppClass::find($id);
 
-            // If note not exist We will redirect the user back to the list
+                if (!$class) {
+                    responseWithError('Classes not found');
+                }
 
-            if(!$class)
-            {
-                r2(U.'classes/app/list','e','Classes not found.');
             }
+            $class->name = $name;
+            $class->code = $code;
+            $class->save();
+
+            if ($id == '') {
+                $message = 'Class created successfully.';
+            } else {
+                $message = 'Class edited successfully';
+            }
+            r2(U . 'classes/app/list', 's', $message);
 
         }
-
-        // Now save the note
-        $class->name = $name;
-        $class->code = $code;
-        $class->save();
-
-        r2(U.'classes/app/list','s','Class created successfully.');
 
 
         break;
@@ -83,7 +88,7 @@ switch ($action){
 
         $class = AppClass::find($id);
 
-        view('app_wrapper',[
+        view('app_wrapper', [
             '_include' => 'view', # This is the template file without extension inside views folder
             'class' => $class
         ]);
@@ -98,7 +103,7 @@ switch ($action){
 
         $class = AppClass::find($id);
 
-        view('app_wrapper',[
+        view('app_wrapper', [
             '_include' => 'edit', # This is the template file without extension inside views folder
             'class' => $class
         ]);
@@ -115,12 +120,12 @@ switch ($action){
         $class = AppClass::find($id);
 
         // If found, delete the note
-        if($class){
+        if ($class) {
             $class->delete();
         }
 
         // Redirect to the list with success message
-        r2(U.'classes/app/list','s','Deleted successfully');
+        r2(U . 'classes/app/list', 's', 'Deleted successfully');
 
 
         break;

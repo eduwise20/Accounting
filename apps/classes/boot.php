@@ -11,4 +11,4 @@ $admin_class_sub_menus = [
     ]
 ];
 
-add_menu_admin('Classes',U.'classes/app','classes','fa fa-file',2,$admin_class_sub_menus);
+add_menu_admin('Classes',U.'classes/app','classes','fal fa-file',2,$admin_class_sub_menus);
