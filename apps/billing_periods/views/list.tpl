@@ -45,10 +45,10 @@
             <div class="panel">
 
                 <div class="panel-hdr">
-                    <h2>List Fee Groups</h2>
+                    <h2>List Billing Periods</h2>
                      <div class="panel-toolbar">
                         <div class="btn-group">
-                            <a href="{$_url}fee_groups/app/add/" class="btn btn-sm btn-success">Add Fee Group</a>
+                            <a href="{$_url}billing_periods/app/add/" class="btn btn-sm btn-success">Add Billing Period</a>
                         </div>
                     </div>
                 </div>
@@ -63,30 +63,34 @@
                                 <tr class="heading">
                                     <th>Name</th>
                                     <th>Remarks</th>
+                                    <th>Hierarchy</th>
                                     <th>Code</th>
                                     <th>Is Active</th>
                                     <th class="text-right" style="width: 80px;">{$_L['Manage']}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {foreach $fee_groups as $fee_group}
+                                {foreach $billing_periods as $billing_period}
                                     <tr>
                                         <td>
-                                            {$fee_group->name}
+                                            {$billing_period->name}
                                         </td>
                                         <td>
-                                            {$fee_group->remarks}
+                                            {$billing_period->remarks}
                                         </td>
                                         <td>
-                                            {$fee_group->code}
+                                            {$billing_period->hierarchy}
                                         </td>
                                         <td>
-                                            {if $fee_group->is_active eq 1}true{else}false{/if}
+                                            {$billing_period->code}
+                                        </td>
+                                        <td>
+                                            {if $billing_period->is_active eq 1}true{else}false{/if}
                                         </td>
                                         <td>
                                             <div class="btn-group float-right">
-                                                <a href="{$_url}fee_groups/app/edit/{$fee_group->id}" class="btn btn-info btn-icon waves-effect waves-themed has-tooltip" data-title="{$_L['Edit']}" data-placement="top"><i class="fal fa-pencil"></i> </a>
-                                                <a href="#" onclick="confirmThenGoToUrl(event,'fee_groups/app/delete/{$fee_group->id}')"  class="btn btn-danger btn-icon waves-effect waves-themed has-tooltip" data-title="{$_L['Delete']}" data-placement="top"><i class="fal fa-trash-alt"></i> </a>
+                                                <a href="{$_url}billing_periods/app/edit/{$billing_period->id}" class="btn btn-info btn-icon waves-effect waves-themed has-tooltip" data-title="{$_L['Edit']}" data-placement="top"><i class="fal fa-pencil"></i> </a>
+                                                <a href="#" onclick="confirmThenGoToUrl(event,'billing_periods/app/delete/{$billing_period->id}')"  class="btn btn-danger btn-icon waves-effect waves-themed has-tooltip" data-title="{$_L['Delete']}" data-placement="top"><i class="fal fa-trash-alt"></i> </a>
                                             </div>
                                         </td>
                                     </tr>

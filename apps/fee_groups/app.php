@@ -102,9 +102,11 @@ switch ($action){
             $msg .= 'Code is required <br>';
         } else if(!is_numeric($code)) {
             $msg .= 'Code should be number only. <br>';
-        } else if($fee_group->code != $code) {
+        }
+        if($fee_group->code != $code) {
             $exist = FeeGroup::where('code', $code)->first();
-        } else if($exist) {
+        }
+        if($exist) {
             $msg .= 'Code should be unique. <br>';
         } 
 
