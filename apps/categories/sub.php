@@ -118,6 +118,6 @@ switch ($action){
         if($subcategory){
             $subcategory->delete();
         }
-        r2(U.'categories/sub/list','s','Deleted successfully');
+        r2(U.'categories/sub/list','s','Subcategory successfully deleted.');
         break;
 }
