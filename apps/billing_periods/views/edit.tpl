@@ -44,7 +44,7 @@
                             <span id="emsgbody"></span>
                         </div>
 
-                        <form id="rform" action="{$_url}billing_periods/app/update">
+                        <form id="rform">
 
                             <div class="row">
                                 <div class="col-md-6 col-sm-12">
@@ -132,7 +132,7 @@
             $("#submit").click(function (e) {
                 e.preventDefault();
                 $('#ibox_form').block({ message:block_msg });
-                $.post(base_url + 'billing_periods/app/update/', $( "#rform" ).serialize())
+                $.post(base_url + 'billing_periods/app/save/', $( "#rform" ).serialize())
                     .done(function (data) {
                         console.log(data);
                         var sbutton = $("#submit");
