@@ -33,30 +33,39 @@ switch ($action){
         break;
 
     case 'save':
-        $name = _post('name');
-        $remarks = _post('remarks');
-        $category = _post('category');
+        $validator = new Validator();
+        $data = $request->all();
 
-        $msg = '';
-        if($name == '') {
-            $msg .= 'Subcategory Name is required <br>';
-        }
-        if($remarks == '') {
-            $msg .= 'Remarks is required <br>';
-        }
-        if($category == 0) {
-            $msg .= 'Please Select a Category <br>';
-        }
-        if($name != '' && $remarks != '' && $category != 0) {
-            $subcategory = new Subcategory;
-            $subcategory->name     = $name;
-            $subcategory->remarks  = $remarks;
-            $subcategory->category_id  = $category;
+        $validation = $validator->validate($data, [
+                'name' => 'required',
+                'remarks' => 'required',
+                'category' => 'not_in:0'
+            ],
+            [
+                'category:not_in' => 'The Category is required',
+            ]    
+        );
+
+        if ($validation->fails()) {
+            $errors = $validation->errors();
+            $errorMessages = $errors->firstOfAll();
+            $msg = '';
+            foreach($errorMessages as $message) {
+                $msg .= $message.'</br>';
+            }
+            echo $msg;
+        } else {
+            if(isset($data['id'])) {
+                $subcategory = Subcategory::find($data['id']);
+            } else {
+                $subcategory = new Subcategory;
+            }
+            $subcategory->name     = $data['name'];
+            $subcategory->remarks  = $data['remarks'];
+            $subcategory->category_id  = $data['category'];
             $subcategory->save();
             echo $subcategory->id;
-        } else {
-            echo $msg;
-        }
+        } 
         break;
 
     case 'view':
@@ -79,37 +88,6 @@ switch ($action){
             'category' => $category,
             'categories' => $categories,
         ]);
-        break;
-
-    case 'update':
-        $id = _post('id');
-        $name = _post('name');
-        $remarks = _post('remarks');
-        $category = _post('category');
-
-        $msg = '';
-        if($name == '') {
-            $msg .= 'Subcategory Name is required <br>';
-        }
-        if($remarks == '') {
-            $msg .= 'Remarks is required <br>';
-        }
-        if($category == 0) {
-            $msg .= 'Please Select a Category <br>';
-        }
-        $subcategory = Subcategory::find($id);
-        if(!$subcategory)
-        {
-            $msg .= 'Subcategory not found.';
-        }
-        if($name != '' && $remarks != '' && $category != 0 && $subcategory) {
-            $subcategory->name     = $name;
-            $subcategory->remarks  = $remarks;
-            $subcategory->category_id  = $category;
-            $subcategory->save();
-            echo $id;
-        }
-        echo $msg;
         break;
 
     case 'delete':
