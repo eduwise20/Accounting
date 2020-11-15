@@ -44,7 +44,7 @@
                             <span id="emsgbody"></span>
                         </div>
 
-                        <form id="rform" action="{$_url}fee_groups/app/update">
+                        <form id="rform">
 
                             <div class="row">
                                 <div class="col-md-6 col-sm-12">
@@ -124,7 +124,7 @@
             $("#submit").click(function (e) {
                 e.preventDefault();
                 $('#ibox_form').block({ message:block_msg });
-                $.post(base_url + 'fee_groups/app/update/', $( "#rform" ).serialize())
+                $.post(base_url + 'fee_groups/app/save/', $( "#rform" ).serialize())
                     .done(function (data) {
                         console.log(data);
                         var sbutton = $("#submit");
