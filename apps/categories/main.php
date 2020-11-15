@@ -12,7 +12,7 @@ $ui->assign('user', $user);
 
 switch ($action){
     case 'list':
-        $categories = Category::orderBy('id','desc')->get();
+        $categories = Category::all();
         view('app_wrapper',[
             '_include' => 'main/list',
             'categories' => $categories
@@ -76,18 +76,11 @@ switch ($action){
     case 'delete':
         $id = route(3);
         $category = Category::find($id);
-        $subcategory = Subcategory::where('category_id', $id)->first();
-        if($subcategory) {
-            $msg = "Delete Unsuccessful. There are subcategories inside ".$category->name." category.";
-            $alert = 'e';
-        } 
-        else {
-            if($category){
-                $category->delete();
-                $msg = "Category successfully deleted.";
-                $alert = 's';
-            }
+        if($category){
+            $category->delete();
+            Subcategory::where('category_id', $id)->delete();
+            $msg = "Category and it's subcategories successfully deleted.";
         }
-        r2(U.'categories/main/list',$alert,$msg);
+        r2(U.'categories/main/list','s',$msg);
         break;
 }
