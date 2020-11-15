@@ -12,7 +12,7 @@ $ui->assign('user', $user);
 
 switch ($action){
     case 'list':
-        $categories = Category::orderBy('id','desc')->get();
+        $categories = Category::all();
         view('app_wrapper',[
             '_include' => 'main/list',
             'categories' => $categories

@@ -13,7 +13,7 @@ $ui->assign('user', $user);
 
 switch ($action){
     case 'list':
-        $subcategories = Subcategory::orderBy('id','desc')->get()
+        $subcategories = Subcategory::all()
             ->map(function($subcategory) {
                 $subcategory->category = Category::find($subcategory->category_id)->name;
                 return $subcategory;
@@ -25,7 +25,7 @@ switch ($action){
         break;
 
     case 'add':
-        $categories = Category::orderBy('id','desc')->get();
+        $categories = Category::orderBy('name','asc')->get();
         view('app_wrapper',[
             '_include' => 'sub/add',
             'categories' => $categories
@@ -79,7 +79,7 @@ switch ($action){
 
     case 'edit':
         $id = route(3);
-        $categories = Category::orderBy('id','desc')->get();
+        $categories = Category::orderBy('name','asc')->get();
         $subcategory = Subcategory::find($id);
         $category = Category::find($subcategory->category_id);
         view('app_wrapper',[
