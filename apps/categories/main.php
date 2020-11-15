@@ -26,24 +26,32 @@ switch ($action){
         break;
 
     case 'save':
-        $name = _post('name');
-        $remarks = _post('remarks');
+        $validator = new Validator();
+        $data = $request->all();
 
-        $msg = '';
-        if($name == '') {
-            $msg .= 'Category Name is required <br>';
-        }
-        if($remarks == '') {
-            $msg .= 'Remarks is required <br>';
-        }
-        if($name != '' && $remarks != '') {
-            $category = new Category;
-            $category->name     = $name;
-            $category->remarks  = $remarks;
+        $validation = $validator->validate($data, [
+            'name' => 'required',
+            'remarks' => 'required',
+        ]);
+
+        if ($validation->fails()) {
+            $errors = $validation->errors();
+            $errorMessages = $errors->firstOfAll();
+            $msg = '';
+            foreach($errorMessages as $message) {
+                $msg .= $message.'</br>';
+            }
+            echo $msg;
+        } else {
+            if(isset($data['id'])) {
+                $category = Category::find($data['id']);
+            } else {
+                $category = new Category;
+            }
+            $category->name     = $data['name'];
+            $category->remarks  = $data['remarks'];
             $category->save();
             echo $category->id;
-        } else {
-            echo $msg;
         }
         break;
 
@@ -63,32 +71,6 @@ switch ($action){
             '_include' => 'main/edit',
             'category' => $category
         ]);
-        break;
-
-    case 'update':
-        $id = _post('id');
-        $name = _post('name');
-        $remarks = _post('remarks');
-
-        $msg = '';
-        if($name == '') {
-            $msg .= 'Category Name is required <br>';
-        }
-        if($remarks == '') {
-            $msg .= 'Remarks is required <br>';
-        }
-        $category = Category::find($id);
-        if(!$category)
-        {
-            $msg .= 'Category not found.';
-        }
-        if($name != '' && $remarks != '' && $category) {
-            $category->name     = $name;
-            $category->remarks  = $remarks;
-            $category->save();
-            echo $id;
-        }
-        echo $msg;
         break;
 
     case 'delete':
