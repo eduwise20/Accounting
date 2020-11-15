@@ -44,7 +44,7 @@
                             <span id="emsgbody"></span>
                         </div>
 
-                        <form id="rform" action="{$_url}categories/sub/save">
+                        <form id="rform">
 
                             <div class="row">
                                 <div class="col-md-6 col-sm-12">
