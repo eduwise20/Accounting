@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class AppCLass extends Model {
+class AppClass extends Model {
 
     protected $table = 'zzz_1_classes';
 

@@ -1,6 +1,6 @@
 <?php
 
-require 'apps/classes/models/AppCLass.php';
+require 'apps/classes/models/AppClass.php';
 
 $action = route(2, 'list');
 _auth();
@@ -15,7 +15,7 @@ switch ($action) {
     case 'list':
 
 
-        $classes = AppCLass::orderBy('id', 'desc')->get();
+        $classes = AppClass::orderBy('id', 'desc')->get();
 
         view('app_wrapper', [
             '_include' => 'list', # This is the template file without extension inside views folder
@@ -42,6 +42,7 @@ switch ($action) {
         $id = _post('id');
 
         $validator = new Validator();
+
         $data = $request->all();
 
         $validation = $validator->validate($data, [
@@ -49,10 +50,20 @@ switch ($action) {
             'code' => 'required|numeric',
         ]);
 
-        if ($validation->fails()) {
+        $class = AppClass::where('code', $code)->where('id', '!=', $id)->first();
+
+        if ($id == '') {
+            $viewUrl = 'classes/app/add';
+        } else {
+            $viewUrl = 'classes/app/edit/'.$id;
+        }
+
+        if ($class) {
+            r2(U . $viewUrl, 'e', 'Code already exists.');
+        } else if ($validation->fails()) {
             $errors = $validation->errors();
             $errorMessage = $errors->firstOfAll()[0];
-            responseWithError($errorMessage);
+            r2(U . $viewUrl, 'e', $errorMessage);
         } else {
             // Check the id exist, if id not exist we assume we are creating new note
             if ($id == '') {
@@ -61,7 +72,7 @@ switch ($action) {
                 $class = AppClass::find($id);
 
                 if (!$class) {
-                    responseWithError('Classes not found');
+                    r2(U . 'classes/app/edit');
                 }
 
             }
@@ -80,22 +91,6 @@ switch ($action) {
 
 
         break;
-
-
-    case 'view':
-
-        $id = route(3);
-
-        $class = AppClass::find($id);
-
-        view('app_wrapper', [
-            '_include' => 'view', # This is the template file without extension inside views folder
-            'class' => $class
-        ]);
-
-
-        break;
-
 
     case 'edit':
 
