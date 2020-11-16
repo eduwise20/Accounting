@@ -68,15 +68,6 @@ switch ($action){
         } 
         break;
 
-    case 'view':
-        $id = route(3);
-        $subcategory = Subcategory::find($id);
-        view('app_wrapper',[
-            '_include' => 'sub/view',
-            'subcategory' => $subcategory
-        ]);
-        break;
-
     case 'edit':
         $id = route(3);
         $categories = Category::orderBy('name','asc')->get();
