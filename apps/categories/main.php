@@ -55,15 +55,6 @@ switch ($action){
         }
         break;
 
-    case 'view':
-        $id = route(3);
-        $category = Category::find($id);
-        view('app_wrapper',[
-            '_include' => 'main/view',
-            'category' => $category
-        ]);
-        break;
-
     case 'edit':
         $id = route(3);
         $category = Category::find($id);
