@@ -33,7 +33,7 @@
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-hdr">
-                    <h2><span></span>Add Category</h2>
+                    <h2><span></span>Edit Category</h2>
                 </div>
 
                 <div class="panel-container show" id="ibox_form">

@@ -33,7 +33,7 @@
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-hdr">
-                    <h2><span></span>Edit Sub Category</h2>
+                    <h2><span></span>Edit Fee Group</h2>
                 </div>
 
                 <div class="panel-container show" id="ibox_form">
@@ -51,26 +51,31 @@
                                     <div class="form-group row">
                                         <label for="name" class="col-sm-3"><span class="h6">Name</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="name" name="name" class="form-control" autofocus value="{$subcategory->name}">
+                                            <input type="text" id="name" name="name" class="form-control" autofocus value="{$fee_group->name}">
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <label for="remarks" class="col-sm-3"><span class="h6">Remarks</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="remarks" name="remarks" class="form-control" value="{$subcategory->remarks}">
+                                            <input type="text" id="remarks" name="remarks" class="form-control" value="{$fee_group->remarks}">
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
-                                        <label for="group" class="col-sm-3"><span class="h6">{$_L['Categories']} </span></label>
+                                        <label for="remarks" class="col-sm-3"><span class="h6">Code</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-9">
-                                            <select class="form-control" name="category" id="category">
-                                                <option value="{$category->id}">{$category->name}</option>
-                                                {foreach $categories as $category}
-                                                    <option value="{$category['id']}">{$category['name']}</option>
-                                                {/foreach}
-                                            </select>
+                                            <input type="text" id="code" name="code" class="form-control" value="{$fee_group->code}">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="remarks" class="col-sm-3"><span class="h6">Is active</span></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" name="is_active" class="custom-control-input" id="is_active" {if $fee_group->is_active eq 1}checked{/if}>
+                                                <label class="custom-control-label" for="is_active"><span class="h6"></span></label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -84,7 +89,7 @@
                                 </div>
                             </div>
 
-                            <input type="hidden" name="id" value="{$subcategory->id}">
+                            <input type="hidden" name="id" value="{$fee_group->id}">
 
                         </form>
                     </div>
@@ -119,12 +124,12 @@
             $("#submit").click(function (e) {
                 e.preventDefault();
                 $('#ibox_form').block({ message:block_msg });
-                $.post(base_url + 'categories/sub/save/', $( "#rform" ).serialize())
+                $.post(base_url + 'fee_groups/app/save/', $( "#rform" ).serialize())
                     .done(function (data) {
                         console.log(data);
                         var sbutton = $("#submit");
                         if ($.isNumeric(data)) {
-                            window.location = base_url + 'categories/sub/list';
+                            window.location = base_url + 'fee_groups/app/list';
                         }
                         else {
                             $('#ibox_form').unblock();
