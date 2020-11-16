@@ -11,48 +11,30 @@ $user = User::_info();
 $ui->assign('user', $user);
 
 switch ($action) {
-
-
     case 'list':
-
-
-        $sections = AppSection::orderBy('id', 'desc')->get();
-        $classes = AppClass::orderBy('id', 'desc')->get();
+        $sections = AppSection::all();
+        $classes = AppClass::all();
         $classIdNameArray = array();
         foreach ($classes as $class) {
             $classIdNameArray[$class->id] = $class->name;
         }
-
         view('app_wrapper', [
-            '_include' => 'list', # This is the template file without extension inside views folder
+            '_include' => 'list',
             'sections' => $sections,
             'classes' => $classes,
             'classIdNameArray' => $classIdNameArray,
         ]);
-
         break;
-
 
     case 'add':
-
-        $classes = AppClass::orderBy('id', 'desc')->get();
-
+        $classes = AppClass::all();
         view('app_wrapper', [
-            '_include' => 'add', # This is the template file without extension inside views folder
+            '_include' => 'add',
             'classes' => $classes,
         ]);
-
         break;
 
-
     case 'save':
-
-        // This route will handle form post for adding new notes and editing existing notes
-        $name = _post('name');
-        $code = _post('code');
-        $class_id = _post('class_id');
-        $id = _post('id');
-
         $validator = new Validator();
         $data = $request->all();
 
@@ -62,83 +44,61 @@ switch ($action) {
             'class_id' => 'required',
         ]);
 
-        $section = AppSection::where('code', $code)->where('id', '!=', $id)->first();
-
-        if ($id == '') {
-            $viewUrl = 'sections/app/add';
-        } else {
-            $viewUrl = 'sections/app/edit/' . $id;
-        }
-
-        if ($section) {
-            r2(U . $viewUrl, 'e', 'Code already exists.');
-        } else if ($validation->fails()) {
+        if ($validation->fails()) {
             $errors = $validation->errors();
-            $errorMessage = $errors->firstOfAll()[0];
-            r2(U . $viewUrl, 'e', $errorMessage);
+            $errorMessages = $errors->firstOfAll();
+            $msg = '';
+            foreach($errorMessages as $message) {
+                $msg .= $message.'</br>';
+            }
+            echo $msg;
         } else {
-            // Check the id exist, if id not exist we assume we are creating new note
-            if ($id == '') {
-                $section = new AppSection;
-            } else {
-                $section = AppSection::find($id);
+            $exist = false;
 
-                if (!$section) {
-                    r2(U . 'sections/app/edit', 'e', 'Section not found.');
+            if((isset($data['id']) && AppSection::find($data['id'])->code != $data['code']) || !isset($data['id'])) {
+                $exist = AppSection::where('code', $data['code'])->first();
+            }
+            if($exist) {
+                echo 'Code should be unique. <br>';
+            } else {
+                if(isset($data['id'])) {
+                    $section = AppSection::find($data['id']);
+                } else {
+                    $section = new AppSection;
                 }
-
+                $section->name = $data['name'];
+                $section->code = $data['code'];
+                $section->class_id = $data['class_id'];
+                $section->save();
+                echo $section->id;
             }
-            $section->name = $name;
-            $section->code = $code;
-            $section->class_id = $class_id;
-
-            $section->save();
-
-            if ($id == '') {
-                $message = 'Section created successfully.';
-            } else {
-                $message = 'Section edited successfully';
-            }
-            r2(U . 'sections/app/list', 's', $message);
-
         }
-
-
         break;
 
     case 'edit':
-
         $id = route(3);
-
         $section = AppSection::find($id);
-        $classes = AppClass::orderBy('id', 'desc')->get();
-
-        view('app_wrapper', [
-            '_include' => 'edit', # This is the template file without extension inside views folder
-            'section' => $section,
-            'classes' => $classes
-        ]);
-
-
+        $classes = AppClass::all();
+        if(!$section) {
+            $msg = "Section not found.";
+            r2(U.'sections/app/list','e',$msg);
+        } else {
+            view('app_wrapper', [
+                '_include' => 'edit',
+                'section' => $section,
+                'classes' => $classes
+            ]);
+        }
         break;
-
 
     case 'delete':
-
         $id = route(3);
-
-        // Find the Note
         $section = AppSection::find($id);
-
-        // If found, delete the note
-        if ($section) {
+        if($section){
             $section->delete();
+            $msg = "Section successfully deleted.";
+            $alert = 's';
         }
-
-        // Redirect to the list with success message
-        r2(U . 'sections/app/list', 's', 'Section deleted successfully');
-
-
+        r2(U.'sections/app/list',$alert,$msg);
         break;
-
 }
