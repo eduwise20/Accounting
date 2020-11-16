@@ -75,22 +75,19 @@ switch ($action){
         }
         break;
 
-    case 'view':
-        $id = route(3);
-        $billing_period = BillingPeriod::find($id);
-        view('app_wrapper',[
-            '_include' => 'view',
-            'billing_period' => $billing_period
-        ]);
-        break;
-
     case 'edit':
         $id = route(3);
         $billing_period = BillingPeriod::find($id);
-        view('app_wrapper',[
-            '_include' => 'edit',
-            'billing_period' => $billing_period
-        ]);
+
+        if(!$billing_period) {
+            $msg = "Billing period not found.";
+            r2(U.'billing_periods/app/list','e',$msg);
+        } else {
+            view('app_wrapper',[
+                '_include' => 'edit',
+                'billing_period' => $billing_period
+            ]);
+        }
         break;
 
     case 'delete':
