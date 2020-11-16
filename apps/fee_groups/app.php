@@ -66,15 +66,6 @@ switch ($action){
         }
         break;
 
-    case 'view':
-        $id = route(3);
-        $fee_group = FeeGroup::find($id);
-        view('app_wrapper',[
-            '_include' => 'view',
-            'fee_group' => $fee_group
-        ]);
-        break;
-
     case 'edit':
         $id = route(3);
         $fee_group = FeeGroup::find($id);
