@@ -50,7 +50,7 @@ switch ($action){
             if((isset($data['id']) && BillingPeriod::find($data['id'])->code != $data['code']) || !isset($data['id'])) {
                 $existCode = BillingPeriod::where('code', $data['code'])->first();
             } 
-            if((isset($data['id']) && BillingPeriod::find($data['id'])->code != $data['hierarchy']) || !isset($data['id'])) {
+            if((isset($data['id']) && BillingPeriod::find($data['id'])->hierarchy != $data['hierarchy']) || !isset($data['id'])) {
                 $existHierarchy = BillingPeriod::where('hierarchy', $data['hierarchy'])->first();
             } 
 
