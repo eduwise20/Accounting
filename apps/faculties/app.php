@@ -2,47 +2,30 @@
 
 require 'apps/faculties/models/AppFaculty.php';
 
-$action = route(2, 'list');
+$action = route(2,'list');
 _auth();
 $ui->assign('_application_menu', 'faculties');
-$ui->assign('_title', 'Classes ' . '- ' . $config['CompanyName']);
+$ui->assign('_title', 'Faculty '.'- '. $config['CompanyName']);
 $user = User::_info();
 $ui->assign('user', $user);
 
-switch ($action) {
-
-
+switch ($action){
     case 'list':
-
-
-        $faculties = AppFaculty::orderBy('id', 'desc')->get();
-
-        view('app_wrapper', [
-            '_include' => 'list', # This is the template file without extension inside views folder
+        $faculties = AppFaculty::all();
+        view('app_wrapper',[
+            '_include' => 'list',
             'faculties' => $faculties
         ]);
-
         break;
-
 
     case 'add':
-
-        view('app_wrapper', [
-            '_include' => 'add' # This is the template file without extension inside views folder
+        view('app_wrapper',[
+            '_include' => 'add'
         ]);
-
         break;
 
-
     case 'save':
-
-        // This route will handle form post for adding new notes and editing existing notes
-        $name = _post('name');
-        $code = _post('code');
-        $id = _post('id');
-
         $validator = new Validator();
-
         $data = $request->all();
 
         $validation = $validator->validate($data, [
@@ -50,79 +33,58 @@ switch ($action) {
             'code' => 'required|numeric',
         ]);
 
-        $faculty = AppFaculty::where('code', $code)->where('id', '!=', $id)->first();
-
-        if ($id == '') {
-            $viewUrl = 'faculties/app/add';
-        } else {
-            $viewUrl = 'faculties/app/edit/'.$id;
-        }
-
-        if ($faculty) {
-            r2(U . $viewUrl, 'e', 'Code already exists.');
-        } else if ($validation->fails()) {
+        if ($validation->fails()) {
             $errors = $validation->errors();
-            $errorMessage = $errors->firstOfAll()[0];
-            r2(U . $viewUrl, 'e', $errorMessage);
+            $errorMessages = $errors->firstOfAll();
+            $msg = '';
+            foreach($errorMessages as $message) {
+                $msg .= $message.'</br>';
+            }
+            echo $msg;
         } else {
-            // Check the id exist, if id not exist we assume we are creating new note
-            if ($id == '') {
-                $faculty = new AppFaculty;
-            } else {
-                $faculty = AppFaculty::find($id);
+            $exist = false;
 
-                if (!$faculty) {
-                    r2(U . 'faculties/app/edit', 'e', 'Faculty not found.');
+            if((isset($data['id']) && AppFaculty::find($data['id'])->code != $data['code']) || !isset($data['id'])) {
+                $exist = AppFaculty::where('code', $data['code'])->first();
+            }
+            if($exist) {
+                echo 'Code should be unique. <br>';
+            } else {
+                if(isset($data['id'])) {
+                    $faculty = AppFaculty::find($data['id']);
+                } else {
+                    $faculty = new AppFaculty;
                 }
-
+                $faculty->name = $data['name'];
+                $faculty->code = $data['code'];
+                $faculty->save();
+                echo $faculty->id;
             }
-            $faculty->name = $name;
-            $faculty->code = $code;
-            $faculty->save();
-
-            if ($id == '') {
-                $message = 'Faculty created successfully.';
-            } else {
-                $message = 'Faculty edited successfully';
-            }
-            r2(U . 'faculties/app/list', 's', $message);
-
         }
-
-
         break;
 
     case 'edit':
-
         $id = route(3);
-
         $faculty = AppFaculty::find($id);
-
-        view('app_wrapper', [
-            '_include' => 'edit', # This is the template file without extension inside views folder
-            'faculty' => $faculty
-        ]);
-
-
+        if(!$faculty) {
+            $msg = "Faculty not found.";
+            r2(U.'faculties/app/list','e',$msg);
+        } else {
+            view('app_wrapper',[
+                '_include' => 'edit',
+                'faculty' => $faculty
+            ]);
+        }
         break;
-
 
     case 'delete':
-
         $id = route(3);
-
-        // Find the Note
         $faculty = AppFaculty::find($id);
-
-        // If found, delete the note
-        if ($faculty) {
+        if($faculty){
             $faculty->delete();
+            $msg = "Faculty successfully deleted.";
+            $alert = 's';
         }
-
-        // Redirect to the list with success message
-        r2(U . 'faculties/app/list', 's', 'Faculty deleted successfully');
-
-
+        r2(U.'faculties/app/list',$alert,$msg);
         break;
-
 }
