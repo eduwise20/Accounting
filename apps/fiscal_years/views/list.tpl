@@ -65,6 +65,8 @@
                                     <th>Code</th>
                                     <th>Order</th>
                                     <th>Year</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
                                     <th>Is Running</th>
                                     <th>Allow Entry</th>
                                     <th class="text-right" style="width: 80px;">{$_L['Manage']}</th>
@@ -84,6 +86,12 @@
                                         </td>
                                         <td>
                                             {$fiscal_year->year}
+                                        </td>
+                                        <td>
+                                            {$fiscal_year->start_date}
+                                        </td>
+                                        <td>
+                                            {$fiscal_year->end_date}
                                         </td>
                                         <td>
                                             {if $fiscal_year->is_running eq 1}true{else}false{/if}

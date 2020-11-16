@@ -25,76 +25,76 @@ switch ($action){
         break;
 
     case 'save':
-        $name = _post('name');
-        $remarks = _post('remarks');
-        $code = _post('code');
-        $order = _post('order');
-        $year = _post('year');
-        $is_running = _post('is_running');
-        $allow_entry = _post('allow_entry');
-        $start_date = _post('start_date');
-        $end_date = _post('end_date');
+        $validator = new Validator();
+        $data = $request->all();
 
-        $msg = '';
-        if($name == '') {
-            $msg .= 'Fiscal Year Name is required. <br>';
-        }
-        if($remarks == '') {
-            $msg .= 'Remarks is required. <br>';
-        }
-        if($year == '') {
-            $msg .= 'Year is required. <br>';
-        }
-        if($start_date == '') {
-            $msg .= 'Start date is required. <br>';
-        }
-        if($end_date == '') {
-            $msg .= 'End date is required. <br>';
-        }
-
-        $existCode = FiscalYear::where('code', $code)->first();
-        if($code == '') {
-            $msg .= 'Code is required. <br>';
-        } else if(!is_numeric($code)) {
-            $msg .= 'Code should be number only. <br>';
-        } else if($existCode) {
-            $msg .= 'Code should be unique. <br>';
-        }
-
-        $existOrder = FiscalYear::where('order', $order)->first();
-        if($order == '') {
-            $msg .= 'Order is required. <br>';
-        } else if(!is_numeric($code)) {
-            $msg .= 'Order should be number only. <br>';
-        } else if($existOrder) {
-            $msg .= 'Order should be unique. <br>';
-        }
-
-        if($name != '' && $remarks != '' && $year && $start_date && $end_date && $code != '' && $order != '' && is_numeric($code) && is_numeric($order) && !$existCode && !$existOrder) {
-            $fiscal_year = new FiscalYear;
-            $fiscal_year->name     = $name;
-            $fiscal_year->remarks  = $remarks;
-            $fiscal_year->code     = $code;
-            $fiscal_year->order     = $order;
-            $fiscal_year->year     = $year;
-            $fiscal_year->start_date   = $start_date;
-            $fiscal_year->end_date     = $end_date;
-            $fiscal_year->is_running = $is_running == 'on' ? 1 : 0;
-            $fiscal_year->allow_entry = $allow_entry == 'on' ? 1 : 0;
-            $fiscal_year->save();
-            echo $fiscal_year->id;
-        } else {
-            echo $msg;
-        }
-        break;
-
-    case 'view':
-        $id = route(3);
-        $fiscal_year = Category::find($id);
-        view('app_wrapper',[
-            '_include' => 'view',
-            'fiscal_year' => $fiscal_year
+        $validation = $validator->validate($data, [
+            'name' => 'required',
+            'remarks' => 'required',
+            'code' => 'required',
+            'order' => 'required',
+            'year' => 'required',
+            'start_date' => 'required',
+            'end_date' => 'required',
         ]);
+
+        if ($validation->fails()) {
+            $errors = $validation->errors();
+            $errorMessages = $errors->firstOfAll();
+            $msg = '';
+            foreach($errorMessages as $message) {
+                $msg .= $message.'</br>';
+            }
+            echo $msg;
+        } else {
+            $existCode = false;
+            $existOrder = false;
+
+            if((isset($data['id']) && FiscalYear::find($data['id'])->code != $data['code']) || !isset($data['id'])) {
+                $existCode = FiscalYear::where('code', $data['code'])->first();
+            } 
+            if((isset($data['id']) && FiscalYear::find($data['id'])->order != $data['order']) || !isset($data['id'])) {
+                $existOrder = FiscalYear::where('order', $data['order'])->first();
+            } 
+            
+            
+            if($existCode) {
+                echo 'Code should be unique. <br>';
+            } else if ($existOrder) {
+                echo 'Order should be unique. <br>';
+            } else {
+                if(isset($data['id'])) {
+                    $fiscal_year = FiscalYear::find($data['id']);
+                } else {
+                    $fiscal_year = new FiscalYear;
+                }
+
+                $fiscal_year->name     = $data['name'];
+                $fiscal_year->remarks  = $data['remarks'];
+                $fiscal_year->code     = $data['code'];
+                $fiscal_year->order     = $data['order'];
+                $fiscal_year->year     = $data['year'];
+                $fiscal_year->start_date   = $data['start_date'];
+                $fiscal_year->end_date     = $data['end_date'];
+
+                if(isset($data['is_running']) && $data['is_running'] == 'on') {
+                        $fiscal_year->is_running = 1;
+                        // if is_running is true all other is_running will be false       
+                        $running_fiscal_years = FiscalYear::where('is_running', 1);
+                            if(isset($data['id'])) {
+                                $running_fiscal_years->where('id', '!=', $data['id']);
+                            }
+                            $running_fiscal_years->update(['is_running' => 0]);
+
+                } else {
+                    $fiscal_year->is_running = 0;
+                }
+
+                $fiscal_year->allow_entry = isset($data['allow_entry']) ? ($data['allow_entry'] == 'on' ? 1 : 0) : 0;
+                $fiscal_year->save();
+                echo $fiscal_year->id;
+            }
+        }
         break;
 
     case 'edit':
@@ -106,89 +106,13 @@ switch ($action){
         ]);
         break;
 
-    case 'update':
-        $id = _post('id');
-        $name = _post('name');
-        $remarks = _post('remarks');
-        $code = _post('code');
-        $order = _post('order');
-        $year = _post('year');
-        $is_running = _post('is_running');
-        $allow_entry = _post('allow_entry');
-        $start_date = _post('start_date');
-        $end_date = _post('end_date');
-
-        $fiscal_year = FiscalYear::find($id);
-        if(!$fiscal_year)
-        {
-            $msg .= 'Fiscal Year not found.';
-        }
-
-        $existCode = false;
-        $existOrder = false;
-        $msg = '';
-        if($name == '') {
-            $msg .= 'Fiscal Year is required <br>';
-        }
-        if($remarks == '') {
-            $msg .= 'Remarks is required <br>';
-        }
-        if($year == '') {
-            $msg .= 'Year is required. <br>';
-        }
-        if($start_date == '') {
-            $msg .= 'Start date is required. <br>';
-        }
-        if($end_date == '') {
-            $msg .= 'End date is required. <br>';
-        }
-
-        if($fiscal_year->code != $code) {
-            $existCode = FiscalYear::where('code', $code)->first();
-        }
-        if($code == '') {
-            $msg .= 'Code is required <br>';
-        } else if(!is_numeric($code)) {
-            $msg .= 'Code should be number only. <br>';
-        } else if($existCode) {
-            $msg .= 'Code should be unique. <br>';
-        } 
-
-        if($fiscal_year->order != $order) {
-            $existOrder = FiscalYear::where('order', $order)->first();
-        }
-        if($order == '') {
-            $msg .= 'Order is required <br>';
-        } else if(!is_numeric($order)) {
-            $msg .= 'Order should be number only. <br>';
-        } else if($existOrder) {
-            $msg .= 'Order should be unique. <br>';
-        } 
-
-        if($name != '' && $remarks != ''  && $year && $start_date && $end_date && $code != '' && $order != '' && $fiscal_year && is_numeric($code) && !$existOrder && is_numeric($order) && !$existOrder) {
-            $fiscal_year->name     = $name;
-            $fiscal_year->remarks  = $remarks;
-            $fiscal_year->code  = $code;
-            $fiscal_year->order  = $order;
-            $fiscal_year->year     = $year;
-            $fiscal_year->start_date   = $start_date;
-            $fiscal_year->end_date     = $end_date;
-            $fiscal_year->is_running = $is_running == 'on' ? 1 : 0;
-            $fiscal_year->allow_entry = $allow_entry == 'on' ? 1 : 0;
-            $fiscal_year->save();
-            echo $id;
-        }
-        echo $msg;
-        break;
-
     case 'delete':
         $id = route(3);
         $fiscal_year = FiscalYear::find($id);
+        $msg = "Fiscal Year successfully deleted.";
         if($fiscal_year){
             $fiscal_year->delete();
-            $msg = "Fiscal Year successfully deleted.";
-            $alert = 's';
         }
-        r2(U.'fiscal_years/app/list',$alert,$msg);
+        r2(U.'fiscal_years/app/list','s',$msg);
         break;
 }
