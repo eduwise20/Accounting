@@ -13,13 +13,13 @@
                 <form id="main_form" method="post" action="{$_url}classes/app/save">
 
                     <div class="form-group">
-                        <label for="address"><span class="h6">Name</span></label>
+                        <label for="name"><span class="h6">Name</span></label>
 
                         <input type="text" id="name" name="name" class="form-control" value="{$class->name}"/>
                     </div>
 
                     <div class="form-group">
-                        <label for="address"><span class="h6">Code</span></label>
+                        <label for="code"><span class="h6">Code</span></label>
 
                         <input type="text" id="code" name="code" class="form-control" value="{$class->code}"/>
                     </div>

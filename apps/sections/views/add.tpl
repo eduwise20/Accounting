@@ -6,11 +6,11 @@
 
             <div class="panel-content">
 
-                <h3>Add Class</h3>
+                <h3>Add Section</h3>
 
                 <hr>
 
-                <form id="main_form" method="post" action="{$_url}classes/app/save">
+                <form id="main_form" method="post" action="{$_url}sections/app/save">
 
                     <div class="form-group">
                         <label for="name"><span class="h6">Name</span></label>
@@ -22,6 +22,16 @@
                         <label for="code"><span class="h6">Code</span></label>
 
                         <input type="text" id="code" name="code" class="form-control"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="class_id"><span class="h6">Class</span> </label>
+                        <select id="class_id" name="class_id" class="custom-select">
+                            <option>--</option>
+                            {foreach $classes as $class}
+                                <option value="{$class->id}">{$class->name}</option>
+                            {/foreach}
+                        </select>
                     </div>
 
                     <div class="form-group">
