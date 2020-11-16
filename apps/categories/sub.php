@@ -68,26 +68,22 @@ switch ($action){
         } 
         break;
 
-    case 'view':
-        $id = route(3);
-        $subcategory = Subcategory::find($id);
-        view('app_wrapper',[
-            '_include' => 'sub/view',
-            'subcategory' => $subcategory
-        ]);
-        break;
-
     case 'edit':
         $id = route(3);
         $categories = Category::orderBy('name','asc')->get();
         $subcategory = Subcategory::find($id);
         $category = Category::find($subcategory->category_id);
-        view('app_wrapper',[
-            '_include' => 'sub/edit',
-            'subcategory' => $subcategory,
-            'category' => $category,
-            'categories' => $categories,
-        ]);
+        if(!$subcategory) {
+            $msg = "Subcategory not found.";
+            r2(U.'categories/sub/list','e',$msg);
+        } else {
+            view('app_wrapper',[
+                '_include' => 'sub/edit',
+                'subcategory' => $subcategory,
+                'category' => $category,
+                'categories' => $categories,
+            ]);
+        }
         break;
 
     case 'delete':

@@ -19,4 +19,4 @@ $admin_category_sub_menus = [
     ]
 ];
 
-add_menu_admin('Categories', U.'categories', 'categories', 'fal fa-file', 1, $admin_category_sub_menus); 
+add_menu_admin('Categories', U.'categories', 'categories', 'fal fa-list-alt', 3, $admin_category_sub_menus); 

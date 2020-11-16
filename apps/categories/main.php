@@ -55,22 +55,19 @@ switch ($action){
         }
         break;
 
-    case 'view':
-        $id = route(3);
-        $category = Category::find($id);
-        view('app_wrapper',[
-            '_include' => 'main/view',
-            'category' => $category
-        ]);
-        break;
-
     case 'edit':
         $id = route(3);
         $category = Category::find($id);
-        view('app_wrapper',[
-            '_include' => 'main/edit',
-            'category' => $category
-        ]);
+
+        if(!$category) {
+            $msg = "Category not found.";
+            r2(U.'categories/main/list','e',$msg);
+        } else {
+            view('app_wrapper',[
+                '_include' => 'main/edit',
+                'category' => $category
+            ]);
+        }
         break;
 
     case 'delete':

@@ -66,22 +66,18 @@ switch ($action){
         }
         break;
 
-    case 'view':
-        $id = route(3);
-        $fee_group = FeeGroup::find($id);
-        view('app_wrapper',[
-            '_include' => 'view',
-            'fee_group' => $fee_group
-        ]);
-        break;
-
     case 'edit':
         $id = route(3);
         $fee_group = FeeGroup::find($id);
-        view('app_wrapper',[
-            '_include' => 'edit',
-            'fee_group' => $fee_group
-        ]);
+        if(!$fee_group) {
+            $msg = "Fee group not found.";
+            r2(U.'fee_groups/app/list','e',$msg);
+        } else {
+            view('app_wrapper',[
+                '_include' => 'edit',
+                'fee_group' => $fee_group
+            ]);
+        }
         break;
 
     case 'delete':
