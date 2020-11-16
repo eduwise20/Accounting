@@ -2,47 +2,30 @@
 
 require 'apps/classes/models/AppClass.php';
 
-$action = route(2, 'list');
+$action = route(2,'list');
 _auth();
 $ui->assign('_application_menu', 'classes');
-$ui->assign('_title', 'Classes ' . '- ' . $config['CompanyName']);
+$ui->assign('_title', 'Class '.'- '. $config['CompanyName']);
 $user = User::_info();
 $ui->assign('user', $user);
 
-switch ($action) {
-
-
+switch ($action){
     case 'list':
-
-
-        $classes = AppClass::orderBy('id', 'desc')->get();
-
-        view('app_wrapper', [
-            '_include' => 'list', # This is the template file without extension inside views folder
+        $classes = AppClass::all();
+        view('app_wrapper',[
+            '_include' => 'list',
             'classes' => $classes
         ]);
-
         break;
-
 
     case 'add':
-
-        view('app_wrapper', [
-            '_include' => 'add' # This is the template file without extension inside views folder
+        view('app_wrapper',[
+            '_include' => 'add'
         ]);
-
         break;
 
-
     case 'save':
-
-        // This route will handle form post for adding new notes and editing existing notes
-        $name = _post('name');
-        $code = _post('code');
-        $id = _post('id');
-
         $validator = new Validator();
-
         $data = $request->all();
 
         $validation = $validator->validate($data, [
@@ -50,79 +33,58 @@ switch ($action) {
             'code' => 'required|numeric',
         ]);
 
-        $class = AppClass::where('code', $code)->where('id', '!=', $id)->first();
-
-        if ($id == '') {
-            $viewUrl = 'classes/app/add';
-        } else {
-            $viewUrl = 'classes/app/edit/'.$id;
-        }
-
-        if ($class) {
-            r2(U . $viewUrl, 'e', 'Code already exists.');
-        } else if ($validation->fails()) {
+        if ($validation->fails()) {
             $errors = $validation->errors();
-            $errorMessage = $errors->firstOfAll()[0];
-            r2(U . $viewUrl, 'e', $errorMessage);
+            $errorMessages = $errors->firstOfAll();
+            $msg = '';
+            foreach($errorMessages as $message) {
+                $msg .= $message.'</br>';
+            }
+            echo $msg;
         } else {
-            // Check the id exist, if id not exist we assume we are creating new note
-            if ($id == '') {
-                $class = new AppClass;
-            } else {
-                $class = AppClass::find($id);
+            $exist = false;
 
-                if (!$class) {
-                    r2(U . 'classes/app/edit');
+            if((isset($data['id']) && AppClass::find($data['id'])->code != $data['code']) || !isset($data['id'])) {
+                $exist = AppClass::where('code', $data['code'])->first();
+            }
+            if($exist) {
+                echo 'Code should be unique. <br>';
+            } else {
+                if(isset($data['id'])) {
+                    $class = AppClass::find($data['id']);
+                } else {
+                    $class = new AppClass;
                 }
-
+                $class->name  = $data['name'];
+                $class->code     = $data['code'];
+                $class->save();
+                echo $class->id;
             }
-            $class->name = $name;
-            $class->code = $code;
-            $class->save();
-
-            if ($id == '') {
-                $message = 'Class created successfully.';
-            } else {
-                $message = 'Class edited successfully';
-            }
-            r2(U . 'classes/app/list', 's', $message);
-
         }
-
-
         break;
 
     case 'edit':
-
         $id = route(3);
-
         $class = AppClass::find($id);
-
-        view('app_wrapper', [
-            '_include' => 'edit', # This is the template file without extension inside views folder
-            'class' => $class
-        ]);
-
-
+        if(!$class) {
+            $msg = "Class not found.";
+            r2(U.'classes/app/list','e',$msg);
+        } else {
+            view('app_wrapper',[
+                '_include' => 'edit',
+                'class' => $class
+            ]);
+        }
         break;
-
 
     case 'delete':
-
         $id = route(3);
-
-        // Find the Note
         $class = AppClass::find($id);
-
-        // If found, delete the note
-        if ($class) {
+        if($class){
             $class->delete();
+            $msg = "Class successfully deleted.";
+            $alert = 's';
         }
-
-        // Redirect to the list with success message
-        r2(U . 'classes/app/list', 's', 'Deleted successfully');
-
-
+        r2(U.'classes/app/list',$alert,$msg);
         break;
-
 }
