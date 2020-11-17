@@ -1,2 +1,3 @@
-.idea/**
 storage/compiled/
+system/config.php
+.idea/**
