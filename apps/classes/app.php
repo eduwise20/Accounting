@@ -55,8 +55,8 @@ switch ($action){
                 } else {
                     $class = new AppClass;
                 }
-                $class->name  = $data['name'];
-                $class->code     = $data['code'];
+                $class->name = $data['name'];
+                $class->code = $data['code'];
                 $class->save();
                 echo $class->id;
             }
