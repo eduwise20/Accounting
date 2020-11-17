@@ -30,7 +30,7 @@ switch ($action){
 
         $validation = $validator->validate($data, [
             'name' => 'required',
-            'remarks' => 'required',
+            'remarks' => '',
             'code' => 'required',
             'order' => 'required',
             'year' => 'required',

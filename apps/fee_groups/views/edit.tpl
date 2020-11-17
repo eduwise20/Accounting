@@ -56,7 +56,7 @@
                                     </div>
 
                                     <div class="form-group row">
-                                        <label for="remarks" class="col-sm-3"><span class="h6">Remarks</span><span class="text-danger">*</span></label>
+                                        <label for="remarks" class="col-sm-3"><span class="h6">Remarks</span></label>
                                         <div class="col-sm-9">
                                             <input type="text" id="remarks" name="remarks" class="form-control" value="{$fee_group->remarks}">
                                         </div>
