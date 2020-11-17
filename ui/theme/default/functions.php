@@ -53,3 +53,44 @@ function add_menu_admin($name,$link='#',$c='',$icon='icon-leaf',$position=5,$sub
     }
 
 }
+
+
+function add_menu_admin_svg($name,$link='#',$c='',$icon='icon-leaf',$position=5,$submenu=array()){
+
+    global $admin_extra_nav,$routes;
+
+    $active = '';
+    if((isset($routes['0'])) AND ($routes['0']) == $c){
+        $active = 'active';
+
+    }
+
+
+
+    if(!empty($submenu)){
+
+        $s = '';
+
+        foreach($submenu as $menu){
+            if(isset($menu['target'])){
+                $target = 'target="'.$menu['target'].'"';
+            }
+            else{
+                $target = '';
+            }
+            $s .= ' <li><a href="'.$menu['link'].'" '.$target.'>'.$menu['name'].'</a></li>';
+        }
+
+        $admin_extra_nav[$position] .= '<li class="'.$active.'"> <a href="javascript:void(0);" class="waves-effect">'.$icon.' <span class="hide-menu"> '.$name.' <span class="fa arrow"></span></span></a>
+                            <ul class="nav nav-second-level">
+                                '.$s.'
+                            </ul>
+                        </li>';
+
+
+    }
+    else{
+        $admin_extra_nav[$position] .= '<li class="waves-effect '.$active.'"> <a href="'.$link.'"  id="li_'.$c.'">'.$icon.' <span class="hide-menu">'.$name.'</span></a> </li>';
+    }
+
+}

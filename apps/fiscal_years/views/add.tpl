@@ -33,7 +33,7 @@
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-hdr">
-                    <h2><span></span>Add Billing Period</h2>
+                    <h2><span></span>Add Fiscal Year</h2>
                 </div>
 
                 <div class="panel-container show" id="ibox_form">
@@ -44,7 +44,7 @@
                             <span id="emsgbody"></span>
                         </div>
 
-                        <form id="rform" action="{$_url}billing_periods/app/save">
+                        <form id="rform">
 
                             <div class="row">
                                 <div class="col-md-6 col-sm-12">
@@ -56,9 +56,57 @@
                                     </div>
 
                                     <div class="form-group row">
-                                        <label for="hierarchy" class="col-sm-3"><span class="h6">Hierarchy</span><span class="text-danger">*</span></label>
+                                        <label for="code" class="col-sm-3"><span class="h6">Code</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="hierarchy" name="hierarchy" class="form-control" autofocus>
+                                            <input type="text" id="code" name="code" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="order" class="col-sm-3"><span class="h6">Order</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="order" name="order" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="year" class="col-sm-3"><span class="h6">Year</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="year" name="year" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="start_date" class="col-sm-3"><span class="h6">Start Date</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="start_date" name="start_date" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="end_date" class="col-sm-3"><span class="h6">End Date</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="end_date" name="end_date" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="is_running" class="col-sm-3"><span class="h6">Is running</span></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" name="is_running" class="custom-control-input" id="is_running">
+                                                <label class="custom-control-label" for="is_running"><span class="h6"></span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="allow_entry" class="col-sm-3"><span class="h6">Allow Entry</span></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" name="allow_entry" class="custom-control-input" id="allow_entry">
+                                                <label class="custom-control-label" for="allow_entry"><span class="h6"></span></label>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -68,23 +116,7 @@
                                             <input type="text" id="remarks" name="remarks" class="form-control">
                                         </div>
                                     </div>
-
-                                    <div class="form-group row">
-                                        <label for="remarks" class="col-sm-3"><span class="h6">Code</span><span class="text-danger">*</span></label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="code" name="code" class="form-control">
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row">
-                                        <label for="remarks" class="col-sm-3"><span class="h6">Is active</span></label>
-                                        <div class="col-sm-9">
-                                            <div class="custom-control custom-switch">
-                                                <input type="checkbox" name="is_active" class="custom-control-input" id="is_active">
-                                                <label class="custom-control-label" for="is_active"><span class="h6"></span></label>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                 </div>
                             </div>
 
@@ -128,12 +160,12 @@
             $("#submit").click(function (e) {
                 e.preventDefault();
                 $('#ibox_form').block({ message:block_msg });
-                $.post(base_url + 'billing_periods/app/save/', $( "#rform" ).serialize())
+                $.post(base_url + 'fiscal_years/app/save/', $( "#rform" ).serialize())
                     .done(function (data) {
                         console.log(data);
                         var sbutton = $("#submit");
                         if ($.isNumeric(data)) {
-                            window.location = base_url + 'billing_periods/app/list';
+                            window.location = base_url + 'fiscal_years/app/list';
                         }
                         else {
                             $('#ibox_form').unblock();
