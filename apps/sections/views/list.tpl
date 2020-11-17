@@ -77,7 +77,7 @@
                                             {$section->code}
                                         </td>
                                         <td class="h6">
-                                            {$classIdNameArray[$section->class_id]}
+                                            {$section->class}
                                         </td>
                                         <td>
                                             <div class="btn-group float-right">

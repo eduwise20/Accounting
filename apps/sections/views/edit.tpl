@@ -44,7 +44,7 @@
                             <span id="emsgbody"></span>
                         </div>
 
-                        <form id="rform" action="{$_url}sections/app/save">
+                        <form id="rform">
 
                             <div class="row">
                                 <div class="col-md-6 col-sm-12">
@@ -66,7 +66,7 @@
                                         <label for="remarks" class="col-sm-3"><span class="h6">Class</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-9">
                                             <select id="class_id" name="class_id" class="custom-select">
-                                                <option>--</option>
+                                                <option value="0">--</option>
                                                 {foreach $classes as $class}
                                                     <option value="{$class->id}"
                                                             {if $section->class_id === $class->id}

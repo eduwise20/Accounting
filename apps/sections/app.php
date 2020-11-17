@@ -12,17 +12,13 @@ $ui->assign('user', $user);
 
 switch ($action) {
     case 'list':
-        $sections = AppSection::all();
-        $classes = AppClass::all();
-        $classIdNameArray = array();
-        foreach ($classes as $class) {
-            $classIdNameArray[$class->id] = $class->name;
-        }
+        $sections = AppSection::all()->map(function($section) {
+            $section->class = AppClass::find($section->class_id)->name;
+            return $section;
+        });
         view('app_wrapper', [
             '_include' => 'list',
             'sections' => $sections,
-            'classes' => $classes,
-            'classIdNameArray' => $classIdNameArray,
         ]);
         break;
 
@@ -39,10 +35,14 @@ switch ($action) {
         $data = $request->all();
 
         $validation = $validator->validate($data, [
-            'name' => 'required',
-            'code' => 'required|numeric',
-            'class_id' => 'required',
-        ]);
+                'name' => 'required',
+                'code' => 'required|numeric',
+                'class_id' => 'required|not_in:0',
+            ],
+            [
+                'class_id:not_in' => 'The Class is required',
+            ]    
+        );
 
         if ($validation->fails()) {
             $errors = $validation->errors();
