@@ -11,4 +11,4 @@ $admin_fee_group_sub_menus = [
     ]
 ];
 
-add_menu_admin('Fee Group', U.'fee_groups', 'fee_groups', 'fal fa-file', 1, $admin_fee_group_sub_menus); 
+add_menu_admin('Fee Group', U.'fee_groups', 'fee_groups', 'fal fa-layer-group', 1, $admin_fee_group_sub_menus); 

@@ -11,4 +11,4 @@ $admin_student_type_sub_menus = [
     ]
 ];
 
-add_menu_admin('Student Types',U.'student_types/app','student_types','fal fa-file',2,$admin_student_type_sub_menus);
+add_menu_admin('Student Types',U.'student_types/app','student_types','fal fa-user-graduate',2,$admin_student_type_sub_menus);

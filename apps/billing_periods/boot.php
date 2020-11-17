@@ -11,4 +11,4 @@ $admin_billing_period_sub_menus = [
     ]
 ];
 
-add_menu_admin('Billing Period', U.'billing_periods', 'billing_periods', 'fal fa-file', 1, $admin_billing_period_sub_menus); 
+add_menu_admin('Billing Period', U.'billing_periods', 'billing_periods', 'fal fa-calendar-alt', 1, $admin_billing_period_sub_menus); 
