@@ -33,7 +33,7 @@
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-hdr">
-                    <h2><span></span>Add Class</h2>
+                    <h2><span></span>Edit Billing Period</h2>
                 </div>
 
                 <div class="panel-container show" id="ibox_form">
@@ -44,24 +44,48 @@
                             <span id="emsgbody"></span>
                         </div>
 
-                        <form id="rform" action="{$_url}classes/app/save">
+                        <form id="rform">
 
                             <div class="row">
                                 <div class="col-md-6 col-sm-12">
                                     <div class="form-group row">
                                         <label for="name" class="col-sm-3"><span class="h6">Name</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="name" name="name" class="form-control" autofocus>
+                                            <input type="text" id="name" name="name" class="form-control" autofocus value="{$billing_period->name}">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="hierarchy" class="col-sm-3"><span class="h6">Hierarchy</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="hierarchy" name="hierarchy" class="form-control" autofocus value="{$billing_period->hierarchy}">
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group row">
+                                        <label for="remarks" class="col-sm-3"><span class="h6">Remarks</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="remarks" name="remarks" class="form-control" value="{$billing_period->remarks}">
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <label for="remarks" class="col-sm-3"><span class="h6">Code</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="code" name="code" class="form-control">
+                                            <input type="text" id="code" name="code" class="form-control" value="{$billing_period->code}">
                                         </div>
                                     </div>
 
+                                    <div class="form-group row">
+                                        <label for="remarks" class="col-sm-3"><span class="h6">Is active</span></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" name="is_active" class="custom-control-input" id="is_active" {if $billing_period->is_active eq 1}checked{/if}>
+                                                <label class="custom-control-label" for="is_active"><span class="h6"></span></label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -72,6 +96,9 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <input type="hidden" name="id" value="{$billing_period->id}">
+
                         </form>
                     </div>
                 </div>
@@ -105,11 +132,12 @@
             $("#submit").click(function (e) {
                 e.preventDefault();
                 $('#ibox_form').block({ message:block_msg });
-                $.post(base_url + 'classes/app/save/', $( "#rform" ).serialize())
+                $.post(base_url + 'billing_periods/app/save/', $( "#rform" ).serialize())
                     .done(function (data) {
+                        console.log(data);
                         var sbutton = $("#submit");
                         if ($.isNumeric(data)) {
-                            window.location = base_url + 'classes/app/list';
+                            window.location = base_url + 'billing_periods/app/list';
                         }
                         else {
                             $('#ibox_form').unblock();
@@ -125,3 +153,5 @@
         });
     </script>
 {/block}
+
+

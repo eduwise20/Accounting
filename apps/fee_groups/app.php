@@ -1,20 +1,20 @@
 <?php
 
-require 'apps/classes/models/AppClass.php';
+require 'apps/fee_groups/models/FeeGroup.php';
 
 $action = route(2,'list');
 _auth();
-$ui->assign('_application_menu', 'classes');
-$ui->assign('_title', 'Class '.'- '. $config['CompanyName']);
+$ui->assign('_application_menu', 'fee_groups');
+$ui->assign('_title', 'Fee Group '.'- '. $config['CompanyName']);
 $user = User::_info();
 $ui->assign('user', $user);
 
 switch ($action){
     case 'list':
-        $classes = AppClass::all();
+        $fee_groups = FeeGroup::all();
         view('app_wrapper',[
             '_include' => 'list',
-            'classes' => $classes
+            'fee_groups' => $fee_groups
         ]);
         break;
 
@@ -31,6 +31,7 @@ switch ($action){
         $validation = $validator->validate($data, [
             'name' => 'required',
             'code' => 'required|numeric',
+            'remarks' => 'required',
         ]);
 
         if ($validation->fails()) {
@@ -44,47 +45,49 @@ switch ($action){
         } else {
             $exist = false;
 
-            if((isset($data['id']) && AppClass::find($data['id'])->code != $data['code']) || !isset($data['id'])) {
-                $exist = AppClass::where('code', $data['code'])->first();
-            }
+            if((isset($data['id']) && FeeGroup::find($data['id'])->code != $data['code']) || !isset($data['id'])) {
+                $exist = FeeGroup::where('code', $data['code'])->first();
+            } 
             if($exist) {
                 echo 'Code should be unique. <br>';
             } else {
                 if(isset($data['id'])) {
-                    $class = AppClass::find($data['id']);
+                    $fee_group = FeeGroup::find($data['id']);
                 } else {
-                    $class = new AppClass;
+                    $fee_group = new FeeGroup;
                 }
-                $class->name  = $data['name'];
-                $class->code     = $data['code'];
-                $class->save();
-                echo $class->id;
+                $fee_group->name  = $data['name'];
+                $fee_group->remarks  = $data['remarks'];
+                $fee_group->code     = $data['code'];
+                $fee_group->is_active = isset($data['is_active']) ? ($data['is_active'] == 'on' ? 1 : 0) : 0;
+                $fee_group->save();
+                echo $fee_group->id;
             }
         }
         break;
 
     case 'edit':
         $id = route(3);
-        $class = AppClass::find($id);
-        if(!$class) {
-            $msg = "Class not found.";
-            r2(U.'classes/app/list','e',$msg);
+        $fee_group = FeeGroup::find($id);
+        if(!$fee_group) {
+            $msg = "Fee group not found.";
+            r2(U.'fee_groups/app/list','e',$msg);
         } else {
             view('app_wrapper',[
                 '_include' => 'edit',
-                'class' => $class
+                'fee_group' => $fee_group
             ]);
         }
         break;
 
     case 'delete':
         $id = route(3);
-        $class = AppClass::find($id);
-        if($class){
-            $class->delete();
-            $msg = "Class successfully deleted.";
+        $fee_group = FeeGroup::find($id);
+        if($fee_group){
+            $fee_group->delete();
+            $msg = "Fee Group successfully deleted.";
             $alert = 's';
         }
-        r2(U.'classes/app/list',$alert,$msg);
+        r2(U.'fee_groups/app/list',$alert,$msg);
         break;
 }
