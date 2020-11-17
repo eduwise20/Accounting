@@ -73,4 +73,4 @@ $admin_category_sub_menus = [
     ]
 ];
 
-add_menu_admin_svg('Categories', U.'categories', 'categories', $svg , 3, $admin_category_sub_menus); 
+add_menu_admin_svg('Categories', U.'categories', 'categories', $svg , 2 , $admin_category_sub_menus); 
