@@ -58,7 +58,12 @@
                                     <div class="form-group row">
                                         <label for="code" class="col-sm-3"><span class="h6">Type</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="type" name="type" class="form-control" value="{$discount->type}">
+                                            <div class="radio">
+                                                <label><input type="radio" name="type" value="Amount" {if $discount->type eq "Amount"}checked{/if}> Amount</label>
+                                            </div>
+                                            <div class="radio">
+                                                <label><input type="radio" name="type" value="Percentage" {if $discount->type eq "Percentage"}checked{/if}> Percentage</label>
+                                            </div>
                                         </div>
                                     </div>
 
