@@ -52,23 +52,23 @@ switch ($action) {
             $running_fiscal_years = FiscalYear::where('is_running', 1)->get();
             if(sizeof($running_fiscal_years) > 1) {
                 echo 'Multiple fiscal year running.';
-            }
-            if (sizeof($running_fiscal_years) < 1) {
+            } else if (sizeof($running_fiscal_years) < 1) {
                 echo 'The fiscal year is not selected.';
-            }
-            if (isset($data['id'])) {
-                $fine = AppFine::find($data['id']);
             } else {
-                $fine = new AppFine;
+                if (isset($data['id'])) {
+                    $fine = AppFine::find($data['id']);
+                } else {
+                    $fine = new AppFine;
+                }
+                $fine->name = $data['name'];
+                $fine->type = $data['type'];
+                $fine->fiscal_year_id = $running_fiscal_years->get(0)->id;
+                $fine->amount = $data['amount'];
+                $fine->is_active = isset($data['is_active']) ? ($data['is_active'] == 'on' ? 1 : 0) : 0;
+                $fine->remarks = $data['remarks'];
+                $fine->save();
+                echo $fine->id;
             }
-            $fine->name = $data['name'];
-            $fine->type = $data['type'];
-            $fine->fiscal_year_id = $running_fiscal_years->get(0)->id;
-            $fine->amount = $data['amount'];
-            $fine->is_active = isset($data['is_active']) ? ($data['is_active'] == 'on' ? 1 : 0) : 0;
-            $fine->remarks = $data['remarks'];
-            $fine->save();
-            echo $fine->id;
         }
 
         break;
