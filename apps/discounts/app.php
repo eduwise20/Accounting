@@ -52,24 +52,24 @@ switch ($action) {
             $running_fiscal_years = FiscalYear::where('is_running', 1)->get();
             if(sizeof($running_fiscal_years) > 1) {
                 echo 'Multiple fiscal year running.';
-            }
-            if (sizeof($running_fiscal_years) < 1) {
+            } else if (sizeof($running_fiscal_years) < 1) {
                 echo 'The fiscal year is not selected.';
-            }
-            if (isset($data['id'])) {
-                $discount = AppDiscount::find($data['id']);
             } else {
-                $discount = new AppDiscount;
+                if (isset($data['id'])) {
+                    $discount = AppDiscount::find($data['id']);
+                } else {
+                    $discount = new AppDiscount;
+                }
+                $discount->name = $data['name'];
+                $discount->type = $data['type'];
+                $discount->fiscal_year_id = $running_fiscal_years->get(0)->id;
+                $discount->amount = $data['amount'];
+                $discount->is_recurring = isset($data['is_recurring']) ? ($data['is_recurring'] == 'on' ? 1 : 0) : 0;
+                $discount->is_active = isset($data['is_active']) ? ($data['is_active'] == 'on' ? 1 : 0) : 0;
+                $discount->remarks = $data['remarks'];
+                $discount->save();
+                echo $discount->id;
             }
-            $discount->name = $data['name'];
-            $discount->type = $data['type'];
-            $discount->fiscal_year_id = $running_fiscal_years->get(0)->id;
-            $discount->amount = $data['amount'];
-            $discount->is_recurring = isset($data['is_recurring']) ? ($data['is_recurring'] == 'on' ? 1 : 0) : 0;
-            $discount->is_active = isset($data['is_active']) ? ($data['is_active'] == 'on' ? 1 : 0) : 0;
-            $discount->remarks = $data['remarks'];
-            $discount->save();
-            echo $discount->id;
         }
 
         break;
