@@ -6,7 +6,7 @@ require 'apps/fiscal_years/models/FiscalYear.php';
 $action = route(2, 'list');
 _auth();
 $ui->assign('_application_menu', 'fines');
-$ui->assign('_title', 'Sections ' . '- ' . $config['CompanyName']);
+$ui->assign('_title', 'Fines ' . '- ' . $config['CompanyName']);
 $user = User::_info();
 $ui->assign('user', $user);
 
