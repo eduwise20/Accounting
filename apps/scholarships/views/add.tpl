@@ -58,7 +58,12 @@
                                     <div class="form-group row">
                                         <label for="code" class="col-sm-3"><span class="h6">Type</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="type" name="type" class="form-control">
+                                            <div class="radio">
+                                                <label><input type="radio" name="type" value="Amount" checked> Amount</label>
+                                            </div>
+                                            <div class="radio">
+                                                <label><input type="radio" name="type" value="Percentage"> Percentage</label>
+                                            </div>
                                         </div>
                                     </div>
 
