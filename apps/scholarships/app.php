@@ -52,24 +52,24 @@ switch ($action) {
             $running_fiscal_years = FiscalYear::where('is_running', 1)->get();
             if(sizeof($running_fiscal_years) > 1) {
                 echo 'Multiple fiscal year running.';
-            }
-            if (sizeof($running_fiscal_years) < 1) {
+            } else if (sizeof($running_fiscal_years) < 1) {
                 echo 'The fiscal year is not selected.';
-            }
-            if (isset($data['id'])) {
-                $scholarship = AppScholarship::find($data['id']);
             } else {
-                $scholarship = new AppScholarship;
+                if (isset($data['id'])) {
+                    $scholarship = AppScholarship::find($data['id']);
+                } else {
+                    $scholarship = new AppScholarship;
+                }
+                $scholarship->name = $data['name'];
+                $scholarship->type = $data['type'];
+                $scholarship->fiscal_year_id = $running_fiscal_years->get(0)->id;
+                $scholarship->amount = $data['amount'];
+                $scholarship->is_recurring = isset($data['is_recurring']) ? ($data['is_recurring'] == 'on' ? 1 : 0) : 0;
+                $scholarship->is_active = isset($data['is_active']) ? ($data['is_active'] == 'on' ? 1 : 0) : 0;
+                $scholarship->remarks = $data['remarks'];
+                $scholarship->save();
+                echo $scholarship->id;
             }
-            $scholarship->name = $data['name'];
-            $scholarship->type = $data['type'];
-            $scholarship->fiscal_year_id = $running_fiscal_years->get(0)->id;
-            $scholarship->amount = $data['amount'];
-            $scholarship->is_recurring = isset($data['is_recurring']) ? ($data['is_recurring'] == 'on' ? 1 : 0) : 0;
-            $scholarship->is_active = isset($data['is_active']) ? ($data['is_active'] == 'on' ? 1 : 0) : 0;
-            $scholarship->remarks = $data['remarks'];
-            $scholarship->save();
-            echo $scholarship->id;
         }
 
         break;
