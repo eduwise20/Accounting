@@ -40,7 +40,7 @@ function add_menu_admin($name,$link='#',$c='',$icon='icon-leaf',$position=5,$sub
             $s .= ' <li><a href="'.$menu['link'].'" '.$target.'>'.$menu['name'].'</a></li>';
         }
 
-        $admin_extra_nav[$position] .= '<li class="'.$active.'"> <a href="javascript:void(0);" class="waves-effect waves-themed"><i class="'.$icon.'"></i> <span class="hide-menu" style="display:none;"> '.$name.' <span class="fa arrow"></span></span></a>
+        $admin_extra_nav[$position] .= '<li class="'.$active.'"> <a href="javascript:void(0);" class="waves-effect waves-themed"><i class="'.$icon.'"></i> <span class="nav-link-text hide-menu"> '.$name.' <span class="fa arrow"></span></span></a>
                             <ul class="nav nav-second-level">
                                 '.$s.'
                             </ul>
@@ -81,7 +81,7 @@ function add_menu_admin_svg($name,$link='#',$c='',$icon='icon-leaf',$position=5,
             $s .= ' <li><a href="'.$menu['link'].'" '.$target.'>'.$menu['name'].'</a></li>';
         }
 
-        $admin_extra_nav[$position] .= '<li class="'.$active.'"> <a href="javascript:void(0);" class="waves-effect waves-themed">'.$icon.' <span class="hide-menu" style="display:none;"> '.$name.' <span class="fa arrow"></span></span></a>
+        $admin_extra_nav[$position] .= '<li class="'.$active.'"> <a href="javascript:void(0);" class="waves-effect waves-themed">'.$icon.' <span class="nav-link-text hide-menu"> '.$name.'</span> <span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 '.$s.'
                             </ul>
