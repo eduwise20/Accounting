@@ -12,7 +12,7 @@ $ui->assign('user', $user);
 
 switch ($action) {
     case 'list':
-        $discounts = AppDiscount::all()->map(function($discount) {
+        $discounts = AppDiscount::all()->map(function ($discount) {
             $discount->fiscal_year = FiscalYear::find($discount->fiscal_year_id)->name;
             return $discount;
         });
@@ -50,10 +50,12 @@ switch ($action) {
             echo $msg;
         } else {
             $running_fiscal_years = FiscalYear::where('is_running', 1)->get();
-            if(sizeof($running_fiscal_years) > 1) {
+            if (sizeof($running_fiscal_years) > 1) {
                 echo 'Multiple fiscal year running.';
             } else if (sizeof($running_fiscal_years) < 1) {
                 echo 'The fiscal year is not selected.';
+            } else if (($data['type'] == 'Percentage') && ($data['amount'] < 0 || $data['amount'] > 100)) {
+                echo 'Percentage should be between 0 to 100.';
             } else {
                 if (isset($data['id'])) {
                     $discount = AppDiscount::find($data['id']);

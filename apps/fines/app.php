@@ -54,7 +54,9 @@ switch ($action) {
                 echo 'Multiple fiscal year running.';
             } else if (sizeof($running_fiscal_years) < 1) {
                 echo 'The fiscal year is not selected.';
-            } else {
+                } else if (($data['type'] == 'Percentage') && ($data['amount'] < 0 || $data['amount'] > 100)) {
+                    echo 'Percentage should be between 0 to 100.';
+                } else {
                 if (isset($data['id'])) {
                     $fine = AppFine::find($data['id']);
                 } else {
