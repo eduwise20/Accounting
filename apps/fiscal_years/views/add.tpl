@@ -25,7 +25,7 @@
 
     </style>
 
-
+    <link rel="stylesheet" href="https://unpkg.com/nepali-date-picker@2.0.1/dist/nepaliDatePicker.min.css" crossorigin="anonymous" />
 {/block}
 
 {block name="content"}
@@ -79,14 +79,14 @@
                                     <div class="form-group row">
                                         <label for="start_date" class="col-sm-3"><span class="h6">Start Date</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="start_date" name="start_date" class="form-control">
+                                            <input type="text" id="start_date" name="start_date" class="form-control date-picker">
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <label for="end_date" class="col-sm-3"><span class="h6">End Date</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-9">
-                                            <input type="text" id="end_date" name="end_date" class="form-control">
+                                            <input type="text" id="end_date" name="end_date" class="form-control date-picker">
                                         </div>
                                     </div>
 
@@ -140,6 +140,7 @@
 {/block}
 
 {block name="script"}
+    <script src="https://unpkg.com/nepali-date-picker@2.0.1/dist/jquery.nepaliDatePicker.min.js" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function () {
             $(".progress").hide();
@@ -178,6 +179,11 @@
             });
 
 
+        });
+
+        $('.date-picker').nepaliDatePicker({
+            dateFormat: '%D, %M %d, %y',
+            closeOnDateSelect: true
         });
     </script>
 {/block}
