@@ -12,7 +12,7 @@ $ui->assign('user', $user);
 
 switch ($action) {
     case 'list':
-        $scholarships = AppScholarship::all()->map(function($scholarship) {
+        $scholarships = AppScholarship::all()->map(function ($scholarship) {
             $scholarship->fiscal_year = FiscalYear::find($scholarship->fiscal_year_id)->name;
             return $scholarship;
         });
@@ -50,10 +50,12 @@ switch ($action) {
             echo $msg;
         } else {
             $running_fiscal_years = FiscalYear::where('is_running', 1)->get();
-            if(sizeof($running_fiscal_years) > 1) {
+            if (sizeof($running_fiscal_years) > 1) {
                 echo 'Multiple fiscal year running.';
             } else if (sizeof($running_fiscal_years) < 1) {
                 echo 'The fiscal year is not selected.';
+            } else if (($data['type'] == 'Percentage') && ($data['amount'] < 0 || $data['amount'] > 100)) {
+                echo 'Percentage should be between 0 to 100.';
             } else {
                 if (isset($data['id'])) {
                     $scholarship = AppScholarship::find($data['id']);
