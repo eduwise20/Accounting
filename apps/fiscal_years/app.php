@@ -62,7 +62,7 @@ switch ($action) {
                 echo 'Code should be unique. <br>';
             } else if ($existOrder) {
                 echo 'Order should be unique. <br>';
-            } else if ($data['start_date'] <= $data['end_date']) {
+            } else if ($data['start_date'] >= $data['end_date']) {
                 echo 'End date should be greater than start date. <br>';
             } else {
                 if (isset($data['id'])) {
