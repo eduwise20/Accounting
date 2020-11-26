@@ -117,6 +117,30 @@
                                     </div>
 
                                     <div class="form-group row">
+                                        <label for="is_running" class="col-sm-3"><span class="h6">Is transportation</span></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" name="is_transportation" class="custom-control-input" id="is_transportation" {if $fee_name->is_transportation eq 1}checked{/if}>
+                                                <label class="custom-control-label" for="is_transportation"><span class="h6"></span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row" id="from_section">
+                                        <label for="name" class="col-sm-3"><span class="h6">From</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="from" name="from" class="form-control" value="{$fee_name->from}">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row" id="to_section">
+                                        <label for="name" class="col-sm-3"><span class="h6">To</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="to" name="to" class="form-control" value="{$fee_name->to}">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
                                         <label for="is_running" class="col-sm-3"><span class="h6">Is active</span></label>
                                         <div class="col-sm-9">
                                             <div class="custom-control custom-switch">
@@ -152,6 +176,21 @@
             $(".progress").hide();
             $("#emsg").hide();
             var _url = '{$_url}';
+            $("#from_section").hide();
+            $("#to_section").hide();
+            if($("#is_transportation").is(':checked')) {
+                $("#from_section").show();
+                $("#to_section").show();
+            }
+            $("#is_transportation").change(function(){
+                if($(this).is(':checked')) {
+                    $("#from_section").show();
+                    $("#to_section").show();
+                } else {
+                    $("#from_section").hide();
+                    $("#to_section").hide();
+                }
+            });
 
 
             $('#tags').select2({

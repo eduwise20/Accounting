@@ -37,7 +37,12 @@ switch ($action) {
         $validation = $validator->validate($data, [
                 'name' => 'required',
                 'code' => 'required',
-                'fee_group_id' => 'required',
+                'fee_group_id' => 'required|not_in:0',
+                'from' => 'required_if:is_transportation,==,on',
+                'to' => 'required_if:is_transportation,==,on',
+            ],
+            [
+                'fee_group_id:not_in' => 'The Fee group is required',
             ]
         );
 
@@ -52,10 +57,10 @@ switch ($action) {
         } else {
             $exist = false;
 
-            if((isset($data['id']) && AppFeeName::find($data['id'])->code != $data['code']) || !isset($data['id'])) {
+            if ((isset($data['id']) && AppFeeName::find($data['id'])->code != $data['code']) || !isset($data['id'])) {
                 $exist = AppFeeName::where('code', $data['code'])->first();
             }
-            if($exist) {
+            if ($exist) {
                 echo 'Code should be unique. <br>';
             } else {
                 if (isset($data['id'])) {
@@ -70,6 +75,11 @@ switch ($action) {
                 $fee_name->is_fine_applicable = isset($data['is_fine_applicable']) ? ($data['is_fine_applicable'] == 'on' ? 1 : 0) : 0;
                 $fee_name->is_discount_applicable = isset($data['is_discount_applicable']) ? ($data['is_discount_applicable'] == 'on' ? 1 : 0) : 0;
                 $fee_name->is_scholarship_applicable = isset($data['is_scholarship_applicable']) ? ($data['is_scholarship_applicable'] == 'on' ? 1 : 0) : 0;
+                $fee_name->is_transportation = isset($data['is_transportation']) ? ($data['is_transportation'] == 'on' ? 1 : 0) : 0;
+                if($fee_name->is_transportation) {
+                    $fee_name->from = $data['from'];
+                    $fee_name->to = $data['to'];
+                }
                 $fee_name->is_active = isset($data['is_active']) ? ($data['is_active'] == 'on' ? 1 : 0) : 0;
                 $fee_name->save();
                 echo $fee_name->id;

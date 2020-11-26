@@ -68,6 +68,7 @@
                                     <th>Is Fine Applicable</th>
                                     <th>Is Discount Applicable</th>
                                     <th>Is Scholarship Applicable</th>
+                                    <th>Is Transportation</th>
                                     <th>Is Active</th>
                                     <th class="text-right" style="width: 80px;">{$_L['Manage']}</th>
                                 </tr>
@@ -95,6 +96,9 @@
                                         </td>
                                         <td>
                                             {if $fee_name->is_scholarship_applicable eq 1}True{else}False{/if}
+                                        </td>
+                                        <td>
+                                            {if $fee_name->is_transportation eq 1}True{else}False{/if}
                                         </td>
                                         <td>
                                             {if $fee_name->is_active eq 1}True{else}False{/if}
