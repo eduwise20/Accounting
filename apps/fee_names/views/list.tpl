@@ -64,12 +64,11 @@
                                     <th>Name</th>
                                     <th>Code</th>
                                     <th>Fee Group</th>
-                                    <th>Is Taxable</th>
-                                    <th>Is Fine Applicable</th>
-                                    <th>Is Discount Applicable</th>
-                                    <th>Is Scholarship Applicable</th>
-                                    <th>Is Transportation</th>
-                                    <th>Is Active</th>
+                                    <th>Fine Applicable</th>
+                                    <th>Discount Applicable</th>
+                                    <th>Scholarship Applicable</th>
+                                    <th>Transportation</th>
+                                    <th>Active</th>
                                     <th class="text-right" style="width: 80px;">{$_L['Manage']}</th>
                                 </tr>
                                 </thead>
@@ -84,9 +83,6 @@
                                         </td>
                                         <td>
                                             {$fee_name->fee_group}
-                                        </td>
-                                        <td>
-                                            {if $fee_name->is_taxable eq 1}True{else}False{/if}
                                         </td>
                                         <td>
                                             {if $fee_name->is_fine_applicable eq 1}True{else}False{/if}

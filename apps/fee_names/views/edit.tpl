@@ -150,6 +150,16 @@
                                         </div>
                                     </div>
 
+                                    <div class="form-group row">
+                                        <label for="is_compulsary" class="col-sm-3"><span class="h6">Is Compulsary</span></label>
+                                        <div class="col-sm-9">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" name="is_compulsary" class="custom-control-input" id="is_compulsary" {if $fee_name->is_compulsary eq 1}checked{/if}>
+                                                <label class="custom-control-label" for="is_compulsary"><span class="h6"></span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
 

@@ -77,8 +77,13 @@ switch ($action) {
                 $fee_name->is_scholarship_applicable = isset($data['is_scholarship_applicable']) ? ($data['is_scholarship_applicable'] == 'on' ? 1 : 0) : 0;
                 $fee_name->is_transportation = isset($data['is_transportation']) ? ($data['is_transportation'] == 'on' ? 1 : 0) : 0;
                 if($fee_name->is_transportation) {
+                    $fee_name->is_compulsary = 0;
                     $fee_name->from = $data['from'];
                     $fee_name->to = $data['to'];
+                } else {
+                    $fee_name->is_compulsary = isset($data['is_compulsary']) ? ($data['is_compulsary'] == 'on' ? 1 : 0) : 0;
+                    $fee_name->from = '';
+                    $fee_name->to = '';
                 }
                 $fee_name->is_active = isset($data['is_active']) ? ($data['is_active'] == 'on' ? 1 : 0) : 0;
                 $fee_name->save();

@@ -7,6 +7,7 @@ $table->add('is_taxable', 'boolean', '', false);
 $table->add('is_fine_applicable', 'boolean', '', false);
 $table->add('is_discount_applicable', 'boolean', '', false);
 $table->add('is_scholarship_applicable', 'boolean', '', false);
+$table->add('is_compulsary', 'boolean', '', false);
 $table->add('is_transportation', 'boolean', '', false);
 $table->add('from', 'varchar', 256);
 $table->add('to', 'varchar', 256);
