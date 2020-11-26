@@ -61,6 +61,22 @@
                                             <input type="text" id="code" name="code" class="form-control" value="{$faculty->code}">
                                         </div>
                                     </div>
+
+                                    <div class="form-group row">
+                                        <label for="remarks" class="col-sm-3"><span class="h6">Class</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-9">
+                                            <select id="class_id" name="class_id" class="custom-select">
+                                                <option value="0">--</option>
+                                                {foreach $classes as $class}
+                                                    <option value="{$class->id}"
+                                                            {if $faculty->class_id === $class->id}
+                                                    selected {/if}>
+                                                        {$class->name}
+                                                    </option>
+                                                {/foreach}
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
