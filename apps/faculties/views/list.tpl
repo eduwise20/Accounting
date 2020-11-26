@@ -63,6 +63,7 @@
                                 <tr class="heading">
                                     <th>Name</th>
                                     <th>Code</th>
+                                    <th>Class</th>
                                     <th class="text-right" style="width: 80px;">{$_L['Manage']}</th>
                                 </tr>
                                 </thead>
@@ -74,6 +75,9 @@
                                         </td>
                                         <td>
                                             {$faculty->code}
+                                        </td>
+                                        <td class="h6">
+                                            {$faculty->class}
                                         </td>
                                         <td>
                                             <div class="btn-group float-right">
