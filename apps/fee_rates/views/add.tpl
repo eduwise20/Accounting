@@ -52,12 +52,8 @@
                                     <div class="form-group row">
                                         <label for="remarks" class="col-sm-4"><span class="h6">Fiscal Year</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
-                                            <select id="fiscal_year_id" name="fiscal_year_id" class="custom-select">
-                                                <option value="0">--</option>
-                                                {foreach $fiscal_years as $fiscal_year}
-                                                    <option value="{$fiscal_year->id}">{$fiscal_year->name}</option>
-                                                {/foreach}
-                                            </select>
+                                            <input type="hidden" id="fiscal_year_id" name="fiscal_year_id" value="{$fiscal_year->id}"/>
+                                            <p>{$fiscal_year->name}</p>
                                         </div>
                                     </div>
 
@@ -106,14 +102,11 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group row">
+                                    <div class="form-group row" id="sub_category_section">
                                         <label for="remarks" class="col-sm-4"><span class="h6">Sub Category</span></label>
                                         <div class="col-sm-8">
                                             <select id="sub_category_id" name="sub_category_id" class="custom-select">
                                                 <option value="0">--</option>
-                                                {foreach $sub_categories as $sub_category}
-                                                    <option value="{$sub_category->id}">{$sub_category->name}</option>
-                                                {/foreach}
                                             </select>
                                         </div>
                                     </div>
@@ -168,6 +161,10 @@
                                                     <tr>
                                                         <td>
                                                             {$fee_name->name}
+                                                            {if $fee_name->is_transportation eq 1}
+                                                                <br/>
+                                                                ({$fee_name->from} - {$fee_name->to})
+                                                            {/if}
                                                         </td>
                                                         <td>
                                                             {$fee_name->code}
@@ -214,27 +211,26 @@
             const class_id = $("#class_id");
             const student_type_id = $("#student_type_id");
             const faculty_id = $("#faculty_id");
-            let is_fiscal_year_chosen = false;
+            const category_id = $("#category_id");
+            const sub_category_id = $("#sub_category_id");
             let is_class_chosen = false;
             let is_student_type_chosen = false;
             let is_faculty_populated = false;
             let is_faculty_chosen = false;
+            let is_category_chosen = false;
             const btn_assign = $("#btn_assign");
             const fee_rate_info_section = $("#fee_rate_info_section");
             const faculty_section = $("#faculty_section");
+            const sub_category_section = $("#sub_category_section");
 
             fee_rate_info_section.hide();
             faculty_section.hide();
+            sub_category_section.hide();
             $(".progress").hide();
             $("#emsg").hide();
             $("#emsg_fee_rate_info").hide();
             btn_assign.prop("disabled", true);
             var _url = '{$_url}';
-
-            fiscal_year_id.change(function(){
-                is_fiscal_year_chosen = fiscal_year_id[0].value != 0;
-                checkToRemoveDisabled();
-            });
 
             class_id.change(function(){
                 is_class_chosen = class_id[0].value != 0;
@@ -250,14 +246,33 @@
             });
 
             faculty_id.change(function(){
-                is_faculty_chosen = faculty_id[0].value !== 0;
+                is_faculty_chosen = faculty_id[0].value != 0;
                 checkToRemoveDisabled();
+            });
+
+            category_id.change(function(){
+                is_category_chosen = category_id[0].value != 0;
+                if (is_category_chosen) {
+                    getSubCategoriesForCategory(category_id[0].value);
+                    enableAssignButton();
+                } else {
+                    $("#sub_category_id").html('<option value="0">--</option>');
+                    sub_category_section.hide();
+                }
+                checkToRemoveDisabled();
+            });
+
+            sub_category_id.change(function(){
+                if(sub_category_id[0].value != 0){
+                    enableAssignButton();
+                    checkToRemoveDisabled();
+                }
             });
 
             function checkToRemoveDisabled() {
                 fee_rate_info_section.hide();
                 $("#fee_rate_info_form").trigger("reset");
-                if (is_fiscal_year_chosen && is_class_chosen && is_student_type_chosen) {
+                if (is_class_chosen && is_student_type_chosen) {
                     if (is_faculty_populated) {
                         if (is_faculty_chosen) {
                             enableAssignButton();
@@ -299,9 +314,33 @@
                     });
             }
 
+            function getSubCategoriesForCategory(category_id) {
+                $.post(base_url + 'fee_rates/app/getSubCategoriesForCategory/',
+                    { category_id : category_id },
+                    function (data, status){
+                        let sub_categories = JSON.parse(data);
+                        if (sub_categories.length > 0) {
+                            populateSubCategoryList(sub_categories);
+                            sub_category_section.show();
+                        } else {
+                            $("#sub_category_id").html('<option value="0">--</option>');
+                            sub_category_section.hide();
+                        }
+                        checkToRemoveDisabled();
+                    });
+            }
+
             function populateFacultySelectList(faculties) {
+                $("#faculty_id").html('<option value="0">--</option>');
                 faculties.forEach(function(faculty) {
                     $("#faculty_id").append('<option value="' + faculty['id'] + '">' + faculty['name'] + '</option>');
+                });
+            }
+
+            function populateSubCategoryList(sub_categories) {
+                $("#sub_category_id").html('<option value="0">--</option>');
+                sub_categories.forEach(function(sub_category) {
+                    $("#sub_category_id").append('<option value="' + sub_category['id'] + '">' + sub_category['name'] + '</option>');
                 });
             }
 
@@ -339,8 +378,8 @@
 
             function populateAmount(fee_structures) {
                 fee_structures.forEach(function(fee_structure) {
-                    let amount = $('input[id="amount['+ fee_structure['fee_names_id'] +']"]')
-                    if (amount) {
+                    let amount = $('input[id="amount['+ fee_structure['fee_names_id'] +']"]');
+                    if (amount.length > 0) {
                         amount[0].value = fee_structure['amount'];
                     }
                 });

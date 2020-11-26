@@ -20,9 +20,9 @@ $ui->assign('user', $user);
 switch ($action) {
 
     case 'add':
-        $fee_names = AppFeeName::all();
+        $fee_names = AppFeeName::where('is_active', 1)->get();
         $classes = AppClass::all();
-        $fiscal_years = FiscalYear::all();
+        $fiscal_years = FiscalYear::where('is_running', 1)->get();
         $student_types = AppStudentType::all();
         $categories = Category::all();
         $sub_categories = Subcategory::all();
@@ -31,7 +31,7 @@ switch ($action) {
             '_include' => 'add',
             'fee_names' => $fee_names,
             'classes' => $classes,
-            'fiscal_years' => $fiscal_years,
+            'fiscal_year' => $fiscal_years[0],
             'student_types' => $student_types,
             'categories' => $categories,
             'sub_categories' => $sub_categories,
@@ -80,6 +80,12 @@ switch ($action) {
             ];
             if ($data['faculty_id'] != 0) {
                 $where['faculty_id'] = $data['faculty_id'];
+            }
+            if ($data['category_id'] != 0) {
+                $where['category_id'] = $data['category_id'];
+                if ($data['sub_category_id'] != 0) {
+                    $where['sub_category_id'] = $data['sub_category_id'];
+                }
             }
             $fee_rate = AppFeeRate::where($where)->get();
             $fee_structures_to_save = array();
@@ -159,6 +165,12 @@ switch ($action) {
         $fee_rate = AppFeeRate::where($where)->get();
         $fee_structures = AppFeeStructure::where('fee_rate_id', $fee_rate[0]->id)->get();
         echo json_encode($fee_structures);
+        break;
+
+    case 'getSubCategoriesForCategory':
+        $data = $request->all();
+        $sub_categories = Subcategory::where('category_id', $data['category_id'])->get();
+        echo json_encode($sub_categories);
         break;
 
 }
