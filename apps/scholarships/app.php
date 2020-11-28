@@ -36,7 +36,7 @@ switch ($action) {
                 'name' => 'required',
                 'type' => 'required',
                 'amount' => 'required|numeric',
-                'remarks' => 'required',
+                'remarks' => '',
             ]
         );
 
