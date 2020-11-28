@@ -104,7 +104,7 @@ switch ($action) {
                         }
                     }
                     if (sizeof($new_fee_structures) > 0) {
-                        foreach($new_fee_structures as $key=>$value) {
+                        foreach ($new_fee_structures as $key => $value) {
                             $fee_structure_to_save = new AppFeeStructure;
                             $fee_structure_to_save->fee_rate_id = $fee_rate->id;
                             $fee_structure_to_save->fee_names_id = $key;
@@ -161,6 +161,12 @@ switch ($action) {
         ];
         if ($data['faculty_id'] != 0) {
             $where['faculty_id'] = $data['faculty_id'];
+        }
+        if ($data['category_id'] != 0) {
+            $where['category_id'] = $data['category_id'];
+            if ($data['sub_category_id'] != 0) {
+                $where['sub_category_id'] = $data['sub_category_id'];
+            }
         }
         $fee_rate = AppFeeRate::where($where)->get();
         $fee_structures = AppFeeStructure::where('fee_rate_id', $fee_rate[0]->id)->get();

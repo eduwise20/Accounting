@@ -307,6 +307,7 @@
                             is_faculty_populated = true;
                             faculty_section.show();
                         } else {
+                            $("#faculty_id").html('<option value="0">--</option>');
                             is_faculty_populated = false;
                             faculty_section.hide();
                         }
@@ -357,13 +358,20 @@
             btn_assign.click(function (e) {
                 disableAssignButton();
                 e.preventDefault();
+                let postValue = {
+                    fiscal_year_id : fiscal_year_id[0].value,
+                    class_id : class_id[0].value,
+                    student_type_id : student_type_id[0].value,
+                    faculty_id : faculty_id[0].value,
+                };
+                if (category_id.length > 0) {
+                    postValue.category_id = category_id[0].value;
+                }
+                if (sub_category_id.length > 0) {
+                    postValue.sub_category_id = sub_category_id[0].value;
+                }
                 $.post(base_url + 'fee_rates/app/getFeeStructuresForFeeRate/',
-                    {
-                        fiscal_year_id : fiscal_year_id[0].value,
-                        class_id : class_id[0].value,
-                        student_type_id : student_type_id[0].value,
-                        faculty_id : faculty_id[0].value,
-                    },
+                    postValue,
                     function (data, status){
                         if(data) {
                             let fee_structures = JSON.parse(data);
