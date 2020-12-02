@@ -8,6 +8,7 @@ require 'apps/faculties/models/AppFaculty.php';
 require 'apps/categories/models/Category.php';
 require 'apps/categories/models/Subcategory.php';
 require 'apps/fee_names/models/AppFeeName.php';
+require 'apps/assign_fee_structure_to_students/models/AppFeeNameStudent.php';
 
 $action = route(2, 'list');
 _auth();
@@ -27,14 +28,12 @@ switch ($action) {
 
     case 'add':
         $classes = AppClass::all();
-        $students = AppStudent::all();
         $student_types = AppStudentType::all();
         $sections = AppSection::all();
         $categories = Category::all();
         view('app_wrapper', [
             '_include' => 'add',
             'classes' => $classes,
-            'students' => $students,
             'student_types' => $student_types,
             'sections' => $sections,
             'categories' => $categories,
@@ -46,11 +45,13 @@ switch ($action) {
         $data = $request->all();
 
         $validation = $validator->validate($data, [
-            'name' => 'required',
-            'code' => 'required|numeric',
-            'remarks' => '',
-            'hierarchy' => 'required|numeric',
-        ]);
+            'class_id' => 'required|not_in:0',
+            'student_type_id' => 'required|not_in:0'
+        ],
+            [
+                'class_id:not_in' => 'The Class is required',
+                'student_type_id:not_in' => 'The Student type is required'
+            ]);
 
         if ($validation->fails()) {
             $errors = $validation->errors();
@@ -61,60 +62,109 @@ switch ($action) {
             }
             echo $msg;
         } else {
-            $existCode = false;
-            $existHierarchy = false;
-
-            if ((isset($data['id']) && BillingPeriod::find($data['id'])->code != $data['code']) || !isset($data['id'])) {
-                $existCode = BillingPeriod::where('code', $data['code'])->first();
-            }
-            if ((isset($data['id']) && BillingPeriod::find($data['id'])->hierarchy != $data['hierarchy']) || !isset($data['id'])) {
-                $existHierarchy = BillingPeriod::where('hierarchy', $data['hierarchy'])->first();
+            $array_of_fee_name_student = array();
+            if ($data['assign_radio_button'] == 'multiple_students') {
+                $array_of_fee_name_student = AppFeeNameStudent::where('fee_name_id', $data['fee_id'])->get();
+            } else if ($data['assign_radio_button'] == 'multiple_fees') {
+                $array_of_fee_name_student = AppFeeNameStudent::where('student_id', $data['student_id'])->get();
             }
 
-            if ($existCode) {
-                echo 'Code should be unique. <br>';
-            } else if ($existHierarchy) {
-                echo 'Hierarchy should be unique. <br>';
-            } else {
-                if (isset($data['id'])) {
-                    $billing_period = BillingPeriod::find($data['id']);
-                } else {
-                    $billing_period = new BillingPeriod;
+            if (sizeof($array_of_fee_name_student) > 0) {
+                if ($data['assign_radio_button'] == 'multiple_students') {
+
+                    $array_of_student_id = array();
+                    $array_of_saved_student = array();
+                    foreach ($data['student_ids'] as $student_id => $value) {
+                        array_push($array_of_student_id, $student_id);
+                    }
+                    foreach ($array_of_fee_name_student as $fee_name_student) {
+                        $array_of_saved_student[$fee_name_student->student_id] = $fee_name_student;
+                    }
+                    foreach ($data['student_ids'] as $student_id => $value) {
+                        foreach ($array_of_fee_name_student as $fee_name_student) {
+                            if ($student_id == $fee_name_student->student_id) {
+                                if (($k = array_search($student_id, $array_of_student_id)) !== false) {
+                                    unset($array_of_student_id[$k]);
+                                }
+                                if (array_key_exists($student_id, $array_of_saved_student)) {
+                                    unset($array_of_saved_student[$student_id]);
+                                }
+                            }
+                        }
+                    }
+                    if (sizeof($array_of_student_id) > 0) {
+                        foreach ($array_of_student_id as $student_id) {
+                            $fee_name_student_object = new AppFeeNameStudent;
+                            $fee_name_student_object->fee_name_id = $data['fee_id'];
+                            $fee_name_student_object->student_id = $student_id;
+                            $fee_name_student_object->save();
+                        }
+                    }
+                    if (sizeof($array_of_saved_student) > 0) {
+                        foreach ($array_of_saved_student as $key => $value) {
+                            $value->delete();
+                        }
+                    }
+
+                } else if ($data['assign_radio_button'] == 'multiple_fees') {
+
+                    $array_of_fee_name_id = array();
+                    $array_of_saved_fee_name = array();
+                    foreach ($data['fee_ids'] as $fee_id => $value) {
+                        array_push($array_of_fee_name_id, $fee_id);
+                    }
+                    foreach ($array_of_fee_name_student as $fee_name_student) {
+                        $array_of_saved_fee_name[$fee_name_student->fee_name_id] = $fee_name_student;
+                    }
+                    foreach ($data['fee_ids'] as $fee_id => $value) {
+
+                        foreach ($array_of_fee_name_student as $fee_name_student) {
+                            if ($fee_id == $fee_name_student->fee_name_id) {
+                                if (($k = array_search($fee_id, $array_of_fee_name_id)) !== false) {
+                                    unset($array_of_fee_name_id[$k]);
+                                }
+                                if (array_key_exists($fee_id, $array_of_saved_fee_name)) {
+                                    unset($array_of_saved_fee_name[$fee_id]);
+                                }
+                            }
+                        }
+                    }
+                    if (sizeof($array_of_fee_name_id) > 0) {
+                        foreach ($array_of_fee_name_id as $fee_id) {
+                            $fee_name_student_object = new AppFeeNameStudent;
+                            $fee_name_student_object->fee_name_id = $fee_id;
+                            $fee_name_student_object->student_id = $data['student_id'];
+                            $fee_name_student_object->save();
+                        }
+                    }
+                    if (sizeof($array_of_saved_fee_name) > 0) {
+                        foreach ($array_of_saved_fee_name as $key => $value) {
+                            $value->delete();
+                        }
+                    }
+
                 }
-                $billing_period->name = $data['name'];
-                $billing_period->remarks = $data['remarks'];
-                $billing_period->code = $data['code'];
-                $billing_period->hierarchy = $data['hierarchy'];
-                $billing_period->is_active = isset($data['is_active']) ? ($data['is_active'] == 'on' ? 1 : 0) : 0;
-                $billing_period->save();
-                echo $billing_period->id;
+            } else {
+                if ($data['assign_radio_button'] == 'multiple_students') {
+                    foreach ($data['student_ids'] as $student_id => $value) {
+                        $fee_name_student = new AppFeeNameStudent;
+                        $fee_name_student->fee_name_id = $data['fee_id'];
+                        $fee_name_student->student_id = $student_id;
+                        $fee_name_student->save();
+                    }
+                } else if ($data['assign_radio_button'] == 'multiple_fees') {
+                    foreach ($data['fee_ids'] as $fee_id => $value) {
+                        $fee_name_student = new AppFeeNameStudent;
+                        $fee_name_student->fee_name_id = $fee_id;
+                        $fee_name_student->student_id = $data['student_id'];
+                        $fee_name_student->save();
+                    }
+                }
             }
-        }
-        break;
 
-    case 'edit':
-        $id = route(3);
-        $billing_period = BillingPeriod::find($id);
+            echo $fee_name_student->id;
 
-        if (!$billing_period) {
-            $msg = "Billing period not found.";
-            r2(U . 'billing_periods/app/list', 'e', $msg);
-        } else {
-            view('app_wrapper', [
-                '_include' => 'edit',
-                'billing_period' => $billing_period
-            ]);
         }
-        break;
-
-    case 'delete':
-        $id = route(3);
-        $billing_period = BillingPeriod::find($id);
-        if ($billing_period) {
-            $billing_period->delete();
-            $msg = "Billing Period successfully deleted.";
-        }
-        r2(U . 'billing_periods/app/list', 's', $msg);
         break;
 
     case 'getFacultyForClass':
@@ -131,9 +181,70 @@ switch ($action) {
 
     case 'getStudentAndFee':
         $data = $request->all();
-        $students = AppStudent::all();
-        $fee_names = AppFeeName::all();
+        $fee_names = array();
+        if ($data['assign_radio_button'] == 'multiple_students') {
+            $fee_names = AppFeeName::where('is_compulsary', 0)->get();
+        } else if ($data['assign_radio_button'] == 'multiple_fees') {
+            $fee_names = AppFeeName::all();
+        }
+        $where = [
+            'class_id' => $data['class_id'],
+            'student_type_id' => $data['student_type_id'],
+        ];
+        if ($data['faculty_id'] != 0) {
+            $where['faculty_id'] = $data['faculty_id'];
+        }
+        if ($data['category_id'] != 0) {
+            $where['category_id'] = $data['category_id'];
+            if ($data['sub_category_id'] != 0) {
+                $where['sub_category_id'] = $data['sub_category_id'];
+            }
+        }
+        $students = AppStudent::where($where)->get();
         $r['students'] = $students;
         $r['fee_names'] = $fee_names;
         echo json_encode($r);
+        break;
+
+    case 'getFeesForStudent':
+        $data = $request->all();
+        $array_of_fee_name_student = AppFeeNameStudent::where('student_id', $data['student_id'])->get();
+        $selected_fees = array();
+        if (sizeof($array_of_fee_name_student) > 0) {
+            foreach ($array_of_fee_name_student as $fee_name_student)
+                array_push($selected_fees, $fee_name_student->fee_name_id);
+        }
+        $fee_names = AppFeeName::all();
+        $r['fees'] = $fee_names;
+        $r['selectedFees'] = $selected_fees;
+        echo json_encode($r);
+        break;
+
+    case 'getStudentsForFee':
+        $data = $request->all();
+        $array_of_fee_name_student = AppFeeNameStudent::where('fee_name_id', $data['fee_id'])->get();
+        $selected_students = array();
+        if (sizeof($array_of_fee_name_student) > 0) {
+            foreach ($array_of_fee_name_student as $fee_name_student)
+                array_push($selected_students, $fee_name_student->student_id);
+        }
+        $where = [
+            'class_id' => $data['class_id'],
+            'student_type_id' => $data['student_type_id'],
+        ];
+        if ($data['faculty_id'] != 0) {
+            $where['faculty_id'] = $data['faculty_id'];
+        }
+        if ($data['category_id'] != 0) {
+            $where['category_id'] = $data['category_id'];
+            if ($data['sub_category_id'] != 0) {
+                $where['sub_category_id'] = $data['sub_category_id'];
+            }
+        }
+        $students = AppStudent::where($where)->get();
+        $r['fee_id'] = $data['fee_id'];
+        $r['students'] = $students;
+        $r['selectedStudents'] = $selected_students;
+        echo json_encode($r);
+        break;
 }

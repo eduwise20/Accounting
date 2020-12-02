@@ -68,6 +68,7 @@
                                     <th>Discount Applicable</th>
                                     <th>Scholarship Applicable</th>
                                     <th>Transportation</th>
+                                    <th>Compulsary</th>
                                     <th>Active</th>
                                     <th class="text-right" style="width: 80px;">{$_L['Manage']}</th>
                                 </tr>
@@ -95,6 +96,9 @@
                                         </td>
                                         <td>
                                             {if $fee_name->is_transportation eq 1}True{else}False{/if}
+                                        </td>
+                                        <td>
+                                            {if $fee_name->is_compulsary eq 1}True{else}False{/if}
                                         </td>
                                         <td>
                                             {if $fee_name->is_active eq 1}True{else}False{/if}

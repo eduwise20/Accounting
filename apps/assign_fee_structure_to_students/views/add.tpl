@@ -44,7 +44,7 @@
                             <span id="emsgbody"></span>
                         </div>
 
-                        <form id="fee_rate_master_form">
+                        <form id="assign_fee_to_student_master_form">
 
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
@@ -57,7 +57,7 @@
                                                 <label><input type="radio" name="assign_radio_button" value="multiple_students" checked> Multiple students one fee</label>
                                             </div>
                                             <div class="radio">
-                                                <label><input type="radio" name="assign_radio_button" value="multiple_fees"> Multiple fees on student</label>
+                                                <label><input type="radio" name="assign_radio_button" value="multiple_fees"> Multiple fees one student</label>
                                             </div>
                                         </div>
                                     </div>
@@ -134,7 +134,7 @@
         <div class="col-md-7" id="student_fee_section">
             <div class="panel panel-default">
                 <div class="panel-hdr">
-                    <h2><span></span>Fee Rate Info</h2>
+                    <h2><span></span>Assign Fee to Student</h2>
                 </div>
 
                 <div class="panel-container show" id="ibox_form">
@@ -145,7 +145,7 @@
                             <span id="emsgbody_fee_rate_info"></span>
                         </div>
 
-                        <form id="fee_rate_info_form">
+                        <form id="assign_fee_to_student_form">
 
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
@@ -203,11 +203,7 @@
             const student_fee_section = $("#student_fee_section");
             const faculty_section = $("#faculty_section");
             const sub_category_section = $("#sub_category_section");
-            const table_section = $("#ib_data_panel");
-            const table_head = $("#table_head");
-            const table_body = $("#table_body");
             const student_and_fee_dropdown = $("#student_and_fee_dropdown");
-            let selectAllCheckbox = $("#selectAllCheckbox");
 
             student_fee_section.hide();
             faculty_section.hide();
@@ -256,6 +252,8 @@
             });
 
             function checkToRemoveDisabled() {
+                $("#table_head").html('');
+                $("#table_body").html('');
                 student_fee_section.hide();
                 $("#fee_rate_info_form").trigger("reset");
                 if (is_class_chosen && is_student_type_chosen) {
@@ -351,6 +349,7 @@
                 e.preventDefault();
                 let assign_radio_button_value = $('input[name="assign_radio_button"]:checked').val();
                 let postValue = {
+                    assign_radio_button : assign_radio_button_value,
                     class_id : class_id[0].value,
                     student_type_id : student_type_id[0].value,
                     faculty_id : faculty_id[0].value,
@@ -381,90 +380,35 @@
 
             function populateMultipleStudentsTable(returnedResult) {
                 setFeesDropdown(returnedResult['fee_names']);
-                setTableHeadForStudentsTable();
-                setStudentsTable(returnedResult['students']);
             }
 
             function setFeesDropdown(fees) {
-                let opts = '';
+                let opts = '<option value="0">--</option>';
                 $.each(fees, function(i) {
                     opts += "<option value='" + fees[i].id + "' >" + fees[i].name + "</option>";
                 });
-                student_and_fee_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Fee Names</span></label><div class="col-sm-8"><select class="custom-select">' + opts + '</select> </div></div>');
-            }
-
-            function setTableHeadForStudentsTable() {
-                let tableHead = '';
-                tableHead += '<tr class="heading" >';
-                tableHead += '<th><input type="checkbox" id="selectAllCheckbox"/></th>';
-                tableHead += '<th>Student Name</th>';
-                tableHead += '</tr>';
-                table_head.html(tableHead);
-            }
-
-            function setStudentsTable(students) {
-                let tableBody = '';
-                $.each(students, function(i) {
-                    tableBody += '<tr>';
-                    tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" /></td>';
-                    tableBody += '<td>' + students[i].name + '</td>';
-                    tableBody += '</tr>';
-                });
-                table_body.html(tableBody);
+                student_and_fee_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Fee Names</span></label><div class="col-sm-8"><select class="custom-select" name="fee_id" id="fee_dropdown">' + opts + '</select> </div></div>');
             }
 
             function populateMultipleFeesTable(returnedResult) {
                 setStudentsDropdown(returnedResult['students']);
-                setTableHeadForFeesTable();
-                setFeesTable(returnedResult['fee_names']);
             }
 
             function setStudentsDropdown(students) {
-                let opts = '';
+                let opts = '<option value="0">--</option>';
                 $.each(students, function(i) {
                     opts += "<option value='" + students[i].id + "' >" + students[i].name + "</option>";
                 });
-                student_and_fee_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Students</span></label><div class="col-sm-8"><select class="custom-select">' + opts + '</select> </div></div>');
+                student_and_fee_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Students</span></label><div class="col-sm-8"><select class="custom-select" name="student_id" id="student_dropdown">' + opts + '</select> </div></div>');
             }
-
-            function setTableHeadForFeesTable() {
-                let tableHead = '';
-                tableHead += '<tr class="heading" >';
-                tableHead += '<th><input type="checkbox" id="selectAllCheckbox"/></th>';
-                tableHead += '<th>Fee Name</th>';
-                tableHead += '<th>Fee Code</th>';
-                tableHead += '</tr>';
-                table_head.html(tableHead);
-            }
-
-            function setFeesTable(fees) {
-                let tableBody = '';
-                $.each(fees, function(i) {
-                    tableBody += '<tr>';
-                    tableBody += '<td><input type="checkbox" id="selectOne[' + fees[i].id + ']" /></td>';
-                    tableBody += '<td>' + fees[i].name + '</td>';
-                    tableBody += '<td>' + fees[i].code + '</td>';
-                    tableBody += '</tr>';
-                });
-                table_body.html(tableBody);
-            }
-
-            selectAllCheckbox.change(function(){
-                console.log('herre');
-                // if ($(this).is(':checked')) {
-                //     $("[id^=selectOne]").attr('checked', true);
-                // } else {
-                //     $("[id^=selectOne]").attr('checked', false);
-                // }
-            });
 
             $("#btn_submit").click(function (e) {
                 e.preventDefault();
                 $('#ibox_form').block({ message:block_msg });
-                $.post(base_url + 'fee_rates/app/save/', $('#fee_rate_master_form, #fee_rate_info_form').serialize())
+                $.post(base_url + 'assign_fee_structure_to_students/app/save/', $('#assign_fee_to_student_master_form, #assign_fee_to_student_form').serialize())
                     .done(function (data) {
                         if ($.isNumeric(data)) {
-                            window.location = base_url + 'fee_rates/app/add';
+                            window.location = base_url + 'assign_fee_structure_to_students/app/add';
                         }
                         else {
                             $('#ibox_form').unblock();
@@ -477,5 +421,94 @@
             });
 
         });
+
+        $(document).on('click', '#selectAllCheckbox', function () {
+            $('.selectOne').prop('checked', this.checked);
+        });
+
+        $(document).on('change', '#student_dropdown', function () {
+
+            $.post(base_url + 'assign_fee_structure_to_students/app/getFeesForStudent/',
+                { student_id : $("#student_dropdown").val()},
+                function (data, status){
+                    if(data) {
+                        let returnedResult = JSON.parse(data);
+                        setTableHeadForFeesTable();
+                        setFeesTable(returnedResult['fees'], returnedResult['selectedFees']);
+                    }
+                });
+        });
+
+        function setFeesTable(fees, selectedFees) {
+            let tableBody = '';
+            $.each(fees, function(i) {
+                tableBody += '<tr>';
+                if (fees[i].is_compulsary) {
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + fees[i].id + ']" class="compulsary_fee" name="fee_ids[' + fees[i].id + ']" checked="checked" onclick="return false;"/></td>';
+                } else if (selectedFees.includes(fees[i].id)) {
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + fees[i].id + ']" class="selectOne" name="fee_ids[' + fees[i].id + ']" checked="checked"/></td>';
+                } else {
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + fees[i].id + ']" class="selectOne" name="fee_ids[' + fees[i].id + ']" /></td>';
+                }
+                tableBody += '<td>' + fees[i].name + '</td>';
+                tableBody += '<td>' + fees[i].code + '</td>';
+                tableBody += '</tr>';
+            });
+            $("#table_body").html(tableBody);
+        }
+
+        $(document).on('change', '#fee_dropdown', function () {
+            let assign_fee_to_student_master_form = $('#assign_fee_to_student_master_form').serialize();
+            $.post(base_url + 'assign_fee_structure_to_students/app/getStudentsForFee/',
+                $('#assign_fee_to_student_master_form, #assign_fee_to_student_form').serialize(),
+                function (data, status){
+                    if(data) {
+                        let returnedResult = JSON.parse(data);
+                        console.log(returnedResult);
+                        if (returnedResult['fee_id'] != 0) {
+                            setTableHeadForStudentsTable();
+                            setStudentsTable(returnedResult['students'], returnedResult['selectedStudents']);
+                        } else {
+                            $("#table_head").html('');
+                            $("#table_body").html('');
+                        }
+                    }
+                });
+        });
+
+        function setStudentsTable(students, selectedStudents) {
+            let tableBody = '';
+            $.each(students, function(i) {
+                tableBody += '<tr>';
+                if (selectedStudents.includes(students[i].id)) {
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" class="selectOne" name="student_ids[' + students[i].id + ']" checked="checked"/></td>';
+                } else {
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" class="selectOne" name="student_ids[' + students[i].id + ']"/></td>';
+                }
+                tableBody += '<td>' + students[i].name + '</td>';
+                tableBody += '</tr>';
+            });
+            $("#table_body").html(tableBody);
+        }
+
+        function setTableHeadForStudentsTable() {
+            let tableHead = '';
+            tableHead += '<tr class="heading" >';
+            tableHead += '<th><input type="checkbox" id="selectAllCheckbox"/></th>';
+            tableHead += '<th>Student Name</th>';
+            tableHead += '</tr>';
+            $("#table_head").html(tableHead);
+        }
+
+        function setTableHeadForFeesTable() {
+            let tableHead = '';
+            tableHead += '<tr class="heading" >';
+            tableHead += '<th><input type="checkbox" id="selectAllCheckbox"/></th>';
+            tableHead += '<th>Fee Name</th>';
+            tableHead += '<th>Fee Code</th>';
+            tableHead += '</tr>';
+            $("#table_head").html(tableHead);
+        }
+
     </script>
 {/block}
