@@ -181,12 +181,7 @@ switch ($action) {
 
     case 'getStudentAndFee':
         $data = $request->all();
-        $fee_names = array();
-        if ($data['assign_radio_button'] == 'multiple_students') {
-            $fee_names = AppFeeName::where('is_compulsary', 0)->get();
-        } else if ($data['assign_radio_button'] == 'multiple_fees') {
-            $fee_names = AppFeeName::all();
-        }
+        $fee_names = AppFeeName::all();
         $where = [
             'class_id' => $data['class_id'],
             'student_type_id' => $data['student_type_id'],
@@ -223,6 +218,7 @@ switch ($action) {
     case 'getStudentsForFee':
         $data = $request->all();
         $array_of_fee_name_student = AppFeeNameStudent::where('fee_name_id', $data['fee_id'])->get();
+        $fee_name = AppFeeName::find($data['fee_id']);
         $selected_students = array();
         if (sizeof($array_of_fee_name_student) > 0) {
             foreach ($array_of_fee_name_student as $fee_name_student)
@@ -245,6 +241,7 @@ switch ($action) {
         $r['fee_id'] = $data['fee_id'];
         $r['students'] = $students;
         $r['selectedStudents'] = $selected_students;
+        $r['fee_name'] = $fee_name;
         echo json_encode($r);
         break;
 }

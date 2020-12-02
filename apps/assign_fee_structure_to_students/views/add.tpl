@@ -365,7 +365,20 @@
                     function (data, status){
                         if(data) {
                             let returnedResult = JSON.parse(data);
-                            if (returnedResult['fee_names'] && returnedResult['fee_names'].length > 0 && returnedResult['students'] && returnedResult['students'].length > 0) {
+                            if (returnedResult['students'].length == 0) {
+                                $('#ibox_form').unblock();
+                                var body = $("html, body");
+                                body.animate({ scrollTop:0 }, '1000', 'swing');
+                                $("#emsgbody").html('No students found!');
+                                $("#emsg").show("slow");
+                            } else if (returnedResult['fee_names'].length == 0) {
+                                $('#ibox_form').unblock();
+                                var body = $("html, body");
+                                body.animate({ scrollTop:0 }, '1000', 'swing');
+                                $("#emsgbody").html('No fee names found!');
+                                $("#emsg").show("slow");
+                            } else  {
+                                $("#emsg").hide("slow");
                                 if (assign_radio_button_value === 'multiple_students') {
                                     populateMultipleStudentsTable(returnedResult);
                                 } else if (assign_radio_button_value === 'multiple_fees') {
@@ -464,10 +477,9 @@
                 function (data, status){
                     if(data) {
                         let returnedResult = JSON.parse(data);
-                        console.log(returnedResult);
                         if (returnedResult['fee_id'] != 0) {
                             setTableHeadForStudentsTable();
-                            setStudentsTable(returnedResult['students'], returnedResult['selectedStudents']);
+                            setStudentsTable(returnedResult['students'], returnedResult['selectedStudents'], returnedResult['fee_name']['is_compulsary']);
                         } else {
                             $("#table_head").html('');
                             $("#table_body").html('');
@@ -476,11 +488,13 @@
                 });
         });
 
-        function setStudentsTable(students, selectedStudents) {
+        function setStudentsTable(students, selectedStudents, isCompulsary) {
             let tableBody = '';
             $.each(students, function(i) {
                 tableBody += '<tr>';
-                if (selectedStudents.includes(students[i].id)) {
+                if (isCompulsary) {
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" class="selectOne" name="student_ids[' + students[i].id + ']" checked="checked" onclick="return false;"/></td>';
+                } else if (selectedStudents.includes(students[i].id)) {
                     tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" class="selectOne" name="student_ids[' + students[i].id + ']" checked="checked"/></td>';
                 } else {
                     tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" class="selectOne" name="student_ids[' + students[i].id + ']"/></td>';
