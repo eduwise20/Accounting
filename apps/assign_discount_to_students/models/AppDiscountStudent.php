@@ -4,6 +4,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class AppDiscountStudent extends Model {
 
-    protected $table = 'fee_structure_student_scholarship';
+    protected $table = 'fee_structure_student_discount';
 
 }
