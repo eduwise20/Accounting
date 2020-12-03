@@ -68,6 +68,10 @@ $admin_student_sub_menus = [
     [
         'name' => 'List Students',
         'link' => U.'students/app/list/'
+    ],
+    [
+        'name' => 'Assign Fee to Student',
+        'link' => U.'students/app_assign_fee_structure/add/'
     ]
 ];
 

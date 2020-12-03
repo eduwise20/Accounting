@@ -7,7 +7,7 @@ require 'apps/sections/models/AppSection.php';
 require 'apps/faculties/models/AppFaculty.php';
 require 'apps/categories/models/Category.php';
 require 'apps/categories/models/Subcategory.php';
-require 'apps/assign_scholarship_to_students/models/AppScholarshipStudent.php';
+require 'apps/scholarships/models/AppScholarshipStudent.php';
 require 'apps/fee_names/models/AppFeeName.php';
 require 'apps/billing_periods/models/BillingPeriod.php';
 require 'apps/scholarships/models/AppScholarship.php';
@@ -26,13 +26,15 @@ switch ($action) {
         $sections = AppSection::all();
         $categories = Category::all();
         $fee_names = AppFeeName::all();
+        $billing_periods = BillingPeriod::all();
         view('app_wrapper', [
-            '_include' => 'add',
+            '_include' => 'assign_scholarship/add',
             'classes' => $classes,
             'student_types' => $student_types,
             'sections' => $sections,
             'categories' => $categories,
             'fee_names' => $fee_names,
+            'billing_periods' => $billing_periods,
         ]);
         break;
 
@@ -51,6 +53,15 @@ switch ($action) {
                 'fee_name_id:not_in' => 'The Fee name is required',
             ]);
 
+        if (!isset($data['yearly_applicable'])) {
+            $billing_period_validation = $validator->validate($data, [
+                'billing_period_id' => 'required|not_in:0'
+            ],
+                [
+                    'billing_period_id:not_in' => 'The Billing period is required',
+                ]);
+        }
+
         if ($validation->fails()) {
             $errors = $validation->errors();
             $errorMessages = $errors->firstOfAll();
@@ -59,6 +70,9 @@ switch ($action) {
                 $msg .= $message . '</br>';
             }
             echo $msg;
+        } else if (isset($billing_period_validation) && $billing_period_validation->fails()) {
+            $errorMessage = $billing_period_validation->errors()->firstOfAll();
+            echo $errorMessage[0];
         } else {
             $array_of_scholarship_student = array();
             if ($data['assign_radio_button'] == 'multiple_students') {
@@ -96,6 +110,8 @@ switch ($action) {
                             $scholarship_student_object->scholarship_id = $data['scholarship_id'];
                             $scholarship_student_object->student_id = $student_id;
                             $scholarship_student_object->fee_name_id = $data['fee_name_id'];
+                            $scholarship_student_object->yearly_applicable = isset($data['yearly_applicable']) ? ($data['yearly_applicable'] == 'on' ? 1 : 0) : 0;
+                            $scholarship_student_object->billing_period_id = $data['billing_period_id'];
                             $scholarship_student_object->save();
                         }
                     }
@@ -134,6 +150,8 @@ switch ($action) {
                             $scholarship_student_object->scholarship_id = $scholarship_id;
                             $scholarship_student_object->student_id = $data['student_id'];
                             $scholarship_student_object->fee_name_id = $data['fee_name_id'];
+                            $scholarship_student_object->yearly_applicable = isset($data['yearly_applicable']) ? ($data['yearly_applicable'] == 'on' ? 1 : 0) : 0;
+                            $scholarship_student_object->billing_period_id = $data['billing_period_id'];
                             $scholarship_student_object->save();
                         }
                     }
@@ -151,6 +169,8 @@ switch ($action) {
                         $scholarship_student->scholarship_id = $data['scholarship_id'];
                         $scholarship_student->student_id = $student_id;
                         $scholarship_student->fee_name_id = $data['fee_name_id'];
+                        $scholarship_student->yearly_applicable = isset($data['yearly_applicable']) ? ($data['yearly_applicable'] == 'on' ? 1 : 0) : 0;
+                        $scholarship_student->billing_period_id = $data['billing_period_id'];
                         $scholarship_student->save();
                     }
                 } else if ($data['assign_radio_button'] == 'multiple_scholarships') {
@@ -159,6 +179,8 @@ switch ($action) {
                         $scholarship_student->scholarship_id = $scholarship_id;
                         $scholarship_student->student_id = $data['student_id'];
                         $scholarship_student->fee_name_id = $data['fee_name_id'];
+                        $scholarship_student->yearly_applicable = isset($data['yearly_applicable']) ? ($data['yearly_applicable'] == 'on' ? 1 : 0) : 0;
+                        $scholarship_student->billing_period_id = $data['billing_period_id'];
                         $scholarship_student->save();
                     }
                 }
@@ -205,7 +227,7 @@ switch ($action) {
 
     case 'getScholarshipsForStudent':
         $data = $request->all();
-        $array_of_scholarship_student = AppScholarshipStudent::where('student_id', $data['student_id'])->get();
+        $array_of_scholarship_student = AppScholarshipStudent::where(['student_id' => $data['student_id'], 'fee_name_id' => $data['fee_name_id']])->get();
         $selected_scholarships = array();
         if (sizeof($array_of_scholarship_student) > 0) {
             foreach ($array_of_scholarship_student as $scholarship_student)
@@ -219,7 +241,7 @@ switch ($action) {
 
     case 'getStudentsForScholarship':
         $data = $request->all();
-        $array_of_scholarship_student = AppScholarshipStudent::where('scholarship_id', $data['scholarship_id'])->get();
+        $array_of_scholarship_student = AppScholarshipStudent::where(['scholarship_id' => $data['scholarship_id'], 'fee_name_id' => $data['fee_name_id']])->get();
         $scholarship = AppScholarship::find($data['scholarship_id']);
         $selected_students = array();
         if (sizeof($array_of_scholarship_student) > 0) {

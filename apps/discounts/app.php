@@ -17,14 +17,14 @@ switch ($action) {
             return $discount;
         });
         view('app_wrapper', [
-            '_include' => 'list',
+            '_include' => 'discount/list',
             'discounts' => $discounts,
         ]);
         break;
 
     case 'add':
         view('app_wrapper', [
-            '_include' => 'add',
+            '_include' => 'discount/add',
         ]);
         break;
 
@@ -84,7 +84,7 @@ switch ($action) {
             r2(U . 'discounts/app/list', 'e', $msg);
         } else {
             view('app_wrapper', [
-                '_include' => 'edit',
+                '_include' => 'discount/edit',
                 'discount' => $discount
             ]);
         }

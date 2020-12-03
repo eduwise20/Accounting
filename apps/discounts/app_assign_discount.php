@@ -7,7 +7,7 @@ require 'apps/sections/models/AppSection.php';
 require 'apps/faculties/models/AppFaculty.php';
 require 'apps/categories/models/Category.php';
 require 'apps/categories/models/Subcategory.php';
-require 'apps/assign_discount_to_students/models/AppDiscountStudent.php';
+require 'apps/discounts/models/AppDiscountStudent.php';
 require 'apps/fee_names/models/AppFeeName.php';
 require 'apps/billing_periods/models/BillingPeriod.php';
 require 'apps/discounts/models/AppDiscount.php';
@@ -26,13 +26,15 @@ switch ($action) {
         $sections = AppSection::all();
         $categories = Category::all();
         $fee_names = AppFeeName::all();
+        $billing_periods = BillingPeriod::all();
         view('app_wrapper', [
-            '_include' => 'add',
+            '_include' => 'assign_discount/add',
             'classes' => $classes,
             'student_types' => $student_types,
             'sections' => $sections,
             'categories' => $categories,
             'fee_names' => $fee_names,
+            'billing_periods' => $billing_periods,
         ]);
         break;
 
@@ -51,6 +53,15 @@ switch ($action) {
                 'fee_name_id:not_in' => 'The Fee name is required',
             ]);
 
+        if (!isset($data['yearly_applicable'])) {
+            $billing_period_validation = $validator->validate($data, [
+                'billing_period_id' => 'required|not_in:0'
+            ],
+                [
+                    'billing_period_id:not_in' => 'The Billing period is required',
+                ]);
+        }
+
         if ($validation->fails()) {
             $errors = $validation->errors();
             $errorMessages = $errors->firstOfAll();
@@ -59,6 +70,9 @@ switch ($action) {
                 $msg .= $message . '</br>';
             }
             echo $msg;
+        } else if (isset($billing_period_validation) && $billing_period_validation->fails()) {
+            $errorMessage = $billing_period_validation->errors()->firstOfAll();
+            echo $errorMessage[0];
         } else {
             $array_of_discount_student = array();
             if ($data['assign_radio_button'] == 'multiple_students') {
@@ -96,6 +110,8 @@ switch ($action) {
                             $discount_student_object->discount_id = $data['discount_id'];
                             $discount_student_object->student_id = $student_id;
                             $discount_student_object->fee_name_id = $data['fee_name_id'];
+                            $discount_student_object->yearly_applicable = isset($data['yearly_applicable']) ? ($data['yearly_applicable'] == 'on' ? 1 : 0) : 0;
+                            $discount_student_object->billing_period_id = $data['billing_period_id'];
                             $discount_student_object->save();
                         }
                     }
@@ -134,6 +150,8 @@ switch ($action) {
                             $discount_student_object->discount_id = $discount_id;
                             $discount_student_object->student_id = $data['student_id'];
                             $discount_student_object->fee_name_id = $data['fee_name_id'];
+                            $discount_student_object->yearly_applicable = isset($data['yearly_applicable']) ? ($data['yearly_applicable'] == 'on' ? 1 : 0) : 0;
+                            $discount_student_object->billing_period_id = $data['billing_period_id'];
                             $discount_student_object->save();
                         }
                     }
@@ -151,6 +169,8 @@ switch ($action) {
                         $discount_student->discount_id = $data['discount_id'];
                         $discount_student->student_id = $student_id;
                         $discount_student->fee_name_id = $data['fee_name_id'];
+                        $discount_student->yearly_applicable = isset($data['yearly_applicable']) ? ($data['yearly_applicable'] == 'on' ? 1 : 0) : 0;
+                        $discount_student->billing_period_id = $data['billing_period_id'];
                         $discount_student->save();
                     }
                 } else if ($data['assign_radio_button'] == 'multiple_discounts') {
@@ -159,6 +179,8 @@ switch ($action) {
                         $discount_student->discount_id = $discount_id;
                         $discount_student->student_id = $data['student_id'];
                         $discount_student->fee_name_id = $data['fee_name_id'];
+                        $discount_student->yearly_applicable = isset($data['yearly_applicable']) ? ($data['yearly_applicable'] == 'on' ? 1 : 0) : 0;
+                        $discount_student->billing_period_id = $data['billing_period_id'];
                         $discount_student->save();
                     }
                 }
@@ -205,7 +227,7 @@ switch ($action) {
 
     case 'getDiscountsForStudent':
         $data = $request->all();
-        $array_of_discount_student = AppDiscountStudent::where('student_id', $data['student_id'])->get();
+        $array_of_discount_student = AppDiscountStudent::where(['student_id' => $data['student_id'], 'fee_name_id' => $data['fee_name_id']])->get();
         $selected_discounts = array();
         if (sizeof($array_of_discount_student) > 0) {
             foreach ($array_of_discount_student as $discount_student)
@@ -219,7 +241,7 @@ switch ($action) {
 
     case 'getStudentsForDiscount':
         $data = $request->all();
-        $array_of_discount_student = AppDiscountStudent::where('discount_id', $data['discount_id'])->get();
+        $array_of_discount_student = AppDiscountStudent::where(['discount_id' => $data['discount_id'], 'fee_name_id' => $data['fee_name_id']])->get();
         $discount = AppDiscount::find($data['discount_id']);
         $selected_students = array();
         if (sizeof($array_of_discount_student) > 0) {

@@ -17,14 +17,14 @@ switch ($action) {
             return $fine;
         });
         view('app_wrapper', [
-            '_include' => 'list',
+            '_include' => 'fine/list',
             'fines' => $fines,
         ]);
         break;
 
     case 'add':
         view('app_wrapper', [
-            '_include' => 'add',
+            '_include' => 'fine/add',
         ]);
         break;
 
@@ -83,7 +83,7 @@ switch ($action) {
             r2(U . 'fines/app/list', 'e', $msg);
         } else {
             view('app_wrapper', [
-                '_include' => 'edit',
+                '_include' => 'fine/edit',
                 'fine' => $fine
             ]);
         }

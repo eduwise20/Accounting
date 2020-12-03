@@ -8,7 +8,7 @@ require 'apps/faculties/models/AppFaculty.php';
 require 'apps/categories/models/Category.php';
 require 'apps/categories/models/Subcategory.php';
 require 'apps/fee_names/models/AppFeeName.php';
-require 'apps/assign_fee_structure_to_students/models/AppFeeNameStudent.php';
+require 'apps/students/models/AppFeeNameStudent.php';
 
 $action = route(2, 'list');
 _auth();
@@ -18,13 +18,6 @@ $user = User::_info();
 $ui->assign('user', $user);
 
 switch ($action) {
-    case 'list':
-        $billing_periods = BillingPeriod::orderBy('id', 'desc')->get();
-        view('app_wrapper', [
-            '_include' => 'list',
-            'billing_periods' => $billing_periods
-        ]);
-        break;
 
     case 'add':
         $classes = AppClass::all();
@@ -32,7 +25,7 @@ switch ($action) {
         $sections = AppSection::all();
         $categories = Category::all();
         view('app_wrapper', [
-            '_include' => 'add',
+            '_include' => 'assign_fee/add',
             'classes' => $classes,
             'student_types' => $student_types,
             'sections' => $sections,
