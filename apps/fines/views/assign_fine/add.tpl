@@ -25,7 +25,7 @@
 
     </style>
 
-
+    <link rel="stylesheet" href="https://unpkg.com/nepali-date-picker@2.0.1/dist/nepaliDatePicker.min.css" crossorigin="anonymous" />
 {/block}
 
 {block name="content"}
@@ -33,7 +33,7 @@
         <div class="col-md-5">
             <div class="panel panel-default">
                 <div class="panel-hdr">
-                    <h2><span></span>Assign Fee to Student</h2>
+                    <h2><span></span>Assign Fine to Student</h2>
                 </div>
 
                 <div class="panel-container show" id="ibox_form">
@@ -44,7 +44,11 @@
                             <span id="emsgbody"></span>
                         </div>
 
-                        <form id="assign_fee_to_student_master_form">
+                        <div class="alert alert-info" id="smsg">
+                            <span id="smsgbody"></span>
+                        </div>
+
+                        <form id="assign_fine_to_student_master_form">
 
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
@@ -54,16 +58,16 @@
                                         </div>
                                         <div class="col-sm-8">
                                             <div class="radio">
-                                                <label><input type="radio" name="assign_radio_button" value="multiple_students" checked> Multiple students one fee</label>
+                                                <label><input type="radio" name="assign_radio_button" value="multiple_students" checked> Assign a single fine to multiple students</label>
                                             </div>
                                             <div class="radio">
-                                                <label><input type="radio" name="assign_radio_button" value="multiple_fees"> Multiple fees one student</label>
+                                                <label><input type="radio" name="assign_radio_button" value="multiple_fines"> Assign multiple fines to a single student</label>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
-                                        <label for="remarks" class="col-sm-4"><span class="h6">Class</span><span class="text-danger">*</span></label>
+                                        <label for="class_id" class="col-sm-4"><span class="h6">Class</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
                                             <select id="class_id" name="class_id" class="custom-select">
                                                 <option value="0">--</option>
@@ -75,7 +79,7 @@
                                     </div>
 
                                     <div class="form-group row" id="faculty_section">
-                                        <label for="remarks" class="col-sm-4"><span class="h6">Faculty</span><span class="text-danger">*</span></label>
+                                        <label for="faculty_id" class="col-sm-4"><span class="h6">Faculty</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
                                             <select id="faculty_id" name="faculty_id" class="custom-select">
                                                 <option value="0">--</option>
@@ -84,7 +88,7 @@
                                     </div>
 
                                     <div class="form-group row">
-                                        <label for="remarks" class="col-sm-4"><span class="h6">Student Type</span><span class="text-danger">*</span></label>
+                                        <label for="student_type_id" class="col-sm-4"><span class="h6">Student Type</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
                                             <select id="student_type_id" name="student_type_id" class="custom-select">
                                                 <option value="0">--</option>
@@ -96,7 +100,7 @@
                                     </div>
 
                                     <div class="form-group row">
-                                        <label for="remarks" class="col-sm-4"><span class="h6">Category</span></label>
+                                        <label for="category_id" class="col-sm-4"><span class="h6">Category</span></label>
                                         <div class="col-sm-8">
                                             <select id="category_id" name="category_id" class="custom-select">
                                                 <option value="0">--</option>
@@ -108,11 +112,30 @@
                                     </div>
 
                                     <div class="form-group row" id="sub_category_section">
-                                        <label for="remarks" class="col-sm-4"><span class="h6">Sub Category</span></label>
+                                        <label for="sub_category_id" class="col-sm-4"><span class="h6">Sub Category</span></label>
                                         <div class="col-sm-8">
                                             <select id="sub_category_id" name="sub_category_id" class="custom-select">
                                                 <option value="0">--</option>
                                             </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="billing_period_id" class="col-sm-4"><span class="h6">Billing Period</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <select id="billing_period_id" name="billing_period_id" class="custom-select">
+                                                <option value="0">--</option>
+                                                {foreach $billing_periods as $billing_period}
+                                                    <option value="{$billing_period->id}">{$billing_period->name}</option>
+                                                {/foreach}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="billing_date" class="col-sm-4"><span class="h6">Billing Date</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <input type="text" id="billing_date" name="billing_date" class="form-control date-picker">
                                         </div>
                                     </div>
 
@@ -131,10 +154,10 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-7" id="student_fee_section">
+        <div class="col-md-7" id="student_fine_section">
             <div class="panel panel-default">
                 <div class="panel-hdr">
-                    <h2><span></span>Assign Fee to Student</h2>
+                    <h2><span></span>Assign Fine to Student</h2>
                 </div>
 
                 <div class="panel-container show" id="ibox_form">
@@ -145,16 +168,16 @@
                             <span id="emsgbody_fee_rate_info"></span>
                         </div>
 
-                        <form id="assign_fee_to_student_form">
+                        <form id="assign_fine_to_student_form">
 
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
 
                                     <div class="panel-content">
-                                        <div id="student_and_fee_dropdown">
+                                        <div id="student_and_fine_dropdown">
                                         </div>
                                         <hr/>
-                                        <div class="table-responsive" id="ib_data_panel">
+                                        <div class="table-responsive" id="fine_table">
 
                                             <table class="table table-striped w-100"  id="clx_datatable">
                                                 <thead style="background: #f0f2ff" id="table_head"></thead>
@@ -181,11 +204,83 @@
     </div>
 
 
+    <div class="modal fade" id="modal_add_item" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Fine</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body" id="ibox_form_modal">
+                    <div class="alert alert-danger" id="emsgmodal">
+                        <span id="emsgbodymodal"></span>
+                    </div>
+                    <form id="fine_form">
+
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12">
+                                <div class="form-group row">
+                                    <label for="name" class="col-sm-3"><span class="h6">Name</span><span class="text-danger">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input type="text" id="name" name="name" class="form-control" autofocus>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="code" class="col-sm-3"><span class="h6">Type</span><span class="text-danger">*</span></label>
+                                    <div class="col-sm-9">
+                                        <div class="radio">
+                                            <label><input type="radio" name="type" value="Amount" checked> Amount</label>
+                                        </div>
+                                        <div class="radio">
+                                            <label><input type="radio" name="type" value="Percentage"> Percentage</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="order" class="col-sm-3"><span class="h6">Amount</span><span class="text-danger">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input type="text" id="amount" name="amount" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="is_running" class="col-sm-3"><span class="h6">Is active</span></label>
+                                    <div class="col-sm-9">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" name="is_active" class="custom-control-input" id="is_active">
+                                            <label class="custom-control-label" for="is_active"><span class="h6"></span></label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="remarks" class="col-sm-3"><span class="h6">Remarks</span></label>
+                                    <div class="col-sm-9">
+                                        <input type="text" id="remarks" name="remarks" class="form-control">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="btn_modal_action" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 {/block}
 
 {block name="script"}
+    <script src="https://unpkg.com/nepali-date-picker@2.0.1/dist/jquery.nepaliDatePicker.min.js" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function () {
 
@@ -194,22 +289,28 @@
             const faculty_id = $("#faculty_id");
             const category_id = $("#category_id");
             const sub_category_id = $("#sub_category_id");
+            const billing_period_id = $("#billing_period_id");
             let is_class_chosen = false;
             let is_student_type_chosen = false;
             let is_faculty_populated = false;
             let is_faculty_chosen = false;
             let is_category_chosen = false;
+            let is_billing_period_chosen = false;
             const btn_assign = $("#btn_assign");
-            const student_fee_section = $("#student_fee_section");
+            const student_fine_section = $("#student_fine_section");
             const faculty_section = $("#faculty_section");
             const sub_category_section = $("#sub_category_section");
-            const student_and_fee_dropdown = $("#student_and_fee_dropdown");
+            const student_and_fine_dropdown = $("#student_and_fine_dropdown");
+            const submit_button = $("#btn_submit");
 
-            student_fee_section.hide();
+            student_fine_section.hide();
             faculty_section.hide();
             sub_category_section.hide();
+            submit_button.hide();
             $(".progress").hide();
             $("#emsg").hide();
+            $("#smsg").hide();
+            $("#emsgmodal").hide();
             $("#emsg_fee_rate_info").hide();
             btn_assign.prop("disabled", true);
             var _url = '{$_url}';
@@ -229,6 +330,11 @@
 
             faculty_id.change(function(){
                 is_faculty_chosen = faculty_id[0].value != 0;
+                checkToRemoveDisabled();
+            });
+
+            billing_period_id.change(function(){
+                is_billing_period_chosen = billing_period_id[0].value != 0;
                 checkToRemoveDisabled();
             });
 
@@ -254,9 +360,11 @@
             function checkToRemoveDisabled() {
                 $("#table_head").html('');
                 $("#table_body").html('');
-                student_fee_section.hide();
+                $("#create_btn").remove();
+                $("#btn_submit").hide();
+                student_fine_section.hide();
                 $("#fee_rate_info_form").trigger("reset");
-                if (is_class_chosen && is_student_type_chosen) {
+                if (is_class_chosen && is_student_type_chosen && is_billing_period_chosen) {
                     if (is_faculty_populated) {
                         if (is_faculty_chosen) {
                             enableAssignButton();
@@ -282,7 +390,7 @@
             }
 
             function getFacultyForClass(class_id) {
-                $.post(base_url + 'assign_fee_structure_to_students/app/getFacultyForClass/',
+                $.post(base_url + 'fines/app_assign_fine/getFacultyForClass/',
                     { class_id : class_id },
                     function (data, status){
                         let faculties = JSON.parse(data);
@@ -300,7 +408,7 @@
             }
 
             function getSubCategoriesForCategory(category_id) {
-                $.post(base_url + 'assign_fee_structure_to_students/app/getSubCategoriesForCategory/',
+                $.post(base_url + 'fines/app_assign_fine/getSubCategoriesForCategory/',
                     { category_id : category_id },
                     function (data, status){
                         let sub_categories = JSON.parse(data);
@@ -340,7 +448,7 @@
             $cid.select2();
 
             $('input[type=radio][name=assign_radio_button]').change(function() {
-                student_fee_section.hide();
+                student_fine_section.hide();
                 checkToRemoveDisabled();
             });
 
@@ -360,7 +468,7 @@
                 if (sub_category_id.length > 0) {
                     postValue.sub_category_id = sub_category_id[0].value;
                 }
-                $.post(base_url + 'assign_fee_structure_to_students/app/getStudentAndFee/',
+                $.post(base_url + 'fines/app_assign_fine/getStudentAndFine/',
                     postValue,
                     function (data, status){
                         if(data) {
@@ -371,20 +479,20 @@
                                 body.animate({ scrollTop:0 }, '1000', 'swing');
                                 $("#emsgbody").html('No students found!');
                                 $("#emsg").show("slow");
-                            } else if (returnedResult['fee_names'].length == 0) {
+                            } else if (returnedResult['fines'].length == 0) {
                                 $('#ibox_form').unblock();
                                 var body = $("html, body");
                                 body.animate({ scrollTop:0 }, '1000', 'swing');
-                                $("#emsgbody").html('No fee names found!');
+                                $("#emsgbody").html('No fines found!');
                                 $("#emsg").show("slow");
                             } else  {
                                 $("#emsg").hide("slow");
                                 if (assign_radio_button_value === 'multiple_students') {
                                     populateMultipleStudentsTable(returnedResult);
-                                } else if (assign_radio_button_value === 'multiple_fees') {
-                                    populateMultipleFeesTable(returnedResult);
+                                } else if (assign_radio_button_value === 'multiple_fines') {
+                                    populateMultipleFinesTable(returnedResult);
                                 }
-                                student_fee_section.show();
+                                student_fine_section.show();
                             }
                         }
                     });
@@ -392,18 +500,18 @@
             });
 
             function populateMultipleStudentsTable(returnedResult) {
-                setFeesDropdown(returnedResult['fee_names']);
+                setFinesDropdown(returnedResult['fines']);
             }
 
-            function setFeesDropdown(fees) {
+            function setFinesDropdown(fines) {
                 let opts = '<option value="0">--</option>';
-                $.each(fees, function(i) {
-                    opts += "<option value='" + fees[i].id + "' >" + fees[i].name + "</option>";
+                $.each(fines, function(i) {
+                    opts += "<option value='" + fines[i].id + "' >" + fines[i].name + "</option>";
                 });
-                student_and_fee_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Fee Names</span></label><div class="col-sm-8"><select class="custom-select" name="fee_id" id="fee_dropdown">' + opts + '</select> </div></div>');
+                student_and_fine_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Fines</span></label><div class="col-sm-8"><select class="custom-select" name="fine_id" id="fine_dropdown">' + opts + '</select> </div></div>');
             }
 
-            function populateMultipleFeesTable(returnedResult) {
+            function populateMultipleFinesTable(returnedResult) {
                 setStudentsDropdown(returnedResult['students']);
             }
 
@@ -412,21 +520,24 @@
                 $.each(students, function(i) {
                     opts += "<option value='" + students[i].id + "' >" + students[i].name + "</option>";
                 });
-                student_and_fee_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Students</span></label><div class="col-sm-8"><select class="custom-select" name="student_id" id="student_dropdown">' + opts + '</select> </div></div>');
+                student_and_fine_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Students</span></label><div class="col-sm-8"><select class="custom-select" name="student_id" id="student_dropdown">' + opts + '</select> </div></div>');
             }
 
             $("#btn_submit").click(function (e) {
                 e.preventDefault();
                 $('#ibox_form').block({ message:block_msg });
-                $.post(base_url + 'assign_fee_structure_to_students/app/save/', $('#assign_fee_to_student_master_form, #assign_fee_to_student_form').serialize())
+                $.post(base_url + 'fines/app_assign_fine/save/', $('#assign_fine_to_student_master_form, #assign_fine_to_student_form').serialize())
                     .done(function (data) {
+                        $('#ibox_form').unblock();
+                        var body = $("html, body");
+                        body.animate({ scrollTop:0 }, '1000', 'swing');
                         if ($.isNumeric(data)) {
-                            window.location = base_url + 'assign_fee_structure_to_students/app/add';
+                            $("#emsg").hide("slow");
+                            $("#smsgbody").html("Fine assigned successfully");
+                            $("#smsg").show("slow");
                         }
                         else {
-                            $('#ibox_form').unblock();
-                            var body = $("html, body");
-                            body.animate({ scrollTop:0 }, '1000', 'swing');
+                            $("#smsg").hide("slow");
                             $("#emsgbody").html(data);
                             $("#emsg").show("slow");
                         }
@@ -440,61 +551,71 @@
         });
 
         $(document).on('change', '#student_dropdown', function () {
+            changeStudentDropdown();
+        });
 
-            $.post(base_url + 'assign_fee_structure_to_students/app/getFeesForStudent/',
+        function changeStudentDropdown() {
+            $.post(base_url + 'fines/app_assign_fine/getFinesForStudent/',
                 { student_id : $("#student_dropdown").val()},
                 function (data, status){
                     if(data) {
                         let returnedResult = JSON.parse(data);
-                        setTableHeadForFeesTable();
-                        setFeesTable(returnedResult['fees'], returnedResult['selectedFees']);
+                        setTableHeadForFinesTable();
+                        setFinesTable(returnedResult['fines'], returnedResult['selectedFines']);
+                        $("#btn_submit").show();
+                    } else {
+                        $("#table_head").html('');
+                        $("#table_body").html('');
+                        $("#btn_submit").hide();
                     }
                 });
-        });
+        }
 
-        function setFeesTable(fees, selectedFees) {
+        function setFinesTable(fines, selectedFines) {
             let tableBody = '';
-            $.each(fees, function(i) {
+            $.each(fines, function(i) {
                 tableBody += '<tr>';
-                if (fees[i].is_compulsary) {
-                    tableBody += '<td><input type="checkbox" id="selectOne[' + fees[i].id + ']" class="compulsary_fee" name="fee_ids[' + fees[i].id + ']" checked="checked" onclick="return false;"/></td>';
-                } else if (selectedFees.includes(fees[i].id)) {
-                    tableBody += '<td><input type="checkbox" id="selectOne[' + fees[i].id + ']" class="selectOne" name="fee_ids[' + fees[i].id + ']" checked="checked"/></td>';
+                if (selectedFines.includes(fines[i].id)) {
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + fines[i].id + ']" class="selectOne" name="fine_ids[' + fines[i].id + ']" checked="checked"/></td>';
                 } else {
-                    tableBody += '<td><input type="checkbox" id="selectOne[' + fees[i].id + ']" class="selectOne" name="fee_ids[' + fees[i].id + ']" /></td>';
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + fines[i].id + ']" class="selectOne" name="fine_ids[' + fines[i].id + ']" /></td>';
                 }
-                tableBody += '<td>' + fees[i].name + '</td>';
-                tableBody += '<td>' + fees[i].code + '</td>';
+                tableBody += '<td>' + fines[i].name + '</td>';
+                tableBody += '<td>' + fines[i].type + '</td>';
+                tableBody += '<td>' + fines[i].amount + '</td>';
                 tableBody += '</tr>';
             });
             $("#table_body").html(tableBody);
+            let createButton = '<a data-toggle="modal" href="#modal_add_item" class="btn btn-success mb-md" id="create_btn"><i class="fal fa-plus"></i> I don\'t have a fine</a>';
+            if ($("#create_btn").length == 0) {
+                $("#fine_table").append(createButton);
+            }
         }
 
-        $(document).on('change', '#fee_dropdown', function () {
-            let assign_fee_to_student_master_form = $('#assign_fee_to_student_master_form').serialize();
-            $.post(base_url + 'assign_fee_structure_to_students/app/getStudentsForFee/',
-                $('#assign_fee_to_student_master_form, #assign_fee_to_student_form').serialize(),
+        $(document).on('change', '#fine_dropdown', function () {
+            $.post(base_url + 'fines/app_assign_fine/getStudentsForFine/',
+                $('#assign_fine_to_student_master_form, #assign_fine_to_student_form').serialize(),
                 function (data, status){
                     if(data) {
                         let returnedResult = JSON.parse(data);
-                        if (returnedResult['fee_id'] != 0) {
+                        if (returnedResult['fine_id'] != 0) {
                             setTableHeadForStudentsTable();
-                            setStudentsTable(returnedResult['students'], returnedResult['selectedStudents'], returnedResult['fee_name']['is_compulsary']);
+                            setStudentsTable(returnedResult['students'], returnedResult['selectedStudents']);
+                            $("#btn_submit").show();
                         } else {
                             $("#table_head").html('');
                             $("#table_body").html('');
+                            $("#btn_submit").hide();
                         }
                     }
                 });
         });
 
-        function setStudentsTable(students, selectedStudents, isCompulsary) {
+        function setStudentsTable(students, selectedStudents) {
             let tableBody = '';
             $.each(students, function(i) {
                 tableBody += '<tr>';
-                if (isCompulsary) {
-                    tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" class="selectOne" name="student_ids[' + students[i].id + ']" checked="checked" onclick="return false;"/></td>';
-                } else if (selectedStudents.includes(students[i].id)) {
+                if (selectedStudents.includes(students[i].id)) {
                     tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" class="selectOne" name="student_ids[' + students[i].id + ']" checked="checked"/></td>';
                 } else {
                     tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" class="selectOne" name="student_ids[' + students[i].id + ']"/></td>';
@@ -514,15 +635,40 @@
             $("#table_head").html(tableHead);
         }
 
-        function setTableHeadForFeesTable() {
+        function setTableHeadForFinesTable() {
             let tableHead = '';
             tableHead += '<tr class="heading" >';
             tableHead += '<th><input type="checkbox" id="selectAllCheckbox"/></th>';
-            tableHead += '<th>Fee Name</th>';
-            tableHead += '<th>Fee Code</th>';
+            tableHead += '<th>Fine Name</th>';
+            tableHead += '<th>Type</th>';
+            tableHead += '<th>Type</th>';
             tableHead += '</tr>';
             $("#table_head").html(tableHead);
         }
+
+        $("#btn_modal_action").click(function (e) {
+            e.preventDefault();
+            $('#ibox_form_modal').block({ message:block_msg });
+            $.post(base_url + 'fines/app/save/', $( "#fine_form" ).serialize())
+                .done(function (data) {
+                    if ($.isNumeric(data)) {
+                        changeStudentDropdown()
+                        $("#modal_add_item").modal('toggle');
+                    }
+                    else {
+                        $('#ibox_form_modal').unblock();
+                        var body = $("html, body");
+                        body.animate({ scrollTop:0 }, '1000', 'swing');
+                        $("#emsgbodymodal").html(data);
+                        $("#emsgmodal").show("slow");
+                    }
+                });
+        });
+
+        $('.date-picker').nepaliDatePicker({
+            dateFormat: '%y-%m-%d',
+            closeOnDateSelect: true
+        });
 
     </script>
 {/block}

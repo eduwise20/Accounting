@@ -8,7 +8,8 @@ require 'apps/faculties/models/AppFaculty.php';
 require 'apps/categories/models/Category.php';
 require 'apps/categories/models/Subcategory.php';
 require 'apps/fines/models/AppFine.php';
-require 'apps/assign_fine_to_students/models/AppFineStudent.php';
+require 'apps/fines/models/AppFineStudent.php';
+require 'apps/billing_periods/models/BillingPeriod.php';
 
 $action = route(2, 'list');
 _auth();
@@ -23,12 +24,14 @@ switch ($action) {
         $student_types = AppStudentType::all();
         $sections = AppSection::all();
         $categories = Category::all();
+        $billing_periods = BillingPeriod::all();
         view('app_wrapper', [
-            '_include' => 'add',
+            '_include' => 'assign_fine/add',
             'classes' => $classes,
             'student_types' => $student_types,
             'sections' => $sections,
             'categories' => $categories,
+            'billing_periods' => $billing_periods,
         ]);
         break;
 
@@ -38,11 +41,14 @@ switch ($action) {
 
         $validation = $validator->validate($data, [
             'class_id' => 'required|not_in:0',
-            'student_type_id' => 'required|not_in:0'
+            'student_type_id' => 'required|not_in:0',
+            'billing_period_id' => 'required|not_in:0',
+            'billing_date' => 'required',
         ],
             [
                 'class_id:not_in' => 'The Class is required',
-                'student_type_id:not_in' => 'The Student type is required'
+                'student_type_id:not_in' => 'The Student type is required',
+                'billing_period_id:not_in' => 'The Billing period is required',
             ]);
 
         if ($validation->fails()) {
@@ -89,6 +95,8 @@ switch ($action) {
                             $fine_student_object = new AppFineStudent;
                             $fine_student_object->fine_id = $data['fine_id'];
                             $fine_student_object->student_id = $student_id;
+                            $fine_student_object->billing_period_id = $data['billing_period_id'];
+                            $fine_student_object->billing_date = $data['billing_date'];
                             $fine_student_object->save();
                         }
                     }
@@ -126,6 +134,8 @@ switch ($action) {
                             $fine_student_object = new AppFineStudent;
                             $fine_student_object->fine_id = $fine_id;
                             $fine_student_object->student_id = $data['student_id'];
+                            $fine_student_object->billing_period_id = $data['billing_period_id'];
+                            $fine_student_object->billing_date = $data['billing_date'];
                             $fine_student_object->save();
                         }
                     }
@@ -142,6 +152,8 @@ switch ($action) {
                         $fine_student = new AppFineStudent;
                         $fine_student->fine_id = $data['fine_id'];
                         $fine_student->student_id = $student_id;
+                        $fine_student->billing_period_id = $data['billing_period_id'];
+                        $fine_student->billing_date = $data['billing_date'];
                         $fine_student->save();
                     }
                 } else if ($data['assign_radio_button'] == 'multiple_fines') {
@@ -149,6 +161,8 @@ switch ($action) {
                         $fine_student = new AppFineStudent;
                         $fine_student->fine_id = $fine_id;
                         $fine_student->student_id = $data['student_id'];
+                        $fine_student->billing_period_id = $data['billing_period_id'];
+                        $fine_student->billing_date = $data['billing_date'];
                         $fine_student->save();
                     }
                 }

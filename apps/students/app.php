@@ -33,7 +33,7 @@ switch ($action) {
             return $student;
         });
         view('app_wrapper', [
-            '_include' => 'list',
+            '_include' => 'student/list',
             'students' => $students,
             'status' => $status,
         ]);
@@ -62,7 +62,7 @@ switch ($action) {
             }
             $student_additional_information = AppStudentAdditionalInformation::where('student_id', $student->id)->get();
             view('app_wrapper', [
-                '_include' => 'view',
+                '_include' => 'student/view',
                 'student' => $student,
                 'student_additional_information' => $student_additional_information[0],
                 'status' => $status
@@ -76,7 +76,7 @@ switch ($action) {
         $categories = Category::all();
         $student_types = AppStudentType::all();
         view('app_wrapper', [
-            '_include' => 'add',
+            '_include' => 'student/add',
             'classes' => $classes,
             'sections' => $sections,
             'categories' => $categories,
@@ -183,7 +183,7 @@ switch ($action) {
             $student_types = AppStudentType::all();
             $faculties = AppFaculty::all();
             view('app_wrapper', [
-                '_include' => 'edit',
+                '_include' => 'student/edit',
                 'classes' => $classes,
                 'sections' => $sections,
                 'categories' => $categories,

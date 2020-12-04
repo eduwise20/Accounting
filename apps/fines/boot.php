@@ -14,6 +14,10 @@ $admin_fine_sub_menus = [
     [
         'name' => 'List Fines',
         'link' => U.'fines/app/list/'
+    ],
+    [
+        'name' => 'Assign Fine to Student',
+        'link' => U.'fines/app_assign_fine/add/'
     ]
 ];
 

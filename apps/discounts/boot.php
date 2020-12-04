@@ -74,6 +74,10 @@ $admin_discount_sub_menus = [
     [
         'name' => 'List Discounts',
         'link' => U.'discounts/app/list/'
+    ],
+    [
+        'name' => 'Assign Discount to Student',
+        'link' => U.'discounts/app_assign_discount/add/'
     ]
 ];
 

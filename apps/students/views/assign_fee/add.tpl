@@ -33,7 +33,7 @@
         <div class="col-md-5">
             <div class="panel panel-default">
                 <div class="panel-hdr">
-                    <h2><span></span>Assign Discount to Student</h2>
+                    <h2><span></span>Assign Fee to Student</h2>
                 </div>
 
                 <div class="panel-container show" id="ibox_form">
@@ -44,7 +44,11 @@
                             <span id="emsgbody"></span>
                         </div>
 
-                        <form id="assign_discount_to_student_master_form">
+                        <div class="alert alert-info" id="smsg">
+                            <span id="smsgbody"></span>
+                        </div>
+
+                        <form id="assign_fee_to_student_master_form">
 
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
@@ -54,10 +58,10 @@
                                         </div>
                                         <div class="col-sm-8">
                                             <div class="radio">
-                                                <label><input type="radio" name="assign_radio_button" value="multiple_students" checked> Multiple students one discount</label>
+                                                <label><input type="radio" name="assign_radio_button" value="multiple_students" checked> Assign a single fee structure to multiple students</label>
                                             </div>
                                             <div class="radio">
-                                                <label><input type="radio" name="assign_radio_button" value="multiple_discounts"> Multiple discounts one student</label>
+                                                <label><input type="radio" name="assign_radio_button" value="multiple_fees"> Assign multiple fee structures to a single student</label>
                                             </div>
                                         </div>
                                     </div>
@@ -116,18 +120,6 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group row">
-                                        <label for="remarks" class="col-sm-4"><span class="h6">Fee Names</span><span class="text-danger">*</span></label>
-                                        <div class="col-sm-8">
-                                            <select id="fee_name_id" name="fee_name_id" class="custom-select">
-                                                <option value="0">--</option>
-                                                {foreach $fee_names as $fee_name}
-                                                    <option value="{$fee_name->id}">{$fee_name->name}</option>
-                                                {/foreach}
-                                            </select>
-                                        </div>
-                                    </div>
-
                                 </div>
                             </div>
 
@@ -143,10 +135,10 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-7" id="student_discount_section">
+        <div class="col-md-7" id="student_fee_section">
             <div class="panel panel-default">
                 <div class="panel-hdr">
-                    <h2><span></span>Assign Discount to Student</h2>
+                    <h2><span></span>Assign Fee to Student</h2>
                 </div>
 
                 <div class="panel-container show" id="ibox_form">
@@ -157,16 +149,16 @@
                             <span id="emsgbody_fee_rate_info"></span>
                         </div>
 
-                        <form id="assing_discount_to_student_form">
+                        <form id="assign_fee_to_student_form">
 
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
 
                                     <div class="panel-content">
-                                        <div id="student_and_discount_dropdown">
+                                        <div id="student_and_fee_dropdown">
                                         </div>
                                         <hr/>
-                                        <div class="table-responsive" id="discount_table">
+                                        <div class="table-responsive" id="ib_data_panel">
 
                                             <table class="table table-striped w-100"  id="clx_datatable">
                                                 <thead style="background: #f0f2ff" id="table_head"></thead>
@@ -193,87 +185,6 @@
     </div>
 
 
-    <div class="modal fade" id="modal_add_item" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Discount</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
-                    </button>
-                </div>
-                <div class="modal-body" id="ibox_form_modal">
-                    <div class="alert alert-danger" id="emsgmodal">
-                        <span id="emsgbodymodal"></span>
-                    </div>
-                    <form id="discount_form">
-
-                        <div class="row">
-                            <div class="col-md-6 col-sm-12">
-                                <div class="form-group row">
-                                    <label for="name" class="col-sm-3"><span class="h6">Name</span><span class="text-danger">*</span></label>
-                                    <div class="col-sm-9">
-                                        <input type="text" id="name" name="name" class="form-control" autofocus>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label for="code" class="col-sm-3"><span class="h6">Type</span><span class="text-danger">*</span></label>
-                                    <div class="col-sm-9">
-                                        <div class="radio">
-                                            <label><input type="radio" name="type" value="Amount" checked> Amount</label>
-                                        </div>
-                                        <div class="radio">
-                                            <label><input type="radio" name="type" value="Percentage"> Percentage</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label for="order" class="col-sm-3"><span class="h6">Amount</span><span class="text-danger">*</span></label>
-                                    <div class="col-sm-9">
-                                        <input type="text" id="amount" name="amount" class="form-control">
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label for="is_running" class="col-sm-3"><span class="h6">Is recurring</span></label>
-                                    <div class="col-sm-9">
-                                        <div class="custom-control custom-switch">
-                                            <input type="checkbox" name="is_recurring" class="custom-control-input" id="is_recurring">
-                                            <label class="custom-control-label" for="is_recurring"><span class="h6"></span></label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label for="is_running" class="col-sm-3"><span class="h6">Is active</span></label>
-                                    <div class="col-sm-9">
-                                        <div class="custom-control custom-switch">
-                                            <input type="checkbox" name="is_active" class="custom-control-input" id="is_active">
-                                            <label class="custom-control-label" for="is_active"><span class="h6"></span></label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label for="remarks" class="col-sm-3"><span class="h6">Remarks</span></label>
-                                    <div class="col-sm-9">
-                                        <input type="text" id="remarks" name="remarks" class="form-control">
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" id="btn_modal_action" class="btn btn-primary">Save</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
 {/block}
@@ -287,27 +198,23 @@
             const faculty_id = $("#faculty_id");
             const category_id = $("#category_id");
             const sub_category_id = $("#sub_category_id");
-            const fee_name_id = $("#fee_name_id");
             let is_class_chosen = false;
             let is_student_type_chosen = false;
             let is_faculty_populated = false;
             let is_faculty_chosen = false;
             let is_category_chosen = false;
-            let is_fee_name_chosen = false;
             const btn_assign = $("#btn_assign");
-            const student_discount_section = $("#student_discount_section");
+            const student_fee_section = $("#student_fee_section");
             const faculty_section = $("#faculty_section");
             const sub_category_section = $("#sub_category_section");
-            const student_and_discount_dropdown = $("#student_and_discount_dropdown");
-            const submit_button = $("#btn_submit");
+            const student_and_fee_dropdown = $("#student_and_fee_dropdown");
 
-            student_discount_section.hide();
+            student_fee_section.hide();
             faculty_section.hide();
             sub_category_section.hide();
-            submit_button.hide();
             $(".progress").hide();
             $("#emsg").hide();
-            $("#emsgmodal").hide();
+            $("#smsg").hide();
             $("#emsg_fee_rate_info").hide();
             btn_assign.prop("disabled", true);
             var _url = '{$_url}';
@@ -322,11 +229,6 @@
 
             student_type_id.change(function(){
                 is_student_type_chosen = student_type_id[0].value != 0;
-                checkToRemoveDisabled();
-            });
-
-            fee_name_id.change(function(){
-                is_fee_name_chosen = student_type_id[0].value != 0;
                 checkToRemoveDisabled();
             });
 
@@ -357,11 +259,9 @@
             function checkToRemoveDisabled() {
                 $("#table_head").html('');
                 $("#table_body").html('');
-                $("#create_btn").remove();
-                $("#btn_submit").hide();
-                student_discount_section.hide();
+                student_fee_section.hide();
                 $("#fee_rate_info_form").trigger("reset");
-                if (is_class_chosen && is_student_type_chosen && is_fee_name_chosen) {
+                if (is_class_chosen && is_student_type_chosen) {
                     if (is_faculty_populated) {
                         if (is_faculty_chosen) {
                             enableAssignButton();
@@ -387,7 +287,7 @@
             }
 
             function getFacultyForClass(class_id) {
-                $.post(base_url + 'assign_discount_to_students/app/getFacultyForClass/',
+                $.post(base_url + 'students/app_assign_fee_structure/getFacultyForClass/',
                     { class_id : class_id },
                     function (data, status){
                         let faculties = JSON.parse(data);
@@ -405,7 +305,7 @@
             }
 
             function getSubCategoriesForCategory(category_id) {
-                $.post(base_url + 'assign_discount_to_students/app/getSubCategoriesForCategory/',
+                $.post(base_url + 'students/app_assign_fee_structure/getSubCategoriesForCategory/',
                     { category_id : category_id },
                     function (data, status){
                         let sub_categories = JSON.parse(data);
@@ -445,7 +345,7 @@
             $cid.select2();
 
             $('input[type=radio][name=assign_radio_button]').change(function() {
-                student_discount_section.hide();
+                student_fee_section.hide();
                 checkToRemoveDisabled();
             });
 
@@ -458,7 +358,6 @@
                     class_id : class_id[0].value,
                     student_type_id : student_type_id[0].value,
                     faculty_id : faculty_id[0].value,
-                    fee_name_id : fee_name_id[0].value,
                 };
                 if (category_id.length > 0) {
                     postValue.category_id = category_id[0].value;
@@ -466,7 +365,7 @@
                 if (sub_category_id.length > 0) {
                     postValue.sub_category_id = sub_category_id[0].value;
                 }
-                $.post(base_url + 'assign_discount_to_students/app/getStudentAndDiscount/',
+                $.post(base_url + 'students/app_assign_fee_structure/getStudentAndFee/',
                     postValue,
                     function (data, status){
                         if(data) {
@@ -477,20 +376,20 @@
                                 body.animate({ scrollTop:0 }, '1000', 'swing');
                                 $("#emsgbody").html('No students found!');
                                 $("#emsg").show("slow");
-                            } else if (returnedResult['discounts'].length == 0) {
+                            } else if (returnedResult['fee_names'].length == 0) {
                                 $('#ibox_form').unblock();
                                 var body = $("html, body");
                                 body.animate({ scrollTop:0 }, '1000', 'swing');
-                                $("#emsgbody").html('No discounts found!');
+                                $("#emsgbody").html('No fee names found!');
                                 $("#emsg").show("slow");
                             } else  {
                                 $("#emsg").hide("slow");
                                 if (assign_radio_button_value === 'multiple_students') {
                                     populateMultipleStudentsTable(returnedResult);
-                                } else if (assign_radio_button_value === 'multiple_discounts') {
-                                    populateMultiplediscountsTable(returnedResult);
+                                } else if (assign_radio_button_value === 'multiple_fees') {
+                                    populateMultipleFeesTable(returnedResult);
                                 }
-                                student_discount_section.show();
+                                student_fee_section.show();
                             }
                         }
                     });
@@ -498,18 +397,18 @@
             });
 
             function populateMultipleStudentsTable(returnedResult) {
-                setDiscountsDropdown(returnedResult['discounts']);
+                setFeesDropdown(returnedResult['fee_names']);
             }
 
-            function setDiscountsDropdown(discounts) {
+            function setFeesDropdown(fees) {
                 let opts = '<option value="0">--</option>';
-                $.each(discounts, function(i) {
-                    opts += "<option value='" + discounts[i].id + "' >" + discounts[i].name + "</option>";
+                $.each(fees, function(i) {
+                    opts += "<option value='" + fees[i].id + "' >" + fees[i].name + "</option>";
                 });
-                student_and_discount_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Discounts</span></label><div class="col-sm-8"><select class="custom-select" name="discount_id" id="discount_dropdown">' + opts + '</select> </div></div>');
+                student_and_fee_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Fee Names</span></label><div class="col-sm-8"><select class="custom-select" name="fee_id" id="fee_dropdown">' + opts + '</select> </div></div>');
             }
 
-            function populateMultiplediscountsTable(returnedResult) {
+            function populateMultipleFeesTable(returnedResult) {
                 setStudentsDropdown(returnedResult['students']);
             }
 
@@ -518,21 +417,24 @@
                 $.each(students, function(i) {
                     opts += "<option value='" + students[i].id + "' >" + students[i].name + "</option>";
                 });
-                student_and_discount_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Students</span></label><div class="col-sm-8"><select class="custom-select" name="student_id" id="student_dropdown">' + opts + '</select> </div></div>');
+                student_and_fee_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Students</span></label><div class="col-sm-8"><select class="custom-select" name="student_id" id="student_dropdown">' + opts + '</select> </div></div>');
             }
 
             $("#btn_submit").click(function (e) {
                 e.preventDefault();
                 $('#ibox_form').block({ message:block_msg });
-                $.post(base_url + 'assign_discount_to_students/app/save/', $('#assign_discount_to_student_master_form, #assing_discount_to_student_form').serialize())
+                $.post(base_url + 'students/app_assign_fee_structure/save/', $('#assign_fee_to_student_master_form, #assign_fee_to_student_form').serialize())
                     .done(function (data) {
+                        $('#ibox_form').unblock();
+                        var body = $("html, body");
+                        body.animate({ scrollTop:0 }, '1000', 'swing');
                         if ($.isNumeric(data)) {
-                            window.location = base_url + 'assign_discount_to_students/app/add';
+                            $("#emsg").hide("slow");
+                            $("#smsgbody").html("Fee structure assigned successfully");
+                            $("#smsg").show("slow");
                         }
                         else {
-                            $('#ibox_form').unblock();
-                            var body = $("html, body");
-                            body.animate({ scrollTop:0 }, '1000', 'swing');
+                            $("#smsg").hide("slow");
                             $("#emsgbody").html(data);
                             $("#emsg").show("slow");
                         }
@@ -546,70 +448,61 @@
         });
 
         $(document).on('change', '#student_dropdown', function () {
-            changeStudentDropdown();
-        });
 
-        function changeStudentDropdown() {
-            $.post(base_url + 'assign_discount_to_students/app/getDiscountsForStudent/',
+            $.post(base_url + 'students/app_assign_fee_structure/getFeesForStudent/',
                 { student_id : $("#student_dropdown").val()},
                 function (data, status){
                     if(data) {
                         let returnedResult = JSON.parse(data);
-                        setTableHeadForDiscountsTable();
-                        setDiscountsTable(returnedResult['discounts'], returnedResult['selectedDiscounts']);
-                        $("#btn_submit").show();
-                    } else {
-                        $("#table_head").html('');
-                        $("#table_body").html('');
-                        $("#btn_submit").hide();
+                        setTableHeadForFeesTable();
+                        setFeesTable(returnedResult['fees'], returnedResult['selectedFees']);
                     }
                 });
-        }
+        });
 
-        function setDiscountsTable(discounts, selectedDiscounts) {
+        function setFeesTable(fees, selectedFees) {
             let tableBody = '';
-            $.each(discounts, function(i) {
+            $.each(fees, function(i) {
                 tableBody += '<tr>';
-                if (selectedDiscounts.includes(discounts[i].id)) {
-                    tableBody += '<td><input type="checkbox" id="selectOne[' + discounts[i].id + ']" class="selectOne" name="discount_ids[' + discounts[i].id + ']" checked="checked"/></td>';
+                if (fees[i].is_compulsary) {
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + fees[i].id + ']" class="compulsary_fee" name="fee_ids[' + fees[i].id + ']" checked="checked" disabled/></td>';
+                } else if (selectedFees.includes(fees[i].id)) {
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + fees[i].id + ']" class="selectOne" name="fee_ids[' + fees[i].id + ']" checked="checked"/></td>';
                 } else {
-                    tableBody += '<td><input type="checkbox" id="selectOne[' + discounts[i].id + ']" class="selectOne" name="discount_ids[' + discounts[i].id + ']" /></td>';
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + fees[i].id + ']" class="selectOne" name="fee_ids[' + fees[i].id + ']" /></td>';
                 }
-                tableBody += '<td>' + discounts[i].name + '</td>';
-                tableBody += '<td>' + discounts[i].amount + '</td>';
+                tableBody += '<td>' + fees[i].name + '</td>';
+                tableBody += '<td>' + fees[i].code + '</td>';
                 tableBody += '</tr>';
             });
             $("#table_body").html(tableBody);
-            let createButton = '<a data-toggle="modal" href="#modal_add_item" class="btn btn-success mb-md" id="create_btn"><i class="fal fa-plus"></i> I don\'t have discount</a>';
-            if ($("#create_btn").length == 0) {
-                $("#discount_table").append(createButton);
-            }
         }
 
-        $(document).on('change', '#discount_dropdown', function () {
-            $.post(base_url + 'assign_discount_to_students/app/getStudentsForDiscount/',
-                $('#assign_discount_to_student_master_form, #assing_discount_to_student_form').serialize(),
+        $(document).on('change', '#fee_dropdown', function () {
+            let assign_fee_to_student_master_form = $('#assign_fee_to_student_master_form').serialize();
+            $.post(base_url + 'students/app_assign_fee_structure/getStudentsForFee/',
+                $('#assign_fee_to_student_master_form, #assign_fee_to_student_form').serialize(),
                 function (data, status){
                     if(data) {
                         let returnedResult = JSON.parse(data);
-                        if (returnedResult['discount_id'] != 0) {
+                        if (returnedResult['fee_id'] != 0) {
                             setTableHeadForStudentsTable();
-                            setStudentsTable(returnedResult['students'], returnedResult['selectedStudents']);
-                            $("#btn_submit").show();
+                            setStudentsTable(returnedResult['students'], returnedResult['selectedStudents'], returnedResult['fee_name']['is_compulsary']);
                         } else {
                             $("#table_head").html('');
                             $("#table_body").html('');
-                            $("#btn_submit").hide();
                         }
                     }
                 });
         });
 
-        function setStudentsTable(students, selectedStudents) {
+        function setStudentsTable(students, selectedStudents, isCompulsary) {
             let tableBody = '';
             $.each(students, function(i) {
                 tableBody += '<tr>';
-                if (selectedStudents.includes(students[i].id)) {
+                if (isCompulsary) {
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" class="selectOne" name="student_ids[' + students[i].id + ']" checked="checked" disabled/></td>';
+                } else if (selectedStudents.includes(students[i].id)) {
                     tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" class="selectOne" name="student_ids[' + students[i].id + ']" checked="checked"/></td>';
                 } else {
                     tableBody += '<td><input type="checkbox" id="selectOne[' + students[i].id + ']" class="selectOne" name="student_ids[' + students[i].id + ']"/></td>';
@@ -629,34 +522,15 @@
             $("#table_head").html(tableHead);
         }
 
-        function setTableHeadForDiscountsTable() {
+        function setTableHeadForFeesTable() {
             let tableHead = '';
             tableHead += '<tr class="heading" >';
             tableHead += '<th><input type="checkbox" id="selectAllCheckbox"/></th>';
-            tableHead += '<th>Discount Name</th>';
-            tableHead += '<th>Amount</th>';
+            tableHead += '<th>Fee Name</th>';
+            tableHead += '<th>Fee Code</th>';
             tableHead += '</tr>';
             $("#table_head").html(tableHead);
         }
-
-        $("#btn_modal_action").click(function (e) {
-            e.preventDefault();
-            $('#ibox_form_modal').block({ message:block_msg });
-            $.post(base_url + 'discounts/app/save/', $( "#discount_form" ).serialize())
-                .done(function (data) {
-                    if ($.isNumeric(data)) {
-                        changeStudentDropdown()
-                        $("#modal_add_item").modal('toggle');
-                    }
-                    else {
-                        $('#ibox_form_modal').unblock();
-                        var body = $("html, body");
-                        body.animate({ scrollTop:0 }, '1000', 'swing');
-                        $("#emsgbodymodal").html(data);
-                        $("#emsgmodal").show("slow");
-                    }
-                });
-        });
 
     </script>
 {/block}

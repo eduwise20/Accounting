@@ -16,6 +16,10 @@ $admin_scholarship_sub_menus = [
     [
         'name' => 'List Scholarships',
         'link' => U.'scholarships/app/list/'
+    ],
+    [
+        'name' => 'Assign Scholarship to Student',
+        'link' => U.'scholarships/app_assign_scholarship/add/'
     ]
 ];
 

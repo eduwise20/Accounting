@@ -17,14 +17,14 @@ switch ($action) {
             return $scholarship;
         });
         view('app_wrapper', [
-            '_include' => 'list',
+            '_include' => 'scholarship/list',
             'scholarships' => $scholarships,
         ]);
         break;
 
     case 'add':
         view('app_wrapper', [
-            '_include' => 'add',
+            '_include' => 'scholarship/add',
         ]);
         break;
 
@@ -84,7 +84,7 @@ switch ($action) {
             r2(U . 'scholarships/app/list', 'e', $msg);
         } else {
             view('app_wrapper', [
-                '_include' => 'edit',
+                '_include' => 'scholarship/edit',
                 'scholarship' => $scholarship
             ]);
         }

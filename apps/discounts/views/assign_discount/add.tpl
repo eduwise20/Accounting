@@ -33,7 +33,7 @@
         <div class="col-md-5">
             <div class="panel panel-default">
                 <div class="panel-hdr">
-                    <h2><span></span>Assign Scholarship to Student</h2>
+                    <h2><span></span>Assign Discount to Student</h2>
                 </div>
 
                 <div class="panel-container show" id="ibox_form">
@@ -44,7 +44,11 @@
                             <span id="emsgbody"></span>
                         </div>
 
-                        <form id="assign_scholarship_to_student_master_form">
+                        <div class="alert alert-info" id="smsg">
+                            <span id="smsgbody"></span>
+                        </div>
+
+                        <form id="assign_discount_to_student_master_form">
 
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
@@ -54,10 +58,10 @@
                                         </div>
                                         <div class="col-sm-8">
                                             <div class="radio">
-                                                <label><input type="radio" name="assign_radio_button" value="multiple_students" checked> Multiple students one scholarship</label>
+                                                <label><input type="radio" name="assign_radio_button" value="multiple_students" checked> Assign a single discount to multiple students</label>
                                             </div>
                                             <div class="radio">
-                                                <label><input type="radio" name="assign_radio_button" value="multiple_scholarships"> Multiple scholarships one student</label>
+                                                <label><input type="radio" name="assign_radio_button" value="multiple_discounts"> Assign multiple discounts to a single student</label>
                                             </div>
                                         </div>
                                     </div>
@@ -128,6 +132,28 @@
                                         </div>
                                     </div>
 
+                                    <div class="form-group row">
+                                        <label for="yearly_applicable" class="col-sm-4"><span class="h6">Yearly Applicable</span></label>
+                                        <div class="col-sm-8">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" name="yearly_applicable" class="custom-control-input" id="yearly_applicable" checked="checked">
+                                                <label class="custom-control-label" for="yearly_applicable"><span class="h6"></span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row" id="billing_period_section">
+                                        <label for="billing_period_id" class="col-sm-4"><span class="h6">Billing Period</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <select id="billing_period_id" name="billing_period_id" class="custom-select">
+                                                <option value="0">--</option>
+                                                {foreach $billing_periods as $billing_period}
+                                                    <option value="{$billing_period->id}">{$billing_period->name}</option>
+                                                {/foreach}
+                                            </select>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
 
@@ -143,10 +169,10 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-7" id="student_scholarship_section">
+        <div class="col-md-7" id="student_discount_section">
             <div class="panel panel-default">
                 <div class="panel-hdr">
-                    <h2><span></span>Assign Scholarship to Student</h2>
+                    <h2><span></span>Assign Discount to Student</h2>
                 </div>
 
                 <div class="panel-container show" id="ibox_form">
@@ -157,16 +183,16 @@
                             <span id="emsgbody_fee_rate_info"></span>
                         </div>
 
-                        <form id="assing_scholarship_to_student_form">
+                        <form id="assign_discount_to_student_form">
 
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
 
                                     <div class="panel-content">
-                                        <div id="student_and_scholarship_dropdown">
+                                        <div id="student_and_discount_dropdown">
                                         </div>
                                         <hr/>
-                                        <div class="table-responsive" id="scholarship_table">
+                                        <div class="table-responsive" id="discount_table">
 
                                             <table class="table table-striped w-100"  id="clx_datatable">
                                                 <thead style="background: #f0f2ff" id="table_head"></thead>
@@ -197,7 +223,7 @@
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Scholarship</h5>
+                    <h5 class="modal-title">Add Discount</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true"><i class="fal fa-times"></i></span>
                     </button>
@@ -206,7 +232,7 @@
                     <div class="alert alert-danger" id="emsgmodal">
                         <span id="emsgbodymodal"></span>
                     </div>
-                    <form id="scholarship_form">
+                    <form id="discount_form">
 
                         <div class="row">
                             <div class="col-md-6 col-sm-12">
@@ -288,25 +314,32 @@
             const category_id = $("#category_id");
             const sub_category_id = $("#sub_category_id");
             const fee_name_id = $("#fee_name_id");
+            const billing_period_id = $("#billing_period_id");
             let is_class_chosen = false;
             let is_student_type_chosen = false;
             let is_faculty_populated = false;
             let is_faculty_chosen = false;
             let is_category_chosen = false;
             let is_fee_name_chosen = false;
+            let is_yearly_applicable_chosen = true;
+            let is_billing_period_chosen = false;
             const btn_assign = $("#btn_assign");
-            const student_scholarship_section = $("#student_scholarship_section");
+            const student_discount_section = $("#student_discount_section");
             const faculty_section = $("#faculty_section");
             const sub_category_section = $("#sub_category_section");
-            const student_and_scholarship_dropdown = $("#student_and_scholarship_dropdown");
+            const billing_period_section = $("#billing_period_section");
+            const student_and_discount_dropdown = $("#student_and_discount_dropdown");
             const submit_button = $("#btn_submit");
+            const yearly_applicable = $("#yearly_applicable");
 
-            student_scholarship_section.hide();
+            student_discount_section.hide();
             faculty_section.hide();
             sub_category_section.hide();
+            billing_period_section.hide();
             submit_button.hide();
             $(".progress").hide();
             $("#emsg").hide();
+            $("#smsg").hide();
             $("#emsgmodal").hide();
             $("#emsg_fee_rate_info").hide();
             btn_assign.prop("disabled", true);
@@ -354,14 +387,30 @@
                 }
             });
 
+            yearly_applicable.click(function() {
+                if ($(this).prop("checked") == true) {
+                    is_yearly_applicable_chosen = true;
+                    billing_period_section.hide();
+                } else {
+                    is_yearly_applicable_chosen = false;
+                    billing_period_section.show();
+                }
+                checkToRemoveDisabled();
+            });
+
+            billing_period_id.change(function () {
+                is_billing_period_chosen = billing_period_id[0].value != 0;
+                checkToRemoveDisabled();
+            });
+
             function checkToRemoveDisabled() {
                 $("#table_head").html('');
                 $("#table_body").html('');
                 $("#create_btn").remove();
                 $("#btn_submit").hide();
-                student_scholarship_section.hide();
+                student_discount_section.hide();
                 $("#fee_rate_info_form").trigger("reset");
-                if (is_class_chosen && is_student_type_chosen && is_fee_name_chosen) {
+                if (is_class_chosen && is_student_type_chosen && is_fee_name_chosen && (is_yearly_applicable_chosen || is_billing_period_chosen)) {
                     if (is_faculty_populated) {
                         if (is_faculty_chosen) {
                             enableAssignButton();
@@ -387,7 +436,7 @@
             }
 
             function getFacultyForClass(class_id) {
-                $.post(base_url + 'assign_scholarship_to_students/app/getFacultyForClass/',
+                $.post(base_url + 'discounts/app_assign_discount/getFacultyForClass/',
                     { class_id : class_id },
                     function (data, status){
                         let faculties = JSON.parse(data);
@@ -405,7 +454,7 @@
             }
 
             function getSubCategoriesForCategory(category_id) {
-                $.post(base_url + 'assign_scholarship_to_students/app/getSubCategoriesForCategory/',
+                $.post(base_url + 'discounts/app_assign_discount/getSubCategoriesForCategory/',
                     { category_id : category_id },
                     function (data, status){
                         let sub_categories = JSON.parse(data);
@@ -445,7 +494,7 @@
             $cid.select2();
 
             $('input[type=radio][name=assign_radio_button]').change(function() {
-                student_scholarship_section.hide();
+                student_discount_section.hide();
                 checkToRemoveDisabled();
             });
 
@@ -466,7 +515,7 @@
                 if (sub_category_id.length > 0) {
                     postValue.sub_category_id = sub_category_id[0].value;
                 }
-                $.post(base_url + 'assign_scholarship_to_students/app/getStudentAndScholarship/',
+                $.post(base_url + 'discounts/app_assign_discount/getStudentAndDiscount/',
                     postValue,
                     function (data, status){
                         if(data) {
@@ -477,20 +526,20 @@
                                 body.animate({ scrollTop:0 }, '1000', 'swing');
                                 $("#emsgbody").html('No students found!');
                                 $("#emsg").show("slow");
-                            } else if (returnedResult['scholarships'].length == 0) {
+                            } else if (returnedResult['discounts'].length == 0) {
                                 $('#ibox_form').unblock();
                                 var body = $("html, body");
                                 body.animate({ scrollTop:0 }, '1000', 'swing');
-                                $("#emsgbody").html('No scholarships found!');
+                                $("#emsgbody").html('No discounts found!');
                                 $("#emsg").show("slow");
                             } else  {
                                 $("#emsg").hide("slow");
                                 if (assign_radio_button_value === 'multiple_students') {
                                     populateMultipleStudentsTable(returnedResult);
-                                } else if (assign_radio_button_value === 'multiple_scholarships') {
-                                    populateMultiplescholarshipsTable(returnedResult);
+                                } else if (assign_radio_button_value === 'multiple_discounts') {
+                                    populateMultiplediscountsTable(returnedResult);
                                 }
-                                student_scholarship_section.show();
+                                student_discount_section.show();
                             }
                         }
                     });
@@ -498,18 +547,18 @@
             });
 
             function populateMultipleStudentsTable(returnedResult) {
-                setScholarshipsDropdown(returnedResult['scholarships']);
+                setDiscountsDropdown(returnedResult['discounts']);
             }
 
-            function setScholarshipsDropdown(scholarships) {
+            function setDiscountsDropdown(discounts) {
                 let opts = '<option value="0">--</option>';
-                $.each(scholarships, function(i) {
-                    opts += "<option value='" + scholarships[i].id + "' >" + scholarships[i].name + "</option>";
+                $.each(discounts, function(i) {
+                    opts += "<option value='" + discounts[i].id + "' >" + discounts[i].name + "</option>";
                 });
-                student_and_scholarship_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Scholarships</span></label><div class="col-sm-8"><select class="custom-select" name="scholarship_id" id="scholarship_dropdown">' + opts + '</select> </div></div>');
+                student_and_discount_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Discounts</span></label><div class="col-sm-8"><select class="custom-select" name="discount_id" id="discount_dropdown">' + opts + '</select> </div></div>');
             }
 
-            function populateMultiplescholarshipsTable(returnedResult) {
+            function populateMultiplediscountsTable(returnedResult) {
                 setStudentsDropdown(returnedResult['students']);
             }
 
@@ -518,21 +567,24 @@
                 $.each(students, function(i) {
                     opts += "<option value='" + students[i].id + "' >" + students[i].name + "</option>";
                 });
-                student_and_scholarship_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Students</span></label><div class="col-sm-8"><select class="custom-select" name="student_id" id="student_dropdown">' + opts + '</select> </div></div>');
+                student_and_discount_dropdown.html('<div class="form-group row"><label for="remarks" class="col-sm-4"><span class="h6">Students</span></label><div class="col-sm-8"><select class="custom-select" name="student_id" id="student_dropdown">' + opts + '</select> </div></div>');
             }
 
             $("#btn_submit").click(function (e) {
                 e.preventDefault();
                 $('#ibox_form').block({ message:block_msg });
-                $.post(base_url + 'assign_scholarship_to_students/app/save/', $('#assign_scholarship_to_student_master_form, #assing_scholarship_to_student_form').serialize())
+                $.post(base_url + 'discounts/app_assign_discount/save/', $('#assign_discount_to_student_master_form, #assign_discount_to_student_form').serialize())
                     .done(function (data) {
+                        $('#ibox_form').unblock();
+                        var body = $("html, body");
+                        body.animate({ scrollTop:0 }, '1000', 'swing');
                         if ($.isNumeric(data)) {
-                            window.location = base_url + 'assign_scholarship_to_students/app/add';
+                            $("#emsg").hide("slow");
+                            $("#smsgbody").html("Discount assigned successfully");
+                            $("#smsg").show("slow");
                         }
                         else {
-                            $('#ibox_form').unblock();
-                            var body = $("html, body");
-                            body.animate({ scrollTop:0 }, '1000', 'swing');
+                            $("#smsg").hide("slow");
                             $("#emsgbody").html(data);
                             $("#emsg").show("slow");
                         }
@@ -550,13 +602,13 @@
         });
 
         function changeStudentDropdown() {
-            $.post(base_url + 'assign_scholarship_to_students/app/getScholarshipsForStudent/',
-                { student_id : $("#student_dropdown").val()},
+            $.post(base_url + 'discounts/app_assign_discount/getDiscountsForStudent/',
+                $('#assign_discount_to_student_master_form, #assign_discount_to_student_form').serialize(),
                 function (data, status){
                     if(data) {
                         let returnedResult = JSON.parse(data);
-                        setTableHeadForScholarshipsTable();
-                        setScholarshipsTable(returnedResult['scholarships'], returnedResult['selectedScholarships']);
+                        setTableHeadForDiscountsTable();
+                        setDiscountsTable(returnedResult['discounts'], returnedResult['selectedDiscounts']);
                         $("#btn_submit").show();
                     } else {
                         $("#table_head").html('');
@@ -566,33 +618,33 @@
                 });
         }
 
-        function setScholarshipsTable(scholarships, selectedScholarships) {
+        function setDiscountsTable(discounts, selectedDiscounts) {
             let tableBody = '';
-            $.each(scholarships, function(i) {
+            $.each(discounts, function(i) {
                 tableBody += '<tr>';
-                if (selectedScholarships.includes(scholarships[i].id)) {
-                    tableBody += '<td><input type="checkbox" id="selectOne[' + scholarships[i].id + ']" class="selectOne" name="scholarship_ids[' + scholarships[i].id + ']" checked="checked"/></td>';
+                if (selectedDiscounts.includes(discounts[i].id)) {
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + discounts[i].id + ']" class="selectOne" name="discount_ids[' + discounts[i].id + ']" checked="checked"/></td>';
                 } else {
-                    tableBody += '<td><input type="checkbox" id="selectOne[' + scholarships[i].id + ']" class="selectOne" name="scholarship_ids[' + scholarships[i].id + ']" /></td>';
+                    tableBody += '<td><input type="checkbox" id="selectOne[' + discounts[i].id + ']" class="selectOne" name="discount_ids[' + discounts[i].id + ']" /></td>';
                 }
-                tableBody += '<td>' + scholarships[i].name + '</td>';
-                tableBody += '<td>' + scholarships[i].amount + '</td>';
+                tableBody += '<td>' + discounts[i].name + '</td>';
+                tableBody += '<td>' + discounts[i].amount + '</td>';
                 tableBody += '</tr>';
             });
             $("#table_body").html(tableBody);
-            let createButton = '<a data-toggle="modal" href="#modal_add_item" class="btn btn-success mb-md" id="create_btn"><i class="fal fa-plus"></i> I don\'t have scholarship</a>';
+            let createButton = '<a data-toggle="modal" href="#modal_add_item" class="btn btn-success mb-md" id="create_btn"><i class="fal fa-plus"></i> I don\'t have discount</a>';
             if ($("#create_btn").length == 0) {
-                $("#scholarship_table").append(createButton);
+                $("#discount_table").append(createButton);
             }
         }
 
-        $(document).on('change', '#scholarship_dropdown', function () {
-            $.post(base_url + 'assign_scholarship_to_students/app/getStudentsForScholarship/',
-                $('#assign_scholarship_to_student_master_form, #assing_scholarship_to_student_form').serialize(),
+        $(document).on('change', '#discount_dropdown', function () {
+            $.post(base_url + 'discounts/app_assign_discount/getStudentsForDiscount/',
+                $('#assign_discount_to_student_master_form, #assign_discount_to_student_form').serialize(),
                 function (data, status){
                     if(data) {
                         let returnedResult = JSON.parse(data);
-                        if (returnedResult['scholarship_id'] != 0) {
+                        if (returnedResult['discount_id'] != 0) {
                             setTableHeadForStudentsTable();
                             setStudentsTable(returnedResult['students'], returnedResult['selectedStudents']);
                             $("#btn_submit").show();
@@ -629,11 +681,11 @@
             $("#table_head").html(tableHead);
         }
 
-        function setTableHeadForScholarshipsTable() {
+        function setTableHeadForDiscountsTable() {
             let tableHead = '';
             tableHead += '<tr class="heading" >';
             tableHead += '<th><input type="checkbox" id="selectAllCheckbox"/></th>';
-            tableHead += '<th>Scholarship Name</th>';
+            tableHead += '<th>Discount Name</th>';
             tableHead += '<th>Amount</th>';
             tableHead += '</tr>';
             $("#table_head").html(tableHead);
@@ -642,7 +694,7 @@
         $("#btn_modal_action").click(function (e) {
             e.preventDefault();
             $('#ibox_form_modal').block({ message:block_msg });
-            $.post(base_url + 'scholarships/app/save/', $( "#scholarship_form" ).serialize())
+            $.post(base_url + 'discounts/app_assign_discount/save/', $( "#discount_form" ).serialize())
                 .done(function (data) {
                     if ($.isNumeric(data)) {
                         changeStudentDropdown()
