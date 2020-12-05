@@ -216,6 +216,7 @@ switch ($action) {
                 array_push($selected_fines, $fine_student->fine_id);
         }
         $fines = AppFine::all();
+        $r['student_id'] = $data['student_id'];
         $r['fines'] = $fines;
         $r['selectedFines'] = $selected_fines;
         echo json_encode($r);

@@ -170,7 +170,7 @@
                                 </div>
                             </div>
 
-                            <div class="row">
+                            <div class="row" id="submit_button_section">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <button class="btn btn-primary mt-3 mr-3" type="button" id="btn_submit">Submit</button>
@@ -208,10 +208,12 @@
             const faculty_section = $("#faculty_section");
             const sub_category_section = $("#sub_category_section");
             const student_and_fee_dropdown = $("#student_and_fee_dropdown");
+            const submit_button_section = $("#submit_button_section");
 
             student_fee_section.hide();
             faculty_section.hide();
             sub_category_section.hide();
+            submit_button_section.hide();
             $(".progress").hide();
             $("#emsg").hide();
             $("#smsg").hide();
@@ -454,8 +456,15 @@
                 function (data, status){
                     if(data) {
                         let returnedResult = JSON.parse(data);
-                        setTableHeadForFeesTable();
-                        setFeesTable(returnedResult['fees'], returnedResult['selectedFees']);
+                        if (returnedResult['student_id'] != 0){
+                            setTableHeadForFeesTable();
+                            setFeesTable(returnedResult['fees'], returnedResult['selectedFees']);
+                            $("#submit_button_section").show();
+                        } else {
+                            $("#table_head").html('');
+                            $("#table_body").html('');
+                            $("#submit_button_section").hide();
+                        }
                     }
                 });
         });
@@ -488,9 +497,11 @@
                         if (returnedResult['fee_id'] != 0) {
                             setTableHeadForStudentsTable();
                             setStudentsTable(returnedResult['students'], returnedResult['selectedStudents'], returnedResult['fee_name']['is_compulsary']);
+                            $("#submit_button_section").show();
                         } else {
                             $("#table_head").html('');
                             $("#table_body").html('');
+                            $("#submit_button_section").hide();
                         }
                     }
                 });

@@ -234,6 +234,7 @@ switch ($action) {
                 array_push($selected_scholarships, $scholarship_student->scholarship_id);
         }
         $scholarships = AppScholarship::all();
+        $r['student_id'] = $data['student_id'];
         $r['scholarships'] = $scholarships;
         $r['selectedScholarships'] = $selected_scholarships;
         echo json_encode($r);

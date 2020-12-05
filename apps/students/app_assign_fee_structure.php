@@ -203,6 +203,7 @@ switch ($action) {
                 array_push($selected_fees, $fee_name_student->fee_name_id);
         }
         $fee_names = AppFeeName::all();
+        $r['student_id'] = $data['student_id'];
         $r['fees'] = $fee_names;
         $r['selectedFees'] = $selected_fees;
         echo json_encode($r);

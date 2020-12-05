@@ -234,6 +234,7 @@ switch ($action) {
                 array_push($selected_discounts, $discount_student->discount_id);
         }
         $discounts = AppDiscount::all();
+        $r['student_id'] = $data['student_id'];
         $r['discounts'] = $discounts;
         $r['selectedDiscounts'] = $selected_discounts;
         echo json_encode($r);
