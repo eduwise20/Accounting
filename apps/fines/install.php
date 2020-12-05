@@ -10,7 +10,7 @@ $table->add('created_at', 'TIMESTAMP', '', 'null');
 $table->add('updated_at', 'TIMESTAMP', '', 'null');
 $table->save();
 
-$table_fine_student = new Schema('fine_student');
+$table_fine_student = new Schema('zzz_19_fine_student');
 $table_fine_student->add('student_id', 'int', 20);
 $table_fine_student->add('fine_id', 'int', 20);
 $table_fine_student->add('billing_period_id', 'int', 20);
