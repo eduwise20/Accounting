@@ -141,4 +141,4 @@ $admin_class_sub_menus = [
     ]
 ];
 
-add_menu_admin_svg('Classes',U.'classes/app','classes',$svg ,2,$admin_class_sub_menus);
+add_menu_admin_svg('Classes',U.'classes/app','classes',$svg ,1,$admin_class_sub_menus);

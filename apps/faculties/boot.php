@@ -64,4 +64,4 @@ $admin_faculty_sub_menus = [
     ]
 ];
 
-add_menu_admin_svg('Faculties',U.'faculties/app','faculties', $svg ,2,$admin_faculty_sub_menus);
+add_menu_admin_svg('Faculties',U.'faculties/app','faculties', $svg ,1,$admin_faculty_sub_menus);

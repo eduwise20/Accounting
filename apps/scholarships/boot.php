@@ -23,4 +23,4 @@ $admin_scholarship_sub_menus = [
     ]
 ];
 
-add_menu_admin_svg('Scholarships',U.'scholarships/app','scholarships', $svg,2, $admin_scholarship_sub_menus);
+add_menu_admin_svg('Scholarships',U.'scholarships/app','scholarships', $svg,1, $admin_scholarship_sub_menus);

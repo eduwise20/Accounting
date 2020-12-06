@@ -75,4 +75,4 @@ $admin_student_sub_menus = [
     ]
 ];
 
-add_menu_admin_svg('Students',U.'students/app','students',$svg,2, $admin_student_sub_menus);
+add_menu_admin_svg('Students',U.'students/app','students',$svg,1, $admin_student_sub_menus);

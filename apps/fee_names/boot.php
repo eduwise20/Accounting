@@ -19,4 +19,4 @@ $admin_fee_name_sub_menus = [
     ]
 ];
 
-add_menu_admin_svg('Fee Names',U.'fee_names/app','fee_names', $svg,2, $admin_fee_name_sub_menus);
+add_menu_admin_svg('Fee Names',U.'fee_names/app','fee_names', $svg,1, $admin_fee_name_sub_menus);
