@@ -1,5 +1,5 @@
 <?php
-$table = new Schema('students');
+$table = new Schema('zzz_16_students');
 $table->add('name', 'varchar', 256);
 $table->add('class_id', 'int', 20);
 $table->add('section_id', 'int', 20);
@@ -15,7 +15,7 @@ $table->add('created_at', 'TIMESTAMP', '', 'null');
 $table->add('updated_at', 'TIMESTAMP', '', 'null');
 $table->save();
 
-$table_student_additional_information = new Schema('student_additional_informations');
+$table_student_additional_information = new Schema('zzz_17_student_additional_informations');
 $table_student_additional_information->add('student_id', 'int', 20);
 $table_student_additional_information->add('phone', 'varchar', 256);
 $table_student_additional_information->add('current_address', 'varchar', 256);
@@ -27,7 +27,7 @@ $table_student_additional_information->add('created_at', 'TIMESTAMP', '', 'null'
 $table_student_additional_information->add('updated_at', 'TIMESTAMP', '', 'null');
 $table_student_additional_information->save();
 
-$table_fee_name_student = new Schema('fee_name_student');
+$table_fee_name_student = new Schema('zzz_18_fee_name_student');
 $table_fee_name_student->add('student_id', 'int', 20);
 $table_fee_name_student->add('fee_name_id', 'int', 20);
 $table_fee_name_student->add('created_at', 'TIMESTAMP', '', 'null');

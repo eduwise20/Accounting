@@ -11,7 +11,7 @@ $table->add('created_at', 'TIMESTAMP', '', 'null');
 $table->add('updated_at', 'TIMESTAMP', '', 'null');
 $table->save();
 
-$table_fee_structure_student_scholarship = new Schema('fee_structure_student_scholarship');
+$table_fee_structure_student_scholarship = new Schema('zzz_21_fee_structure_student_scholarship');
 $table_fee_structure_student_scholarship->add('student_id', 'int', 20);
 $table_fee_structure_student_scholarship->add('fee_name_id', 'int', 20);
 $table_fee_structure_student_scholarship->add('scholarship_id', 'int', 20);

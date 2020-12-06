@@ -12,7 +12,7 @@ $table->add('updated_at', 'TIMESTAMP', '', 'null');
 $table->save();
 
 
-$table_student_discount = new Schema('fee_structure_student_discount');
+$table_student_discount = new Schema('zzz_20_fee_structure_student_discount');
 $table_student_discount->add('student_id', 'int', 20);
 $table_student_discount->add('fee_name_id', 'int', 20);
 $table_student_discount->add('discount_id', 'int', 20);
