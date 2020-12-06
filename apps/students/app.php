@@ -221,4 +221,79 @@ switch ($action) {
         $faculties = AppFaculty::where('class_id', $data['class_id'])->get();
         echo json_encode($faculties);
         break;
+
+    case 'import_csv' :
+        view('app_wrapper', [
+            '_include' => 'student/students_import'
+        ]);
+        break;
+
+    case 'csv_upload' :
+        $uploader   =   new Uploader();
+        $uploader->setDir('storage/temp/');
+        // $uploader->sameName(true);
+        $uploader->setExtensions(array('csv'));  //allowed extensions list//
+        if($uploader->uploadFile('file')){   //txtFile is the filebrowse element name //
+            $uploaded  =   $uploader->getUploadName(); //get uploaded file name, renames on upload//
+
+            $_SESSION['uploaded'] = $uploaded;
+
+        }else{//upload failed
+            _msglog('e',$uploader->getMessage()); //get upload error message
+        }
+        break;
+
+    case 'csv_uploaded':
+        if(isset($_SESSION['uploaded'])){
+            $uploaded = $_SESSION['uploaded'];
+            $csv = new parseCSV();
+            $csv->auto('storage/temp/'.$uploaded);
+            $students = $csv->data;
+
+            $cn = 0;
+
+            foreach($students as $s){
+
+                $student = new AppStudent;
+                $student_additional_information = new AppStudentAdditionalInformation;
+
+                $student->name = $s['Full Name'];
+                $student->admission_no = $s['Admission Number'];
+                $student->roll_no = $s['Roll Number'];
+                $class = AppClass::where('name', $s['Class'])->get();
+                $student->class_id = $class[0]->id;
+                $section = AppSection::where('name', $s['Section'])->get();
+                $student->section_id = $section[0]->id;
+                $category = Category::where('name', $s['Category'])->get();
+                $student->category_id = $category[0]->id;
+                $sub_category = Subcategory::where('name', $s['Sub Category'])->get();
+                $student->sub_category_id = $sub_category[0]->id;
+                $student_type = AppStudentType::where('name', $s['Student Type'])->get();
+                $student->student_type_id = $student_type[0]->id;
+                $faculty = AppFaculty::where('name', $s['Faculty'])->get();
+                $student->faculty_id = $faculty[0]->id;
+                $student->status = array_search($s['Status'], $status);
+                $student->remarks = $s['Remarks'];
+                $student->save();
+
+                $student_additional_information->student_id = $student->id;
+                $student_additional_information->phone = $s['Phone'];
+                $student_additional_information->current_address = $s['Current Address'];
+                $student_additional_information->permanent_address = $s['Permanent Address'];
+                $student_additional_information->parent_name = $s['Parent Name'];
+                $student_additional_information->local_guardian_name = $s['Local Guardian Name'];
+                $student_additional_information->gender = $s['Gender'];
+                $student_additional_information->save();
+
+                if(is_numeric($student->id)){
+                    $cn++;
+                }
+
+            }
+            _msglog('s',$cn.' Students Imported');
+        }
+        else{
+            _msglog('e','An Error Occurred while uploading the files');
+        }
+        break;
 }
