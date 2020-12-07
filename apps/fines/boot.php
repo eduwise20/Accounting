@@ -21,4 +21,4 @@ $admin_fine_sub_menus = [
     ]
 ];
 
-add_menu_admin_svg('Fines',U.'fines/app','fines',$svg,2, $admin_fine_sub_menus);
+add_menu_admin_svg('Fines',U.'fines/app','fines',$svg,1, $admin_fine_sub_menus);

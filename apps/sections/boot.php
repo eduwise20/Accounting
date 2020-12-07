@@ -20,4 +20,4 @@ $admin_section_sub_menus = [
     ]
 ];
 
-add_menu_admin_svg('Sections',U.'sections/app','sections', $svg ,2,$admin_section_sub_menus);
+add_menu_admin_svg('Sections',U.'sections/app','sections', $svg ,1,$admin_section_sub_menus);

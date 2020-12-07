@@ -19,4 +19,4 @@ $admin_student_type_sub_menus = [
     ]
 ];
 
-add_menu_admin_svg('Student Types',U.'student_types/app','student_types', $svg ,2,$admin_student_type_sub_menus);
+add_menu_admin_svg('Student Types',U.'student_types/app','student_types', $svg ,1,$admin_student_type_sub_menus);

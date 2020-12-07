@@ -4,6 +4,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class AppStudent extends Model {
 
-    protected $table = 'students';
+    protected $table = 'zzz_16_students';
 
 }

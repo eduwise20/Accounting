@@ -189,7 +189,7 @@
                                 </div>
                             </div>
 
-                            <div class="row">
+                            <div class="row" id="submit_button_section">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <button class="btn btn-primary mt-3 mr-3" type="button" id="btn_submit">Submit</button>
@@ -301,12 +301,12 @@
             const faculty_section = $("#faculty_section");
             const sub_category_section = $("#sub_category_section");
             const student_and_fine_dropdown = $("#student_and_fine_dropdown");
-            const submit_button = $("#btn_submit");
+            const submit_button_section = $("#submit_button_section");
 
             student_fine_section.hide();
             faculty_section.hide();
             sub_category_section.hide();
-            submit_button.hide();
+            submit_button_section.hide();
             $(".progress").hide();
             $("#emsg").hide();
             $("#smsg").hide();
@@ -360,8 +360,8 @@
             function checkToRemoveDisabled() {
                 $("#table_head").html('');
                 $("#table_body").html('');
-                $("#create_btn").remove();
-                $("#btn_submit").hide();
+                $("#create_btn").hide();
+                submit_button_section.hide();
                 student_fine_section.hide();
                 $("#fee_rate_info_form").trigger("reset");
                 if (is_class_chosen && is_student_type_chosen && is_billing_period_chosen) {
@@ -560,13 +560,17 @@
                 function (data, status){
                     if(data) {
                         let returnedResult = JSON.parse(data);
-                        setTableHeadForFinesTable();
-                        setFinesTable(returnedResult['fines'], returnedResult['selectedFines']);
-                        $("#btn_submit").show();
-                    } else {
-                        $("#table_head").html('');
-                        $("#table_body").html('');
-                        $("#btn_submit").hide();
+                        if (returnedResult['student_id'] != 0){
+                            setTableHeadForFinesTable();
+                            setFinesTable(returnedResult['fines'], returnedResult['selectedFines']);
+                            $("#submit_button_section").show();
+                            $("#create_btn").show();
+                        } else {
+                            $("#table_head").html('');
+                            $("#table_body").html('');
+                            $("#submit_button_section").hide();
+                            $("#create_btn").hide();
+                        }
                     }
                 });
         }
@@ -601,11 +605,13 @@
                         if (returnedResult['fine_id'] != 0) {
                             setTableHeadForStudentsTable();
                             setStudentsTable(returnedResult['students'], returnedResult['selectedStudents']);
-                            $("#btn_submit").show();
+                            $("#submit_button_section").show();
+                            $("#create_btn").show();
                         } else {
                             $("#table_head").html('');
                             $("#table_body").html('');
-                            $("#btn_submit").hide();
+                            $("#submit_button_section").hide();
+                            $("#create_btn").hide();
                         }
                     }
                 });

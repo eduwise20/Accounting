@@ -12,4 +12,4 @@ $admin_fee_rates_sub_menus = [
     ]
 ];
 
-add_menu_admin_svg('Fee Rates',U.'fee_rates/app','fee_rates',$svg,2,$admin_fee_rates_sub_menus);
+add_menu_admin_svg('Fee Rates',U.'fee_rates/app','fee_rates',$svg,1,$admin_fee_rates_sub_menus);
