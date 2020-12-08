@@ -229,30 +229,35 @@ switch ($action) {
         break;
 
     case 'csv_upload' :
-        $uploader   =   new Uploader();
+        $uploader = new Uploader();
         $uploader->setDir('storage/temp/');
-        // $uploader->sameName(true);
-        $uploader->setExtensions(array('csv'));  //allowed extensions list//
-        if($uploader->uploadFile('file')){   //txtFile is the filebrowse element name //
-            $uploaded  =   $uploader->getUploadName(); //get uploaded file name, renames on upload//
+        $uploader->setExtensions(array('csv'));
+        if ($uploader->uploadFile('file')) {
+            $uploaded = $uploader->getUploadName();
 
             $_SESSION['uploaded'] = $uploaded;
 
-        }else{//upload failed
-            _msglog('e',$uploader->getMessage()); //get upload error message
+        } else {//upload failed
+            _msglog('e', $uploader->getMessage()); 
         }
         break;
 
     case 'csv_uploaded':
-        if(isset($_SESSION['uploaded'])){
+        if (isset($_SESSION['uploaded'])) {
             $uploaded = $_SESSION['uploaded'];
             $csv = new parseCSV();
-            $csv->auto('storage/temp/'.$uploaded);
+            $csv->auto('storage/temp/' . $uploaded);
             $students = $csv->data;
 
-            $cn = 0;
+            $error = false;
 
-            foreach($students as $s){
+            $students_to_insert = array();
+            $student_additional_informations_to_insert = array();
+
+            $success_count = 0;
+            $error_count = 0;
+
+            foreach ($students as $s) {
 
                 $student = new AppStudent;
                 $student_additional_information = new AppStudentAdditionalInformation;
@@ -261,39 +266,59 @@ switch ($action) {
                 $student->admission_no = $s['Admission Number'];
                 $student->roll_no = $s['Roll Number'];
                 $class = AppClass::where('name', $s['Class'])->get();
-                $student->class_id = $class[0]->id;
                 $section = AppSection::where('name', $s['Section'])->get();
-                $student->section_id = $section[0]->id;
                 $category = Category::where('name', $s['Category'])->get();
-                $student->category_id = $category[0]->id;
                 $sub_category = Subcategory::where('name', $s['Sub Category'])->get();
-                $student->sub_category_id = $sub_category[0]->id;
                 $student_type = AppStudentType::where('name', $s['Student Type'])->get();
-                $student->student_type_id = $student_type[0]->id;
                 $faculty = AppFaculty::where('name', $s['Faculty'])->get();
+                if (
+                    sizeof($class) != 1
+                    || sizeof($section) != 1
+                    || ($s['Category'] != '' && sizeof($category) != 1)
+                    || ($s['Sub Category'] != '' && sizeof($sub_category) != 1)
+                    || sizeof($student_type) != 1
+                    || ($s['Faculty'] != '' && sizeof($faculty) != 1)
+                    || !array_search($s['Status'], $status)
+                ) {
+                    $error = true;
+                    break;
+                }
+                $student->class_id = $class[0]->id;
+                $student->section_id = $section[0]->id;
+                $student->category_id = $category[0]->id;
+                $student->sub_category_id = $sub_category[0]->id;
+                $student->student_type_id = $student_type[0]->id;
                 $student->faculty_id = $faculty[0]->id;
                 $student->status = array_search($s['Status'], $status);
                 $student->remarks = $s['Remarks'];
-                $student->save();
+                array_push($students_to_insert, $student);
 
-                $student_additional_information->student_id = $student->id;
                 $student_additional_information->phone = $s['Phone'];
                 $student_additional_information->current_address = $s['Current Address'];
                 $student_additional_information->permanent_address = $s['Permanent Address'];
                 $student_additional_information->parent_name = $s['Parent Name'];
                 $student_additional_information->local_guardian_name = $s['Local Guardian Name'];
                 $student_additional_information->gender = $s['Gender'];
-                $student_additional_information->save();
-
-                if(is_numeric($student->id)){
-                    $cn++;
-                }
+                array_push($student_additional_informations_to_insert, $student_additional_information);
 
             }
-            _msglog('s',$cn.' Students Imported');
-        }
-        else{
-            _msglog('e','An Error Occurred while uploading the files');
+            if ($error) {
+                _msglog('e', 'An Error Occurred while adding students');
+            } else if (sizeof($students_to_insert) > 0) {
+                for ($i = 0; $i < sizeof($students_to_insert); $i++) {
+                    $student_to_insert = $students_to_insert[$i];
+                    $student_to_insert->save();
+
+                    $student_additional_information_to_insert = $student_additional_informations_to_insert[$i];
+                    $student_additional_information_to_insert->student_id = $student_to_insert->id;
+                    $student_additional_information_to_insert->save();
+                }
+                _msglog('s', sizeof($students_to_insert) . ' Students Imported');
+            } else {
+                _msglog('e', 'No students to add');
+            }
+        } else {
+            _msglog('e', 'An Error Occurred while uploading the files');
         }
         break;
 }
