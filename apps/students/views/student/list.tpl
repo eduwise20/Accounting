@@ -49,6 +49,7 @@
                     <div class="panel-toolbar">
                         <div class="btn-group">
                             <a href="{$_url}students/app/add/" class="btn btn-sm btn-success">Add Student</a>
+                            <a href="{$_url}students/app/import_csv/" class="btn btn-sm btn-warning">Import</a>
                         </div>
                     </div>
                 </div>
