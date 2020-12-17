@@ -238,7 +238,7 @@ switch ($action) {
             $_SESSION['uploaded'] = $uploaded;
 
         } else {//upload failed
-            _msglog('e', $uploader->getMessage()); 
+            _msglog('e', $uploader->getMessage());
         }
         break;
 
@@ -256,6 +256,7 @@ switch ($action) {
 
             $success_count = 0;
             $error_count = 0;
+            $error_message = "";
 
             foreach ($students as $s) {
 
@@ -271,39 +272,80 @@ switch ($action) {
                 $sub_category = Subcategory::where('name', $s['Sub Category'])->get();
                 $student_type = AppStudentType::where('name', $s['Student Type'])->get();
                 $faculty = AppFaculty::where('name', $s['Faculty'])->get();
-                if (
-                    sizeof($class) != 1
-                    || sizeof($section) != 1
-                    || ($s['Category'] != '' && sizeof($category) != 1)
-                    || ($s['Sub Category'] != '' && sizeof($sub_category) != 1)
-                    || sizeof($student_type) != 1
-                    || ($s['Faculty'] != '' && sizeof($faculty) != 1)
-                    || !array_search($s['Status'], $status)
-                ) {
+                if (sizeof($class) == 0) {
+                    $error_message .= "You need to have class " . $s['Class'] . "<br/>";
                     $error = true;
-                    break;
                 }
-                $student->class_id = $class[0]->id;
-                $student->section_id = $section[0]->id;
-                $student->category_id = $category[0]->id;
-                $student->sub_category_id = $sub_category[0]->id;
-                $student->student_type_id = $student_type[0]->id;
-                $student->faculty_id = $faculty[0]->id;
-                $student->status = array_search($s['Status'], $status);
-                $student->remarks = $s['Remarks'];
-                array_push($students_to_insert, $student);
+                if (sizeof($class) > 1) {
+                    $error_message .= "More than one class " . $s['Class'] . " found<br/>";
+                    $error = true;
+                }
+                if (sizeof($section) == 0) {
+                    $error_message .= "You need to have section " . $s['Section'] . "<br/>";
+                    $error = true;
+                }
+                if (sizeof($section) > 1) {
+                    $error_message .= "More than one section " . $s['Section'] . " found<br/>";
+                    $error = true;
+                }
+                if ($s['Category'] != '' && sizeof($category) == 0) {
+                    $error_message .= "You need to have category " . $s['Category'] . "<br/>";
+                    $error = true;
+                }
+                if ($s['Category'] != '' && sizeof($category) > 1) {
+                    $error_message .= "More than one category " . $s['Category'] . " found<br/>";
+                    $error = true;
+                }
+                if ($s['Sub Category'] != '' && sizeof($sub_category) == 0) {
+                    $error_message .= "You need to have sub category " . $s['Sub Category'] . "<br/>";
+                    $error = true;
+                }
+                if ($s['Sub Category'] != '' && sizeof($sub_category) > 1) {
+                    $error_message .= "More than one sub category " . $s['Sub Category'] . " found<br/>";
+                    $error = true;
+                }
+                if (sizeof($student_type) == 0) {
+                    $error_message .= "You need to have student type " . $s['Student Type'] . "<br/>";
+                    $error = true;
+                }
+                if (sizeof($student_type) > 1) {
+                    $error_message .= "More than one student type " . $s['Student Type'] . " found<br/>";
+                    $error = true;
+                }
+                if ($s['Faculty'] != '' && sizeof($faculty) == 0) {
+                    $error_message .= "You need to have faculty " . $s['Faculty'] . "<br/>";
+                    $error = true;
+                }
+                if ($s['Faculty'] != '' && sizeof($faculty) > 1) {
+                    $error_message .= "More than one faculty " . $s['Faculty'] . " found<br/>";
+                    $error = true;
+                }
+                if (!array_search($s['Status'], $status)) {
+                    $error_message .= "You need to have status " . $s['Status'] . "<br/>";
+                    $error = true;
+                }
+                if (!$error) {
+                    $student->class_id = $class[0]->id;
+                    $student->section_id = $section[0]->id;
+                    $student->category_id = $category[0]->id;
+                    $student->sub_category_id = $sub_category[0]->id;
+                    $student->student_type_id = $student_type[0]->id;
+                    $student->faculty_id = $faculty[0]->id;
+                    $student->status = array_search($s['Status'], $status);
+                    $student->remarks = $s['Remarks'];
+                    array_push($students_to_insert, $student);
 
-                $student_additional_information->phone = $s['Phone'];
-                $student_additional_information->current_address = $s['Current Address'];
-                $student_additional_information->permanent_address = $s['Permanent Address'];
-                $student_additional_information->parent_name = $s['Parent Name'];
-                $student_additional_information->local_guardian_name = $s['Local Guardian Name'];
-                $student_additional_information->gender = $s['Gender'];
-                array_push($student_additional_informations_to_insert, $student_additional_information);
-
+                    $student_additional_information->phone = $s['Phone'];
+                    $student_additional_information->current_address = $s['Current Address'];
+                    $student_additional_information->permanent_address = $s['Permanent Address'];
+                    $student_additional_information->parent_name = $s['Parent Name'];
+                    $student_additional_information->local_guardian_name = $s['Local Guardian Name'];
+                    $student_additional_information->gender = $s['Gender'];
+                    array_push($student_additional_informations_to_insert, $student_additional_information);
+                }
             }
             if ($error) {
-                _msglog('e', 'An Error Occurred while adding students');
+                _msglog('e', 'Following errors occurred while adding students : <br/> ' . $error_message);
             } else if (sizeof($students_to_insert) > 0) {
                 for ($i = 0; $i < sizeof($students_to_insert); $i++) {
                     $student_to_insert = $students_to_insert[$i];
