@@ -9,6 +9,9 @@ require 'apps/categories/models/Subcategory.php';
 require 'apps/student_types/models/AppStudentType.php';
 require 'apps/faculties/models/AppFaculty.php';
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 $action = route(2, 'list');
 _auth();
 $ui->assign('_application_menu', 'students');
@@ -222,78 +225,250 @@ switch ($action) {
         echo json_encode($faculties);
         break;
 
-    case 'import_csv' :
+    case 'import_excel' :
         view('app_wrapper', [
             '_include' => 'student/students_import'
         ]);
         break;
 
-    case 'csv_upload' :
-        $uploader   =   new Uploader();
+    case 'excel_upload' :
+        $uploader = new Uploader();
         $uploader->setDir('storage/temp/');
-        // $uploader->sameName(true);
-        $uploader->setExtensions(array('csv'));  //allowed extensions list//
-        if($uploader->uploadFile('file')){   //txtFile is the filebrowse element name //
-            $uploaded  =   $uploader->getUploadName(); //get uploaded file name, renames on upload//
+        $uploader->setExtensions(array('xls', 'xlsx'));
+        if ($uploader->uploadFile('file')) {
+            $uploaded = $uploader->getUploadName();
 
             $_SESSION['uploaded'] = $uploaded;
 
-        }else{//upload failed
-            _msglog('e',$uploader->getMessage()); //get upload error message
+        } else {
+            _msglog('e', $uploader->getMessage());
         }
         break;
 
-    case 'csv_uploaded':
-        if(isset($_SESSION['uploaded'])){
+    case 'excel_uploaded':
+        if (isset($_SESSION['uploaded'])) {
             $uploaded = $_SESSION['uploaded'];
-            $csv = new parseCSV();
-            $csv->auto('storage/temp/'.$uploaded);
-            $students = $csv->data;
+            $spreadsheet = PhpOffice\PhpSpreadsheet\IOFactory::load('storage/temp/' . $uploaded);
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = [];
+            foreach ($worksheet->getRowIterator() as $row) {
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(FALSE); // This loops through all cells,
+                $cells = [];
+                foreach ($cellIterator as $cell) {
+                    $cells[] = $cell->getValue();
+                }
+                $rows[] = $cells;
+            }
 
-            $cn = 0;
+            $error = false;
 
-            foreach($students as $s){
+            $students_to_insert = array();
+            $student_additional_informations_to_insert = array();
+
+            $success_count = 0;
+            $error_count = 0;
+            $error_message = "";
+
+            for ($i = 1; $i < sizeof($rows); $i++) {
 
                 $student = new AppStudent;
                 $student_additional_information = new AppStudentAdditionalInformation;
 
-                $student->name = $s['Full Name'];
-                $student->admission_no = $s['Admission Number'];
-                $student->roll_no = $s['Roll Number'];
-                $class = AppClass::where('name', $s['Class'])->get();
-                $student->class_id = $class[0]->id;
-                $section = AppSection::where('name', $s['Section'])->get();
-                $student->section_id = $section[0]->id;
-                $category = Category::where('name', $s['Category'])->get();
-                $student->category_id = $category[0]->id;
-                $sub_category = Subcategory::where('name', $s['Sub Category'])->get();
-                $student->sub_category_id = $sub_category[0]->id;
-                $student_type = AppStudentType::where('name', $s['Student Type'])->get();
-                $student->student_type_id = $student_type[0]->id;
-                $faculty = AppFaculty::where('name', $s['Faculty'])->get();
-                $student->faculty_id = $faculty[0]->id;
-                $student->status = array_search($s['Status'], $status);
-                $student->remarks = $s['Remarks'];
-                $student->save();
-
-                $student_additional_information->student_id = $student->id;
-                $student_additional_information->phone = $s['Phone'];
-                $student_additional_information->current_address = $s['Current Address'];
-                $student_additional_information->permanent_address = $s['Permanent Address'];
-                $student_additional_information->parent_name = $s['Parent Name'];
-                $student_additional_information->local_guardian_name = $s['Local Guardian Name'];
-                $student_additional_information->gender = $s['Gender'];
-                $student_additional_information->save();
-
-                if(is_numeric($student->id)){
-                    $cn++;
+                $student->name = $rows[$i][0];
+                $student->admission_no = $rows[$i][1];
+                $student->roll_no = $rows[$i][2];
+                $class = AppClass::where('name', $rows[$i][3])->get();
+                $section = AppSection::where('name', $rows[$i][4])->get();
+                $category = Category::where('name', $rows[$i][5])->get();
+                $sub_category = Subcategory::where('name', $rows[$i][6])->get();
+                $student_type = AppStudentType::where('name', $rows[$i][7])->get();
+                $faculty = AppFaculty::where('name', $rows[$i][8])->get();
+                if (sizeof($class) == 0) {
+                    $error_message .= "You need to have class " . $rows[$i][3] . "<br/>";
+                    $error = true;
                 }
+                if (sizeof($class) > 1) {
+                    $error_message .= "More than one class " . $rows[$i][3] . " found<br/>";
+                    $error = true;
+                }
+                if (sizeof($section) == 0) {
+                    $error_message .= "You need to have section " . $rows[$i][4] . "<br/>";
+                    $error = true;
+                }
+                if (sizeof($section) > 1) {
+                    $error_message .= "More than one section " . $rows[$i][4] . " found<br/>";
+                    $error = true;
+                }
+                if ($rows[$i][5] != '' && sizeof($category) == 0) {
+                    $error_message .= "You need to have category " . $rows[$i][5] . "<br/>";
+                    $error = true;
+                }
+                if ($rows[$i][5] != '' && sizeof($category) > 1) {
+                    $error_message .= "More than one category " . $rows[$i][5] . " found<br/>";
+                    $error = true;
+                }
+                if ($rows[$i][6] != '' && sizeof($sub_category) == 0) {
+                    $error_message .= "You need to have sub category " . $rows[$i][6] . "<br/>";
+                    $error = true;
+                }
+                if ($rows[$i][6] != '' && sizeof($sub_category) > 1) {
+                    $error_message .= "More than one sub category " . $rows[$i][6] . " found<br/>";
+                    $error = true;
+                }
+                if (sizeof($student_type) == 0) {
+                    $error_message .= "You need to have student type " . $rows[$i][7] . "<br/>";
+                    $error = true;
+                }
+                if (sizeof($student_type) > 1) {
+                    $error_message .= "More than one student type " . $rows[$i][7] . " found<br/>";
+                    $error = true;
+                }
+                if ($rows[$i][8] != '' && sizeof($faculty) == 0) {
+                    $error_message .= "You need to have faculty " . $rows[$i][8] . "<br/>";
+                    $error = true;
+                }
+                if ($rows[$i][8] != '' && sizeof($faculty) > 1) {
+                    $error_message .= "More than one faculty " . $rows[$i][8] . " found<br/>";
+                    $error = true;
+                }
+                if (!array_search($rows[$i][9], $status)) {
+                    $error_message .= "You need to have status " . $rows[$i][9] . "<br/>";
+                    $error = true;
+                }
+                if (!$error) {
+                    $student->class_id = $class[0]->id;
+                    $student->section_id = $section[0]->id;
+                    $student->category_id = $category[0]->id;
+                    $student->sub_category_id = $sub_category[0]->id;
+                    $student->student_type_id = $student_type[0]->id;
+                    $student->faculty_id = $faculty[0]->id;
+                    $student->status = array_search($rows[$i][9], $status);
+                    $student->remarks = $rows[$i][15];
+                    array_push($students_to_insert, $student);
 
+                    $student_additional_information->phone = $rows[$i][10];
+                    $student_additional_information->current_address = $rows[$i][11];
+                    $student_additional_information->permanent_address = $rows[$i][12];
+                    $student_additional_information->parent_name = $rows[$i][13];
+                    $student_additional_information->local_guardian_name = $rows[$i][14];
+                    $student_additional_information->gender = $rows[$i][16];
+                    array_push($student_additional_informations_to_insert, $student_additional_information);
+                }
             }
-            _msglog('s',$cn.' Students Imported');
-        }
-        else{
-            _msglog('e','An Error Occurred while uploading the files');
+            if ($error) {
+                _msglog('e', 'Following errors occurred while adding students : <br/> ' . $error_message);
+            } else if (sizeof($students_to_insert) > 0) {
+                for ($i = 0; $i < sizeof($students_to_insert); $i++) {
+                    $student_to_insert = $students_to_insert[$i];
+                    $student_to_insert->save();
+
+                    $student_additional_information_to_insert = $student_additional_informations_to_insert[$i];
+                    $student_additional_information_to_insert->student_id = $student_to_insert->id;
+                    $student_additional_information_to_insert->save();
+                }
+                _msglog('s', sizeof($students_to_insert) . ' Students Imported');
+            } else {
+                _msglog('e', 'No students to add');
+            }
+        } else {
+            _msglog('e', 'An Error Occurred while uploading the files');
         }
         break;
+
+    case 'download_excel_file' :
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->getProperties()->setCreator('PhpOffice')
+            ->setLastModifiedBy('PhpOffice')
+            ->setTitle('Excel File')
+            ->setSubject('Office 2007 XLSX Test Document')
+            ->setDescription('PhpOffice')
+            ->setKeywords('PhpOffice')
+            ->setCategory('PhpOffice');
+        $spreadsheet->createSheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Full Name');
+        $sheet->setCellValue('B1', 'Admission Number');
+        $sheet->setCellValue('C1', 'Roll Number');
+        $sheet->setCellValue('D1', 'Class');
+        $sheet->setCellValue('E1', 'Section');
+        $sheet->setCellValue('F1', 'Category');
+        $sheet->setCellValue('G1', 'Sub Category');
+        $sheet->setCellValue('H1', 'Student Type');
+        $sheet->setCellValue('I1', 'Faculty');
+        $sheet->setCellValue('J1', 'Status');
+        $sheet->setCellValue('K1', 'Phone');
+        $sheet->setCellValue('L1', 'Current Address');
+        $sheet->setCellValue('M1', 'Permanent Address');
+        $sheet->setCellValue('N1', 'Parent Name');
+        $sheet->setCellValue('O1', 'Local Guardian Name');
+        $sheet->setCellValue('P1', 'Gender');
+        $sheet->setCellValue('Q1', 'Remarks');
+        $classes = AppClass::select('name')->get();
+        $sections = AppSection::select('name')->get();
+        $categories = Category::select('name')->get();
+        $sub_categories = SubCategory::select('name')->get();
+        $student_types = AppStudentType::select('name')->get();
+        $faculties = AppFaculty::select('name')->get();
+        $class_names = array();
+        $section_names = array();
+        $category_names = array();
+        $sub_category_names = array();
+        $student_type_names = array();
+        $faculty_names = array();
+        $status_names = array();
+        $gender_names = ['Male', 'Female'];
+        foreach ($classes as $class) {
+            array_push($class_names, $class->name);
+        }
+        foreach ($sections as $section) {
+            array_push($section_names, $section->name);
+        }
+        foreach ($categories as $category) {
+            array_push($category_names, $category->name);
+        }
+        foreach ($sub_categories as $sub_category) {
+            array_push($sub_category_names, $sub_category->name);
+        }
+        foreach ($student_types as $student_type) {
+            array_push($student_type_names, $student_type->name);
+        }
+        foreach ($faculties as $faculty) {
+            array_push($faculty_names, $faculty->name);
+        }
+        foreach ($status as $key => $value) {
+            array_push($status_names, $value);
+        }
+        set_dropdown('D', $class_names, $sheet);
+        set_dropdown('E', $section_names, $sheet);
+        set_dropdown('F', $category_names, $sheet);
+        set_dropdown('G', $sub_category_names, $sheet);
+        set_dropdown('H', $student_type_names, $sheet);
+        set_dropdown('I', $faculty_names, $sheet);
+        set_dropdown('J', $status_names, $sheet);
+        set_dropdown('P', $gender_names, $sheet);
+
+
+        $spreadsheet->setActiveSheetIndex(0);
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="' . 'Sample Student File' . '.xlsx"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+}
+
+function set_dropdown($column_name, $array_to_set, $sheet)
+{
+    for ($i = 2; $i <= 500; $i++) {
+        $objValidation = $sheet->getCell($column_name . $i)->getDataValidation();
+        $objValidation->setType(PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+        $objValidation->setErrorStyle(PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION);
+        $objValidation->setAllowBlank(false);
+        $objValidation->setShowInputMessage(true);
+        $objValidation->setShowErrorMessage(true);
+        $objValidation->setShowDropDown(true);
+        $objValidation->setErrorTitle('Input error');
+        $objValidation->setError('Value is not in list.');
+        $objValidation->setFormula1('"' . implode(',', $array_to_set) . '"');
+    }
 }
