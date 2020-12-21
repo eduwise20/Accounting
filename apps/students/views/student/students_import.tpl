@@ -24,7 +24,7 @@
                     <form action="{$_url}students/app/excel_upload/" class="dropzone" id="upload_container">
 
                         <div class="dz-message">
-                            <h3><i class="fal fa-cloud-upload"></i> {$_L['Drop Excel File Here']}</h3>
+                            <h3><i class="fal fa-cloud-upload"></i> Drop Excel File Here</h3>
                             <br/>
                             <span class="note">{$_L['Or Click to Upload']}</span>
                         </div>
