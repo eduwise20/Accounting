@@ -250,15 +250,15 @@ switch ($action) {
             $uploaded = $_SESSION['uploaded'];
             $spreadsheet = PhpOffice\PhpSpreadsheet\IOFactory::load('storage/temp/' . $uploaded);
             $worksheet = $spreadsheet->getActiveSheet();
-            $rows = [];
-            foreach ($worksheet->getRowIterator() as $row) {
-                $cellIterator = $row->getCellIterator();
-                $cellIterator->setIterateOnlyExistingCells(FALSE); // This loops through all cells,
-                $cells = [];
-                foreach ($cellIterator as $cell) {
-                    $cells[] = $cell->getValue();
+            $no_of_rows = $worksheet->getHighestDataRow();
+            $no_of_columns = $worksheet->getHighestDataColumn();
+            $no_of_columns = PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($no_of_columns);
+            $data = [];
+
+            for ($currentRow = 1; $currentRow <= $no_of_rows; $currentRow++) {
+                for ($currentCol = 1; $currentCol <= $no_of_columns; $currentCol++) {
+                    $data[$currentRow - 1][$currentCol - 1] = $worksheet->getCellByColumnAndRow($currentCol, $currentRow)->getCalculatedValue();
                 }
-                $rows[] = $cells;
             }
 
             $error = false;
@@ -270,70 +270,80 @@ switch ($action) {
             $error_count = 0;
             $error_message = "";
 
-            for ($i = 1; $i < sizeof($rows); $i++) {
+            for ($i = 1; $i < sizeof($data); $i++) {
 
                 $student = new AppStudent;
                 $student_additional_information = new AppStudentAdditionalInformation;
 
-                $student->name = $rows[$i][0];
-                $student->admission_no = $rows[$i][1];
-                $student->roll_no = $rows[$i][2];
-                $class = AppClass::where('name', $rows[$i][3])->get();
-                $section = AppSection::where('name', $rows[$i][4])->get();
-                $category = Category::where('name', $rows[$i][5])->get();
-                $sub_category = Subcategory::where('name', $rows[$i][6])->get();
-                $student_type = AppStudentType::where('name', $rows[$i][7])->get();
-                $faculty = AppFaculty::where('name', $rows[$i][8])->get();
+                $student->name = $data[$i][0];
+                $student->admission_no = $data[$i][1];
+                $student->roll_no = $data[$i][2];
+                $class = AppClass::where('name', $data[$i][3])->get();
+                $exploded_section_name = explode(".", $data[$i][4]);
+                $section = AppSection::where('name', $exploded_section_name[1])->get();
+                $category = Category::where('name', $data[$i][5])->get();
+                $exploded_sub_category_name = explode(".", $data[$i][6]);
+                $sub_category = Subcategory::where('name', $exploded_sub_category_name[1])->get();
+                $student_type = AppStudentType::where('name', $data[$i][7])->get();
+                $faculty = AppFaculty::where('name', $data[$i][8])->get();
                 if (sizeof($class) == 0) {
-                    $error_message .= "You need to have class " . $rows[$i][3] . "<br/>";
+                    $error_message .= "You need to have class " . $data[$i][3] . "<br/>";
                     $error = true;
                 }
                 if (sizeof($class) > 1) {
-                    $error_message .= "More than one class " . $rows[$i][3] . " found<br/>";
+                    $error_message .= "More than one class " . $data[$i][3] . " found<br/>";
                     $error = true;
                 }
                 if (sizeof($section) == 0) {
-                    $error_message .= "You need to have section " . $rows[$i][4] . "<br/>";
+                    $error_message .= "You need to have section " . $data[$i][4] . "<br/>";
                     $error = true;
                 }
                 if (sizeof($section) > 1) {
-                    $error_message .= "More than one section " . $rows[$i][4] . " found<br/>";
+                    $error_message .= "More than one section " . $data[$i][4] . " found<br/>";
                     $error = true;
                 }
-                if ($rows[$i][5] != '' && sizeof($category) == 0) {
-                    $error_message .= "You need to have category " . $rows[$i][5] . "<br/>";
+                if ($class[0]->name != $exploded_section_name[0]) {
+                    $error_message .= "Section " . $exploded_section_name[1] . " doesn't belong to class " . $exploded_section_name[0] . "<br/>";
                     $error = true;
                 }
-                if ($rows[$i][5] != '' && sizeof($category) > 1) {
-                    $error_message .= "More than one category " . $rows[$i][5] . " found<br/>";
+                if ($data[$i][5] != '' && sizeof($category) == 0) {
+                    $error_message .= "You need to have category " . $data[$i][5] . "<br/>";
                     $error = true;
                 }
-                if ($rows[$i][6] != '' && sizeof($sub_category) == 0) {
-                    $error_message .= "You need to have sub category " . $rows[$i][6] . "<br/>";
+                if ($data[$i][5] != '' && sizeof($category) > 1) {
+                    $error_message .= "More than one category " . $data[$i][5] . " found<br/>";
                     $error = true;
                 }
-                if ($rows[$i][6] != '' && sizeof($sub_category) > 1) {
-                    $error_message .= "More than one sub category " . $rows[$i][6] . " found<br/>";
+                if ($data[$i][6] != '' && sizeof($sub_category) == 0) {
+                    $error_message .= "You need to have sub category " . $data[$i][6] . "<br/>";
+                    $error = true;
+                }
+                if ($data[$i][6] != '' && sizeof($sub_category) > 1) {
+                    $error_message .= "More than one sub category " . $data[$i][6] . " found<br/>";
+                    $error = true;
+                }
+                if ($category[0]->name != $exploded_sub_category_name[0]) {
+                    $error_message .= "Sub category " . $exploded_sub_category_name[1] . " doesn't belong to category " . $exploded_sub_category_name[0] . "<br/>";
                     $error = true;
                 }
                 if (sizeof($student_type) == 0) {
-                    $error_message .= "You need to have student type " . $rows[$i][7] . "<br/>";
+                    $error_message .= "You need to have student type " . $data[$i][7] . "<br/>";
                     $error = true;
                 }
                 if (sizeof($student_type) > 1) {
-                    $error_message .= "More than one student type " . $rows[$i][7] . " found<br/>";
+                    $error_message .= "More than one student type " . $data[$i][7] . " found<br/>";
                     $error = true;
                 }
-                if ($rows[$i][8] != '' && sizeof($faculty) == 0) {
-                    $error_message .= "You need to have faculty " . $rows[$i][8] . "<br/>";
+                if ($data[$i][8] != '' && sizeof($faculty) == 0) {
+                    $error_message .= "You need to have faculty " . $data[$i][8] . "<br/>";
                     $error = true;
                 }
-                if ($rows[$i][8] != '' && sizeof($faculty) > 1) {
-                    $error_message .= "More than one faculty " . $rows[$i][8] . " found<br/>";
+                if ($data[$i][8] != '' && sizeof($faculty) > 1) {
+                    $error_message .= "More than one faculty " . $data[$i][8] . " found<br/>";
                     $error = true;
                 }
-                if (!array_search($rows[$i][9], $status)) {
-                    $error_message .= "You need to have status " . $rows[$i][9] . "<br/>";
+                if (!array_search($data[$i][9], $status)) {
+                    $error_message .= "You need to have status " . $data[$i][9] . "<br/>";
                     $error = true;
                 }
                 if (!$error) {
@@ -343,16 +353,16 @@ switch ($action) {
                     $student->sub_category_id = $sub_category[0]->id;
                     $student->student_type_id = $student_type[0]->id;
                     $student->faculty_id = $faculty[0]->id;
-                    $student->status = array_search($rows[$i][9], $status);
-                    $student->remarks = $rows[$i][15];
+                    $student->status = array_search($data[$i][9], $status);
+                    $student->remarks = $data[$i][15];
                     array_push($students_to_insert, $student);
 
-                    $student_additional_information->phone = $rows[$i][10];
-                    $student_additional_information->current_address = $rows[$i][11];
-                    $student_additional_information->permanent_address = $rows[$i][12];
-                    $student_additional_information->parent_name = $rows[$i][13];
-                    $student_additional_information->local_guardian_name = $rows[$i][14];
-                    $student_additional_information->gender = $rows[$i][16];
+                    $student_additional_information->phone = $data[$i][10];
+                    $student_additional_information->current_address = $data[$i][11];
+                    $student_additional_information->permanent_address = $data[$i][12];
+                    $student_additional_information->parent_name = $data[$i][13];
+                    $student_additional_information->local_guardian_name = $data[$i][14];
+                    $student_additional_information->gender = $data[$i][16];
                     array_push($student_additional_informations_to_insert, $student_additional_information);
                 }
             }
@@ -405,9 +415,9 @@ switch ($action) {
         $sheet->setCellValue('P1', 'Gender');
         $sheet->setCellValue('Q1', 'Remarks');
         $classes = AppClass::select('name')->get();
-        $sections = AppSection::select('name')->get();
+        $sections = AppSection::select('class_id', 'name')->get();
         $categories = Category::select('name')->get();
-        $sub_categories = SubCategory::select('name')->get();
+        $sub_categories = SubCategory::select('category_id', 'name')->get();
         $student_types = AppStudentType::select('name')->get();
         $faculties = AppFaculty::select('name')->get();
         $class_names = array();
@@ -422,13 +432,15 @@ switch ($action) {
             array_push($class_names, $class->name);
         }
         foreach ($sections as $section) {
-            array_push($section_names, $section->name);
+            $class_name = AppClass::find($section->class_id)->name;
+            array_push($section_names, $class_name . "." . $section->name);
         }
         foreach ($categories as $category) {
             array_push($category_names, $category->name);
         }
         foreach ($sub_categories as $sub_category) {
-            array_push($sub_category_names, $sub_category->name);
+            $category_name = Category::find($sub_category->category_id)->name;
+            array_push($sub_category_names, $category_name . "." . $sub_category->name);
         }
         foreach ($student_types as $student_type) {
             array_push($student_type_names, $student_type->name);
