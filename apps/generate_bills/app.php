@@ -54,7 +54,21 @@ switch ($action) {
         break;
 
     case 'save':
-
+        $data = $request->all();
+        for($i = 0; $i < sizeof($data['student_id']); $i++) {
+            $billing = new Billing;
+            $billing->fee = $data['student_fee'][$i];
+            $billing->fee_id = 1;
+            $billing->month = 'Baisakh';
+            $billing->fine = $data['student_fine'][$i];
+            $billing->discount = $data['student_discount'][$i];
+            $billing->scholarship = $data['student_scholarship'][$i];
+            $billing->total_fee = $data['student_total_fee'][$i];
+            $billing->generated_by_id = 1;
+            $billing->fiscal_year_id = $data['fiscal_year_id'];
+            $billing->save();
+        }
+        echo $billing->id;
         break;
 
     case 'getFacultyForClass':
@@ -80,7 +94,6 @@ switch ($action) {
         $billing_update->fiscal_year_id = $data['fiscal_year_id'];
         $billing_update->save();
         echo $billing_update->id;
-//        print_r($data['old_fee']); exit;
         break;
 
     case 'get_students_with_bill_detail':

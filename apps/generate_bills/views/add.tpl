@@ -178,7 +178,7 @@
                             <span id="emsgbody_fee_rate_info"></span>
                         </div>
 
-                        <form id="fee_rate_info_form">
+                        <form id="student_billing_form">
 
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
@@ -469,51 +469,22 @@
 
             function populateStudents(students) {
                 let tableBody = '';
+                let count = 0;
                 students.forEach(function(student){
+                    let total_fee = student['fee'] + student['fine'] - student['discount'] - student['scholarship'];
                     tableBody += '<tr>';
-                    tableBody += '<td>';
-                    tableBody += student['name'];
-                    tableBody += '</td>';
-                    tableBody += '<td>';
-                    tableBody += student['fee'];
-                    tableBody += '</td>';
-                    tableBody += '<td>';
-                    tableBody += student['fine'];
-                    tableBody += '</td>';
-                    tableBody += '<td>';
-                    tableBody += student['discount'];
-                    tableBody += '</td>';
-                    tableBody += '<td>';
-                    tableBody += student['scholarship'];
-                    tableBody += '</td>';
-                    tableBody += '<td class="item_total_fee">';
-                    tableBody += student['fee'] + student['fine'] - student['discount'] - student['scholarship'];
-                    tableBody += '</td>';
-                    tableBody += '<td>';
-                    tableBody += '<a data-toggle="modal" href="#modal_add_item" class="btn btn-success mb-md" id="edit_button" onclick="fill_modal('+student["id"]+');">Edit</a>';
-                    tableBody += '</td>';
+                    tableBody += '<td>' + student['name'] + '</td><input type="hidden" name="student_id[' + count + ']" value="' + student['id'] + '"/>';
+                    tableBody += '<td>' + student['fee'] + '</td><input type="hidden" name="student_fee[' + count + ']" value="' + student['fee'] + '"/>';
+                    tableBody += '<td>' + student['fine'] + '</td><input type="hidden" name="student_fine[' + count + ']" value="' + student['fine'] + '"/>';
+                    tableBody += '<td>' + student['discount'] + '</td><input type="hidden" name="student_discount[' + count + ']" value="' + student['discount'] + '"/>';
+                    tableBody += '<td>' + student['scholarship'] + '</td><input type="hidden" name="student_scholarship[' + count + ']" value="' + student['scholarship'] + '"/>';
+                    tableBody += '<td class="item_total_fee">' + total_fee + '</td><input type="hidden" name="student_total_fee[' + count + ']" value="' + total_fee + '"/>';
+                    tableBody += '<td>' + '<a data-toggle="modal" href="#modal_add_item" class="btn btn-success mb-md" id="edit_button" onclick="fill_modal('+student["id"]+');">Edit</a>' + '</td>';
                     tableBody += '</tr>';
+                    count++;
                 });
                 $("#student_billing_table_body").html(tableBody);
             }
-
-            $("#btn_submit").click(function (e) {
-                e.preventDefault();
-                $('#ibox_form').block({ message:block_msg });
-                $.post(base_url + 'generate_bills/app/save/', $('#billing_master_form, #fee_change_form').serialize())
-                    .done(function (data) {
-                        if ($.isNumeric(data)) {
-                            window.location = base_url + 'fee_rates/app/add';
-                        }
-                        else {
-                            $('#ibox_form').unblock();
-                            var body = $("html, body");
-                            body.animate({ scrollTop:0 }, '1000', 'swing');
-                            $("#emsgbody").html(data);
-                            $("#emsg").show("slow");
-                        }
-                    });
-            });
 
         });
 
@@ -536,6 +507,25 @@
             $.post(base_url + 'generate_bills/app/updateTotalFee/', $('#billing_master_form, #fee_change_form').serialize())
                 .done(function (data) {
                     $("#modal_add_item").modal('toggle');
+                });
+        });
+
+        $("#btn_submit").click(function (e) {
+            e.preventDefault();
+            $('#ibox_form').block({ message:block_msg });
+            $.post(base_url + 'generate_bills/app/save/', $('#billing_master_form, #student_billing_form').serialize())
+                .done(function (data) {
+                    console.log(data);
+                    if ($.isNumeric(data)) {
+                        window.location = base_url + 'generate_bills/app/generate_bills';
+                    }
+                    else {
+                        $('#ibox_form').unblock();
+                        var body = $("html, body");
+                        body.animate({ scrollTop:0 }, '1000', 'swing');
+                        $("#emsgbody").html(data);
+                        $("#emsg").show("slow");
+                    }
                 });
         });
 
