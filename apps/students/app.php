@@ -289,12 +289,13 @@ switch ($action) {
                 $section = AppSection::where('name', $exploded_section_name[1])->get();
                 $category = Category::where('name', $data[$i][5])->get();
                 $exploded_sub_category_name = explode(".", $data[$i][6]);
+                $exploded_faculty_name = explode(".", $data[$i][8]);
                 $sub_category = [];
                 if(sizeof($category) == 1) {
                     $sub_category = Subcategory::where('name', $exploded_sub_category_name[1])->get();
                 }
                 $student_type = AppStudentType::where('name', $data[$i][7])->get();
-                $faculty = AppFaculty::where('name', $data[$i][8])->get();
+                $faculty = AppFaculty::where('name', $exploded_faculty_name)->get();
                 if (sizeof($class) == 0) {
                     $error_message .= "You need to have class " . $data[$i][3] . "<br/>";
                     $error = true;
@@ -445,7 +446,7 @@ switch ($action) {
         $categories = Category::select('name')->get();
         $sub_categories = SubCategory::select('category_id', 'name')->get();
         $student_types = AppStudentType::select('name')->get();
-        $faculties = AppFaculty::select('name')->get();
+        $faculties = AppFaculty::select('class_id', 'name')->get();
         $class_names = array();
         $section_names = array();
         $category_names = array();
@@ -472,7 +473,8 @@ switch ($action) {
             array_push($student_type_names, $student_type->name);
         }
         foreach ($faculties as $faculty) {
-            array_push($faculty_names, $faculty->name);
+            $class_name = AppClass::find($section->class_id)->name;
+            array_push($faculty_names, $class_name . "." . $faculty->name);
         }
         foreach ($status as $key => $value) {
             array_push($status_names, $value);
