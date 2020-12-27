@@ -376,6 +376,8 @@ switch ($action) {
                     $student->student_type_id = $student_type[0]->id;
                     if(sizeof($faculty) != 0) {
                         $student->faculty_id = $faculty[0]->id;
+                    } else {
+                        $student->faculty_id = 0;
                     }
                     $student->status = strtolower($data[$i][9]);
                     $student->remarks = $data[$i][15];
