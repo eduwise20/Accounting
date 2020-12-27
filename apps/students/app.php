@@ -370,9 +370,13 @@ switch ($action) {
 
                     if(sizeof($category) != 0) {
                         $student->category_id = $category[0]->id;
+                    } else {
+                        $student->category_id = 0;
                     }
                     if(sizeof($sub_category) != 0) {
                         $student->sub_category_id = $sub_category[0]->id;
+                    } else {
+                        $student->sub_category_id = 0;
                     }
                     $student->student_type_id = $student_type[0]->id;
                     if(sizeof($faculty) != 0) {
