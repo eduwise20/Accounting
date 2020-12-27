@@ -251,11 +251,13 @@ switch ($action) {
             $spreadsheet = PhpOffice\PhpSpreadsheet\IOFactory::load('storage/temp/' . $uploaded);
             $worksheet = $spreadsheet->getActiveSheet();
             $no_of_rows = $worksheet->getHighestDataRow();
-            $no_of_columns = $worksheet->getHighestDataColumn();
-            $no_of_columns = PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($no_of_columns);
+            $highestColumn = $worksheet->getHighestDataColumn();
+            $no_of_columns = PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
             $data = [];
 
-            for ($currentRow = 1; $currentRow <= $no_of_rows; $currentRow++) {
+            for ($currentRow = 1; $currentRow <= $no_of_rows; $currentRow++){ 
+                $rowData = $worksheet->rangeToArray('A' . $currentRow . ':' . $highestColumn . $currentRow, NULL, TRUE, FALSE);
+                if(isEmptyRow(reset($rowData))) { continue; }
                 for ($currentCol = 1; $currentCol <= $no_of_columns; $currentCol++) {
                     $data[$currentRow - 1][$currentCol - 1] = $worksheet->getCellByColumnAndRow($currentCol, $currentRow)->getCalculatedValue();
                 }
@@ -279,11 +281,18 @@ switch ($action) {
                 $student->admission_no = $data[$i][1];
                 $student->roll_no = $data[$i][2];
                 $class = AppClass::where('name', $data[$i][3])->get();
+                $faculties = [];
+                if(sizeof($class) == 1) {
+                    $faculties = AppFaculty::where('class_id', $class[0]->id)->get();
+                }
                 $exploded_section_name = explode(".", $data[$i][4]);
                 $section = AppSection::where('name', $exploded_section_name[1])->get();
                 $category = Category::where('name', $data[$i][5])->get();
                 $exploded_sub_category_name = explode(".", $data[$i][6]);
-                $sub_category = Subcategory::where('name', $exploded_sub_category_name[1])->get();
+                $sub_category = [];
+                if(sizeof($category) == 1) {
+                    $sub_category = Subcategory::where('name', $exploded_sub_category_name[1])->get();
+                }
                 $student_type = AppStudentType::where('name', $data[$i][7])->get();
                 $faculty = AppFaculty::where('name', $data[$i][8])->get();
                 if (sizeof($class) == 0) {
@@ -322,7 +331,7 @@ switch ($action) {
                     $error_message .= "More than one sub category " . $data[$i][6] . " found<br/>";
                     $error = true;
                 }
-                if ($category[0]->name != $exploded_sub_category_name[0]) {
+                if (sizeof($sub_category) > 1 && $category[0]->name != $exploded_sub_category_name[0]) {
                     $error_message .= "Sub category " . $exploded_sub_category_name[1] . " doesn't belong to category " . $exploded_sub_category_name[0] . "<br/>";
                     $error = true;
                 }
@@ -334,11 +343,19 @@ switch ($action) {
                     $error_message .= "More than one student type " . $data[$i][7] . " found<br/>";
                     $error = true;
                 }
-                if ($data[$i][8] != '' && sizeof($faculty) == 0) {
+                if(AppStudent::where('roll_no', $data[$i][2])->count() > 0) {
+                    $error_message .= "Roll no " . $data[$i][2] . " already exists.<br/>";
+                    $error = true;
+                }
+                if(AppStudent::where('admission_no', $data[$i][1])->count() > 0) {
+                    $error_message .= "Admission no " . $data[$i][1] . " already exists.<br/>";
+                    $error = true;
+                }
+                if (sizeof($faculties) > 0 && $data[$i][8] != '' && sizeof($faculty) == 0) {
                     $error_message .= "You need to have faculty " . $data[$i][8] . "<br/>";
                     $error = true;
                 }
-                if ($data[$i][8] != '' && sizeof($faculty) > 1) {
+                if (sizeof($faculties) > 0 && $data[$i][8] != '' && sizeof($faculty) > 1) {
                     $error_message .= "More than one faculty " . $data[$i][8] . " found<br/>";
                     $error = true;
                 }
@@ -349,11 +366,18 @@ switch ($action) {
                 if (!$error) {
                     $student->class_id = $class[0]->id;
                     $student->section_id = $section[0]->id;
-                    $student->category_id = $category[0]->id;
-                    $student->sub_category_id = $sub_category[0]->id;
+
+                    if(sizeof($category) != 0) {
+                        $student->category_id = $category[0]->id;
+                    }
+                    if(sizeof($sub_category) != 0) {
+                        $student->sub_category_id = $sub_category[0]->id;
+                    }
                     $student->student_type_id = $student_type[0]->id;
-                    $student->faculty_id = $faculty[0]->id;
-                    $student->status = array_search($data[$i][9], $status);
+                    if(sizeof($faculty) != 0) {
+                        $student->faculty_id = $faculty[0]->id;
+                    }
+                    $student->status = strtolower($data[$i][9]);
                     $student->remarks = $data[$i][15];
                     array_push($students_to_insert, $student);
 
@@ -483,4 +507,11 @@ function set_dropdown($column_name, $array_to_set, $sheet)
         $objValidation->setError('Value is not in list.');
         $objValidation->setFormula1('"' . implode(',', $array_to_set) . '"');
     }
+}
+
+function isEmptyRow($row) {
+    foreach($row as $cell){
+        if (null !== $cell) return false;
+    }
+    return true;
 }
