@@ -286,13 +286,13 @@ switch ($action) {
                     $faculties = AppFaculty::where('class_id', $class[0]->id)->get();
                 }
                 $exploded_section_name = explode(".", $data[$i][4]);
-                $section = AppSection::where('name', $exploded_section_name[1])->get();
+                $section = AppSection::where('name', $exploded_section_name[1])->where('class_id', $class[0]->id)->get();
                 $category = Category::where('name', $data[$i][5])->get();
                 $exploded_sub_category_name = explode(".", $data[$i][6]);
                 $exploded_faculty_name = explode(".", $data[$i][8]);
                 $sub_category = [];
                 if(sizeof($category) == 1) {
-                    $sub_category = Subcategory::where('name', $exploded_sub_category_name[1])->get();
+                    $sub_category = Subcategory::where('name', $exploded_sub_category_name[1])->where('category_id', $category[0]->id)->get();
                 }
                 $student_type = AppStudentType::where('name', $data[$i][7])->get();
                 $faculty = AppFaculty::where('name', $exploded_faculty_name)->get();
