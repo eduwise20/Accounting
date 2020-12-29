@@ -225,6 +225,12 @@ switch ($action) {
         echo json_encode($faculties);
         break;
 
+    case 'getSectionForClass':
+        $data = $request->all();
+        $sections = AppSection::where('class_id', $data['class_id'])->get();
+        echo json_encode($sections);
+        break;
+
     case 'import_excel' :
         view('app_wrapper', [
             '_include' => 'student/students_import'
