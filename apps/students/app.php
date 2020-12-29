@@ -99,6 +99,7 @@ switch ($action) {
             'class_id' => 'required|not_in:0',
             'student_type_id' => 'required|not_in:0',
             'status' => 'required|not_in:0',
+            'gender' => 'required',
         ],
             [
                 'name:required' => 'The Full name is required',
@@ -180,7 +181,7 @@ switch ($action) {
         } else {
             $student_additional_information = AppStudentAdditionalInformation::where('student_id', $student->id)->get();
             $classes = AppClass::all();
-            $sections = AppSection::all();
+            $sections = AppSection::where('class_id', $student->class_id)->get();
             $categories = Category::all();
             $sub_categories = Subcategory::all();
             $student_types = AppStudentType::all();
@@ -399,7 +400,7 @@ switch ($action) {
                     $student_additional_information->permanent_address = $data[$i][12];
                     $student_additional_information->parent_name = $data[$i][13];
                     $student_additional_information->local_guardian_name = $data[$i][14];
-                    $student_additional_information->gender = $data[$i][16];
+                    $student_additional_information->gender = $data[$i][15];
                     array_push($student_additional_informations_to_insert, $student_additional_information);
                 }
             }
