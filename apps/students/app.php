@@ -392,7 +392,7 @@ switch ($action) {
                         $student->faculty_id = 0;
                     }
                     $student->status = strtolower($data[$i][9]);
-                    $student->remarks = $data[$i][15];
+                    $student->remarks = $data[$i][16];
                     array_push($students_to_insert, $student);
 
                     $student_additional_information->phone = $data[$i][10];
