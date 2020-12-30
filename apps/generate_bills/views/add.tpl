@@ -471,14 +471,13 @@
                 let tableBody = '';
                 let count = 0;
                 students.forEach(function(student){
-                    let total_fee = student['fee'] + student['fine'] - student['discount'] - student['scholarship'];
                     tableBody += '<tr>';
                     tableBody += '<td>' + student['name'] + '</td><input type="hidden" name="student_id[' + count + ']" value="' + student['id'] + '"/>';
                     tableBody += '<td>' + student['fee'] + '</td><input type="hidden" name="student_fee[' + count + ']" value="' + student['fee'] + '"/>';
                     tableBody += '<td>' + student['fine'] + '</td><input type="hidden" name="student_fine[' + count + ']" value="' + student['fine'] + '"/>';
                     tableBody += '<td>' + student['discount'] + '</td><input type="hidden" name="student_discount[' + count + ']" value="' + student['discount'] + '"/>';
                     tableBody += '<td>' + student['scholarship'] + '</td><input type="hidden" name="student_scholarship[' + count + ']" value="' + student['scholarship'] + '"/>';
-                    tableBody += '<td class="item_total_fee">' + total_fee + '</td><input type="hidden" name="student_total_fee[' + count + ']" value="' + total_fee + '"/>';
+                    tableBody += '<td class="item_total_fee">' + student['total_fee'] + '</td><input type="hidden" id="hidden_total_fee" name="student_total_fee[' + count + ']" value="' + student['total_fee'] + '"/>';
                     tableBody += '<td>' + '<a data-toggle="modal" href="#modal_add_item" class="btn btn-success mb-md" id="edit_button" onclick="fill_modal('+student["id"]+');">Edit</a>' + '</td>';
                     tableBody += '</tr>';
                     count++;
@@ -489,9 +488,11 @@
         });
 
         let total_fee;
+        let total_fee_hidden;
         function fill_modal(student_id) {
             $(document).on('click', '#edit_button', function(){
                 total_fee = $(this).closest('tr').find('.item_total_fee');
+                total_fee_hidden = $(this).closest('tr').find('#hidden_total_fee');
                 let total_fee_text = total_fee.text();
                 $("#current_fee_id").html(total_fee_text);
                 $("#current_fee_id_input").val(total_fee_text);
@@ -502,8 +503,9 @@
 
         $("#btn_modal_action").click(function (e) {
             e.preventDefault();
-            console.log($("#new_fee")[0].value);
-            total_fee.html($("#new_fee")[0].value);
+            let new_fee = $("#new_fee")[0].value;
+            total_fee.html(new_fee);
+            total_fee_hidden.val(new_fee);
             $.post(base_url + 'generate_bills/app/updateTotalFee/', $('#billing_master_form, #fee_change_form').serialize())
                 .done(function (data) {
                     $("#modal_add_item").modal('toggle');
@@ -515,7 +517,6 @@
             $('#ibox_form').block({ message:block_msg });
             $.post(base_url + 'generate_bills/app/save/', $('#billing_master_form, #student_billing_form').serialize())
                 .done(function (data) {
-                    console.log(data);
                     if ($.isNumeric(data)) {
                         window.location = base_url + 'generate_bills/app/generate_bills';
                     }

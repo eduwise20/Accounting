@@ -56,16 +56,27 @@ switch ($action) {
     case 'save':
         $data = $request->all();
         for($i = 0; $i < sizeof($data['student_id']); $i++) {
+            $print_no = 1;
+            $billing_queried = Billing::where([
+                'student_id' => $data['student_id'][$i],
+                'billing_period_id' => $data['billing_period_id'],
+                'fiscal_year_id' => $data['fiscal_year_id']
+            ])->orderBy('created_at', 'desc')->first();
+            if($billing_queried != null) {
+                $print_no += $billing_queried->print_no;
+            }
             $billing = new Billing;
             $billing->fee = $data['student_fee'][$i];
-            $billing->fee_id = 1;
-            $billing->month = 'Baisakh';
+            $billing->month = date('m');
             $billing->fine = $data['student_fine'][$i];
             $billing->discount = $data['student_discount'][$i];
             $billing->scholarship = $data['student_scholarship'][$i];
             $billing->total_fee = $data['student_total_fee'][$i];
-            $billing->generated_by_id = 1;
+            $billing->generated_by_id = $user->id;
+            $billing->billing_period_id = $data['billing_period_id'];
+            $billing->student_id = $data['student_id'][$i];
             $billing->fiscal_year_id = $data['fiscal_year_id'];
+            $billing->print_no = $print_no;
             $billing->save();
         }
         echo $billing->id;
@@ -127,6 +138,16 @@ switch ($action) {
         }
 
         if (sizeof($students) > 0) {
+            foreach ($students as $student) {
+                $billing_update = BillingUpdate::where([
+                    'student_id' => $student->id,
+                    'billing_period_id' => $data['billing_period_id'],
+                    'fiscal_year_id' => $data['fiscal_year_id']
+                ])->orderBy('created_at', 'desc')->first();
+                if ($billing_update != null) {
+                    $student->total_fee = $billing_update->to_fee;
+                }
+            }
             $fee_names_for_student = array();
             foreach ($students as $student) {
                 $fee_name_students = AppFeeNameStudent::where('student_id', $student->id)->get();
@@ -229,6 +250,9 @@ switch ($action) {
                     }
                 }
                 $student->fine = $fine_amount;
+                if (!isset($student->total_fee)){
+                    $student->total_fee = $student->fee + $student->fine - $student->discount - $student->scholarship;
+                }
             }
         }
 
