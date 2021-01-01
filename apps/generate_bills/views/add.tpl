@@ -471,13 +471,17 @@
                 let tableBody = '';
                 let count = 0;
                 students.forEach(function(student){
+                    let student_fee_ids = student['fee_ids'].length > 0 ? student['fee_ids'] : 0;
+                    let student_fine_ids = student['fine_ids'].length > 0 ? student['fine_ids'] : 0;
+                    let student_discount_ids = student['discount_ids'].length > 0 ? student['discount_ids'] : 0;
+                    let student_scholarship_ids = student['scholarship_ids'].length > 0 ? student['scholarship_ids'] : 0;
                     tableBody += '<tr>';
                     tableBody += '<td>' + student['name'] + '</td><input type="hidden" name="student_id[' + count + ']" value="' + student['id'] + '"/>';
-                    tableBody += '<td>' + student['fee'] + '</td><input type="hidden" name="student_fee[' + count + ']" value="' + student['fee'] + '"/>';
-                    tableBody += '<td>' + student['fine'] + '</td><input type="hidden" name="student_fine[' + count + ']" value="' + student['fine'] + '"/>';
-                    tableBody += '<td>' + student['discount'] + '</td><input type="hidden" name="student_discount[' + count + ']" value="' + student['discount'] + '"/>';
-                    tableBody += '<td>' + student['scholarship'] + '</td><input type="hidden" name="student_scholarship[' + count + ']" value="' + student['scholarship'] + '"/>';
-                    tableBody += '<td class="item_total_fee">' + student['total_fee'] + '</td><input type="hidden" id="hidden_total_fee" name="student_total_fee[' + count + ']" value="' + student['total_fee'] + '"/>';
+                    tableBody += '<td>' + student['fee'] + '</td><input type="hidden" name="student_fee[' + student['id'] + ']" value="' + student['fee'] + '"/><input type="hidden" id="student_fee_id" name="student_fee_id[' + student['id'] + ']" value="' + student_fee_ids + '"/>';
+                    tableBody += '<td>' + student['fine'] + '</td><input type="hidden" name="student_fine[' + student['id'] + ']" value="' + student['fine'] + '"/><input type="hidden" id="student_fine_id" name="student_fine_id[' + student['id'] + ']" value="' + student_fine_ids + '"/>';
+                    tableBody += '<td>' + student['discount'] + '</td><input type="hidden" name="student_discount[' + student['id'] + ']" value="' + student['discount'] + '"/><input type="hidden" id="student_discount_id" name="student_discount_id[' + student['id'] + ']" value="' + student_discount_ids + '"/>';
+                    tableBody += '<td>' + student['scholarship'] + '</td><input type="hidden" name="student_scholarship[' + student['id'] + ']" value="' + student['scholarship'] + '"/><input type="hidden" id="student_scholarship_id" name="student_scholarship_id[' + student['id'] + ']" value="' + student_scholarship_ids + '"/>';
+                    tableBody += '<td class="item_total_fee">' + student['total_fee'] + '</td><input type="hidden" id="hidden_total_fee" name="student_total_fee[' + student['id'] + ']" value="' + student['total_fee'] + '"/>';
                     tableBody += '<td>' + '<a data-toggle="modal" href="#modal_add_item" class="btn btn-success mb-md" id="edit_button" onclick="fill_modal('+student["id"]+');">Edit</a>' + '</td>';
                     tableBody += '</tr>';
                     count++;
