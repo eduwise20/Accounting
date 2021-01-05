@@ -23,7 +23,6 @@ switch ($action) {
     case 'add':
         $classes = AppClass::all();
         $student_types = AppStudentType::all();
-        $sections = AppSection::all();
         $categories = Category::all();
         $fee_names = AppFeeName::all();
         $billing_periods = BillingPeriod::all();
@@ -31,7 +30,6 @@ switch ($action) {
             '_include' => 'assign_discount/add',
             'classes' => $classes,
             'student_types' => $student_types,
-            'sections' => $sections,
             'categories' => $categories,
             'fee_names' => $fee_names,
             'billing_periods' => $billing_periods,
@@ -197,6 +195,12 @@ switch ($action) {
         echo json_encode($faculties);
         break;
 
+    case 'getSectionForClass':
+        $data = $request->all();
+        $sections = AppSection::where('class_id', $data['class_id'])->get();
+        echo json_encode($sections);
+        break;
+
     case 'getSubCategoriesForCategory':
         $data = $request->all();
         $sub_categories = Subcategory::where('category_id', $data['category_id'])->get();
@@ -212,6 +216,9 @@ switch ($action) {
         ];
         if ($data['faculty_id'] != 0) {
             $where['faculty_id'] = $data['faculty_id'];
+        }
+        if ($data['section_id'] != 0) {
+            $where['section_id'] = $data['section_id'];
         }
         if ($data['category_id'] != 0) {
             $where['category_id'] = $data['category_id'];
