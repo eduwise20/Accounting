@@ -164,12 +164,20 @@ switch ($action) {
         $data = $request->all();
         $where = [
             'class_id' => $data['class_id'],
-            'section_id' => $data['section_id'],
-            'student_type_id' => $data['student_type_id'],
-            'faculty_id' => $data['faculty_id'],
-            'category_id' => $data['category_id'],
-            'sub_category_id' => $data['sub_category_id']
+            'student_type_id' => $data['student_type_id']
         ];
+        if ($data['faculty_id'] != 0) {
+            $where['faculty_id'] = $data['faculty_id'];
+        }
+        if ($data['section_id'] != 0) {
+            $where['section_id'] = $data['section_id'];
+        }
+        if ($data['category_id'] != 0) {
+            $where['category_id'] = $data['category_id'];
+            if ($data['sub_category_id'] != 0) {
+                $where['sub_category_id'] = $data['sub_category_id'];
+            }
+        }
         $students = AppStudent::where($where)->get();
 
         $fee_rate_where = [
