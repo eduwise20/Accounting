@@ -23,7 +23,6 @@ switch ($action) {
     case 'add':
         $classes = AppClass::all();
         $student_types = AppStudentType::all();
-        $sections = AppSection::all();
         $categories = Category::all();
         $fee_names = AppFeeName::all();
         $billing_periods = BillingPeriod::all();
@@ -31,7 +30,6 @@ switch ($action) {
             '_include' => 'assign_scholarship/add',
             'classes' => $classes,
             'student_types' => $student_types,
-            'sections' => $sections,
             'categories' => $categories,
             'fee_names' => $fee_names,
             'billing_periods' => $billing_periods,
@@ -42,24 +40,30 @@ switch ($action) {
         $validator = new Validator();
         $data = $request->all();
 
-        $validation = $validator->validate($data, [
-            'class_id' => 'required|not_in:0',
-            'student_type_id' => 'required|not_in:0',
-            'fee_name_id' => 'required|not_in:0'
-        ],
+        $validation = $validator->validate(
+            $data,
+            [
+                'class_id' => 'required|not_in:0',
+                'student_type_id' => 'required|not_in:0',
+                'fee_name_id' => 'required|not_in:0'
+            ],
             [
                 'class_id:not_in' => 'The Class is required',
                 'student_type_id:not_in' => 'The Student type is required',
                 'fee_name_id:not_in' => 'The Fee name is required',
-            ]);
+            ]
+        );
 
         if (!isset($data['yearly_applicable'])) {
-            $billing_period_validation = $validator->validate($data, [
-                'billing_period_id' => 'required|not_in:0'
-            ],
+            $billing_period_validation = $validator->validate(
+                $data,
+                [
+                    'billing_period_id' => 'required|not_in:0'
+                ],
                 [
                     'billing_period_id:not_in' => 'The Billing period is required',
-                ]);
+                ]
+            );
         }
 
         if ($validation->fails()) {
@@ -120,7 +124,6 @@ switch ($action) {
                             $value->delete();
                         }
                     }
-
                 } else if ($data['assign_radio_button'] == 'multiple_scholarships') {
 
                     $array_of_scholarship_id = array();
@@ -160,7 +163,6 @@ switch ($action) {
                             $value->delete();
                         }
                     }
-
                 }
             } else {
                 if ($data['assign_radio_button'] == 'multiple_students') {
@@ -187,7 +189,6 @@ switch ($action) {
             }
 
             echo $scholarship_student->id;
-
         }
         break;
 
@@ -195,6 +196,12 @@ switch ($action) {
         $data = $request->all();
         $faculties = AppFaculty::where('class_id', $data['class_id'])->get();
         echo json_encode($faculties);
+        break;
+
+    case 'getSectionForClass':
+        $data = $request->all();
+        $sections = AppSection::where('class_id', $data['class_id'])->get();
+        echo json_encode($sections);
         break;
 
     case 'getSubCategoriesForCategory':
@@ -212,6 +219,9 @@ switch ($action) {
         ];
         if ($data['faculty_id'] != 0) {
             $where['faculty_id'] = $data['faculty_id'];
+        }
+        if ($data['section_id'] != 0) {
+            $where['section_id'] = $data['section_id'];
         }
         if ($data['category_id'] != 0) {
             $where['category_id'] = $data['category_id'];
