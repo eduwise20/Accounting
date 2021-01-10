@@ -284,8 +284,10 @@
             class_id.change(function(){
                 if (class_id[0].value != 0) {
                     getFacultyForClass(class_id[0].value);
+                    getSectionForClass(class_id[0].value);
                 } else {
                     $("#faculty_id").html('<option value="0">--</option>');
+                    $("#section_id").html('<option value="0">--</option>');
                     faculty_section.hide();
                 }
             });
@@ -314,6 +316,19 @@
                     });
             }
 
+            function getSectionForClass(class_id) {
+                $.post(base_url + 'students/app/getSectionForClass/',
+                    { class_id : class_id },
+                    function (data, status){
+                        let sections = JSON.parse(data);
+                        if (sections.length > 0) {
+                            populateSectionSelectList(sections);
+                        } else {
+                            $("#section_id").html('<option value="0">--</option>');
+                        }
+                    });
+            }
+
             function getSubCategoriesForCategory(category_id) {
                 $.post(base_url + 'students/app/getSubCategoriesForCategory/',
                     { category_id : category_id },
@@ -333,6 +348,13 @@
                 $("#faculty_id").html('<option value="0">--</option>');
                 faculties.forEach(function(faculty) {
                     $("#faculty_id").append('<option value="' + faculty['id'] + '">' + faculty['name'] + '</option>');
+                });
+            }
+
+            function populateSectionSelectList(faculties) {
+                $("#section_id").html('<option value="0">--</option>');
+                faculties.forEach(function(section) {
+                    $("#section_id").append('<option value="' + section['id'] + '">' + section['name'] + '</option>');
                 });
             }
 
