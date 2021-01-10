@@ -255,23 +255,34 @@ switch ($action) {
                 if (sizeof($student_fee_names) > 0) {
                     foreach ($all_fees as $all_fee) {
                         for ($i = 0; $i < sizeof($all_discounts); $i++) {
+                            if (!isset($student_discounts[$i])) {
+                                $student_discounts[$i] = 0;
+                            }
                             if ($all_fee->is_discount_applicable == 1) {
-                                $fee_structure_student_discounts = AppDiscountStudent::where(['student_id' => $student->id, 'fee_name_id' => $all_fee->id])->get();
-                                foreach ($fee_structure_student_discounts as $fee_structure_student_discount) {
-                                    if ($fee_structure_student_discount->billing_period_id == $data['billing_period_id'] || $fee_structure_student_discount->yearly_applicable == 1) {
-                                        $discount = AppDiscount::find($fee_structure_student_discount->discount_id);
-                                        $fee_structure = AppFeeStructure::where(['fee_names_id' => $all_fee->id, 'fee_rate_id' => $fee_rates[0]->id])->first();
-                                        if ($discount->type == "Amount") {
-                                            $student_discounts[$i] = $discount->amount;
-                                        } else if ($discount->type == "Percentage") {
-                                            $student_discounts[$i] = $fee_structure->amount * $discount->amount / 100;
+                                $fee_structure_student_discounts = AppDiscountStudent::where(['student_id' => $student->id, 'fee_name_id' => $all_fee->id, 'discount_id' => $all_discounts[$i]->id])->get();
+                                if (sizeof($fee_structure_student_discounts) > 0) {
+                                    foreach ($fee_structure_student_discounts as $fee_structure_student_discount) {
+                                        if ($fee_structure_student_discount->billing_period_id == $data['billing_period_id'] || $fee_structure_student_discount->yearly_applicable == 1) {
+                                            $discount = AppDiscount::find($fee_structure_student_discount->discount_id);
+                                            foreach ($fee_rates as $fee_rate) {
+                                                $fee_structure = AppFeeStructure::where(['fee_names_id' => $all_fee->id, 'fee_rate_id' => $fee_rate->id])->first();
+                                                if ($discount->type == "Amount") {
+                                                    $student_discounts[$i] += $discount->amount;
+                                                } else if ($discount->type == "Percentage") {
+                                                    $student_discounts[$i] += $fee_structure->amount * $discount->amount / 100;
+                                                } else {
+                                                    $student_discounts[$i] += 0;
+                                                }
+                                            }
+                                        } else {
+                                            $student_discounts[$i] += 0;
                                         }
-                                    } else {
-                                        $student_discounts[$i] = 0;
                                     }
+                                } else {
+                                    $student_discounts[$i] += 0;
                                 }
                             } else {
-                                $student_discounts[$i] = 0;
+                                $student_discounts[$i] += 0;
                             }
                         }
                     }
@@ -281,25 +292,36 @@ switch ($action) {
                 $student->scholarships = array();
                 $student_scholarships = $student->scholarships;
                 if (sizeof($student_fee_names) > 0) {
-                    for ($i = 0; $i < sizeof($all_scholarships); $i++) {
-                        foreach ($all_fees as $all_fee) {
+                    foreach ($all_fees as $all_fee) {
+                        for ($i = 0; $i < sizeof($all_scholarships); $i++) {
+                            if (!isset($student_scholarships[$i])) {
+                                $student_scholarships[$i] = 0;
+                            }
                             if ($all_fee->is_scholarship_applicable == 1) {
-                                $fee_structure_student_scholarships = AppScholarshipStudent::where(['student_id' => $student->id, 'fee_name_id' => $all_fee->id])->get();
-                                foreach ($fee_structure_student_scholarships as $fee_structure_student_scholarship) {
-                                    if ($fee_structure_student_scholarship->billing_period_id == $data['billing_period_id'] || $fee_structure_student_scholarship->yearly_applicable == 1) {
-                                        $scholarship = AppScholarship::find($fee_structure_student_scholarship->scholarship_id);
-                                        $fee_structure = AppFeeStructure::where(['fee_names_id' => $all_fee->id, 'fee_rate_id' => $fee_rates[0]->id])->first();
-                                        if ($scholarship->type == "Amount") {
-                                            $student_scholarships[$i] = $scholarship->amount;
-                                        } else if ($scholarship->type == "Percentage") {
-                                            $student_scholarships[$i] = $fee_structure->amount * $scholarship->amount / 100;
+                                $fee_structure_student_scholarships = AppScholarshipStudent::where(['student_id' => $student->id, 'fee_name_id' => $all_fee->id, 'scholarship_id' => $all_scholarships[$i]->id])->get();
+                                if (sizeof($fee_structure_student_scholarships) > 0) {
+                                    foreach ($fee_structure_student_scholarships as $fee_structure_student_scholarship) {
+                                        if ($fee_structure_student_scholarship->billing_period_id == $data['billing_period_id'] || $fee_structure_student_scholarship->yearly_applicable == 1) {
+                                            $scholarship = AppScholarship::find($fee_structure_student_scholarship->scholarship_id);
+                                            foreach ($fee_rates as $fee_rate) {
+                                                $fee_structure = AppFeeStructure::where(['fee_names_id' => $all_fee->id, 'fee_rate_id' => $fee_rate->id])->first();
+                                                if ($scholarship->type == "Amount") {
+                                                    $student_scholarships[$i] += $scholarship->amount;
+                                                } else if ($scholarship->type == "Percentage") {
+                                                    $student_scholarships[$i] += $fee_structure->amount * $scholarship->amount / 100;
+                                                } else {
+                                                    $student_scholarships[$i] += 0;
+                                                }
+                                            }
+                                        } else {
+                                            $student_scholarships[$i] += 0;
                                         }
-                                    } else {
-                                        $student_scholarships[$i] = 0;
                                     }
+                                } else {
+                                    $student_scholarships[$i] += 0;
                                 }
                             } else {
-                                $student_scholarships[$i] = 0;
+                                $student_scholarships[$i] += 0;
                             }
                         }
                     }
@@ -309,123 +331,25 @@ switch ($action) {
                 $student->fines = array();
                 $student_fines = $student->fines;
                 if (sizeof($student_fee_names) > 0) {
-                    foreach ($all_fees as $all_fee) {
-                        for ($i = 0; $i < sizeof($all_fines); $i++) {
+                    for ($i = 0; $i < sizeof($all_fines); $i++) {
+                        if (!isset($student_fines[$i])) {
+                            $student_fines[$i] = 0;
+                        }
+                        $fine_student = AppFineStudent::where(['fine_id' => $all_fines[$i]->id, 'student_id' => $student->id, 'billing_period_id' => $data['billing_period_id']])->first();
+                        if ($fine_student) {
+                            if ($all_fines[$i]->type == "Amount") {
+                                $student_fines[$i] += $all_fines[$i]->amount;
+                            } else if ($all_fines[$i]->type == "Percentage") {
+                                $student_fines[$i] += ($total_fee_for_student * $all_fines[$i]->amount) / 100;
+                            }
+                        } else {
+                            $student_fines[$i] += 0;
                         }
                     }
                 }
                 $student->fines = $student_fines;
-
-                // $fee_name_students = AppFeeNameStudent::where('student_id', $student->id)->get();
-                // foreach ($fee_name_students as $fee_name_student) {
-                //     $fee_name_for_student = AppFeeName::find($fee_name_student->fee_name_id);
-                //     array_push($fee_names_for_student, $fee_name_for_student);
-                // }
-
-                // $discount_amount = 0;
-                // $discount_ids = array();
-                // if (sizeof($fee_names_for_student) > 0) {
-                //     foreach ($fee_names_for_student as $fee_name_for_student) {
-                //         if ($fee_name_for_student->is_compulsory == 1 || in_array($fee_name_for_student->id, $fee_name_ids)) {
-                //             if ($fee_name_for_student->is_discount_applicable == 1) {
-                //                 $fee_structure_student_discounts = AppDiscountStudent::where(['student_id' => $student->id, 'fee_name_id' => $fee_name_for_student->id])->get();
-                //                 foreach ($fee_structure_student_discounts as $fee_structure_student_discount) {
-                //                     if ($fee_structure_student_discount->billing_period_id == $data['billing_period_id'] || $fee_structure_student_discount->yearly_applicable == 1) {
-                //                         array_push($discount_ids, $fee_structure_student_discount->discount_id);
-                //                     }
-                //                 }
-                //             }
-                //         }
-                //         $fee_structure = AppFeeStructure::where(['fee_names_id' => $fee_name_for_student->id, 'fee_rate_id' => $fee_rates[0]->id])->first();
-                //         $fee_amount = $fee_structure->amount;
-                //         $discounts = AppDiscount::whereIn('id', $discount_ids)->get();
-                //         foreach ($discounts as $discount) {
-                //             if ($discount->type == "Amount") {
-                //                 $discount_amount += $discount->amount;
-                //             } else if ($discount->type == "Percentage") {
-                //                 $discount_amount += $discount->amount * $fee_amount / 100;
-                //             }
-                //         }
-                //     }
-                // }
-                // $student->discount = $discount_amount;
-                // $student->discount_ids = $discount_ids;
-
-                // $scholarship_amount = 0;
-                // $scholarship_ids = array();
-                // if (sizeof($fee_names_for_student) > 0) {
-                //     foreach ($fee_names_for_student as $fee_name_for_student) {
-                //         if ($fee_name_for_student->is_compulsory == 1 || in_array($fee_name_for_student->id, $fee_name_ids)) {
-                //             if ($fee_name_for_student->is_scholarship_applicable == 1) {
-                //                 $fee_structure_student_scholarships = AppScholarshipStudent::where(['student_id' => $student->id, 'fee_name_id' => $fee_name_for_student->id])->get();
-                //                 foreach ($fee_structure_student_scholarships as $fee_structure_student_scholarship) {
-                //                     if ($fee_structure_student_scholarship->billing_period_id == $data['billing_period_id'] || $fee_structure_student_scholarship->yearly_applicable == 1) {
-                //                         array_push($scholarship_ids, $fee_structure_student_scholarship->scholarship_id);
-                //                     }
-                //                 }
-                //             }
-                //         }
-                //         $fee_structure = AppFeeStructure::where(['fee_names_id' => $fee_name_for_student->id, 'fee_rate_id' => $fee_rates[0]->id])->first();
-                //         $fee_amount = $fee_structure->amount;
-                //         $scholarships = AppScholarship::whereIn('id', $scholarship_ids)->get();
-                //         foreach ($scholarships as $scholarship) {
-                //             if ($scholarship->type == "Amount") {
-                //                 $scholarship_amount += $scholarship->amount;
-                //             } else if ($scholarship->type == "Percentage") {
-                //                 $scholarship_amount += $scholarship->amount * $fee_amount / 100;
-                //             }
-                //         }
-                //     }
-                // }
-                // $student->scholarship = $scholarship_amount;
-                // $student->scholarship_ids = $scholarship_ids;
-
-                // $fee_amount = 0;
-                // $non_compulsary_fee_structures = array();
-                // $fee_ids = array();
-                // if (sizeof($fee_names) > 0) {
-                //     foreach ($fee_names as $fee_name) {
-                //         foreach ($fee_rates as $fee_rate) {
-                //             $non_compulsary_fee_structure_queried = AppFeeStructure::where(['fee_rate_id' => $fee_rate->id, 'fee_names_id' => $fee_name->id])->get();
-                //             if (sizeof($non_compulsary_fee_structure_queried) > 0) {
-                //                 foreach ($non_compulsary_fee_structure_queried as $fee_structure_query) {
-                //                     array_push($non_compulsary_fee_structures, $fee_structure_query);
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     if (sizeof($non_compulsary_fee_structures) > 0) {
-                //         foreach ($non_compulsary_fee_structures as $non_compulsary_fee_structure) {
-                //             array_push($fee_ids, $non_compulsary_fee_structure->id);
-                //             $fee_amount += $non_compulsary_fee_structure->amount;
-                //         }
-                //     }
-                // }
-                // $student->fee = $fee_amount;
-                // $student->fee_ids = $fee_ids;
-
-                // $fine_students = AppFineStudent::where(['student_id' => $student->id, 'billing_period_id' => $data['billing_period_id']])->get();
-                // $fine_amount = 0;
-                // $fine_ids = array();
-                // if (sizeof($fine_students) > 0) {
-                //     foreach ($fine_students as $fine_student) {
-                //         $fine = AppFine::find($fine_student->fine_id);
-                //         array_push($fine_ids, $fine->id);
-                //         if ($fine->type == "Amount") {
-                //             $fine_amount += $fine->amount;
-                //         } else if ($fine->type == "Percentage") {
-                //             $fine_amount += ($fee_amount * $fine->amount) / 100;
-                //         }
-                //     }
-                // }
-                // $student->fine = $fine_amount;
-                // $student->fine_ids = $fine_ids;
-                // if (!isset($student->total_fee)) {
-                //     $student->total_fee = $student->fee + $student->fine - $student->discount - $student->scholarship;
-                // }
             }
         }
-
         echo json_encode(['students' => $students, 'fines' => $all_fines, 'fees' => $all_fees, 'discounts' => $all_discounts, 'scholarships' => $all_scholarships]);
         break;
 }

@@ -80,9 +80,9 @@ switch ($action) {
         } else {
             $array_of_scholarship_student = array();
             if ($data['assign_radio_button'] == 'multiple_students') {
-                $array_of_scholarship_student = AppScholarshipStudent::where('scholarship_id', $data['scholarship_id'])->get();
+                $array_of_scholarship_student = AppScholarshipStudent::where(['scholarship_id' => $data['scholarship_id'], 'fee_name_id' => $data['fee_name_id']])->get();
             } else if ($data['assign_radio_button'] == 'multiple_scholarships') {
-                $array_of_scholarship_student = AppScholarshipStudent::where('student_id', $data['student_id'])->get();
+                $array_of_scholarship_student = AppScholarshipStudent::where(['student_id' => $data['student_id'], 'fee_name_id' => $data['fee_name_id']])->get();
             }
 
             if (sizeof($array_of_scholarship_student) > 0) {

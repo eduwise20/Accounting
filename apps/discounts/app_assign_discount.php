@@ -40,24 +40,30 @@ switch ($action) {
         $validator = new Validator();
         $data = $request->all();
 
-        $validation = $validator->validate($data, [
-            'class_id' => 'required|not_in:0',
-            'student_type_id' => 'required|not_in:0',
-            'fee_name_id' => 'required|not_in:0'
-        ],
+        $validation = $validator->validate(
+            $data,
+            [
+                'class_id' => 'required|not_in:0',
+                'student_type_id' => 'required|not_in:0',
+                'fee_name_id' => 'required|not_in:0'
+            ],
             [
                 'class_id:not_in' => 'The Class is required',
                 'student_type_id:not_in' => 'The Student type is required',
                 'fee_name_id:not_in' => 'The Fee name is required',
-            ]);
+            ]
+        );
 
         if (!isset($data['yearly_applicable'])) {
-            $billing_period_validation = $validator->validate($data, [
-                'billing_period_id' => 'required|not_in:0'
-            ],
+            $billing_period_validation = $validator->validate(
+                $data,
+                [
+                    'billing_period_id' => 'required|not_in:0'
+                ],
                 [
                     'billing_period_id:not_in' => 'The Billing period is required',
-                ]);
+                ]
+            );
         }
 
         if ($validation->fails()) {
@@ -74,9 +80,9 @@ switch ($action) {
         } else {
             $array_of_discount_student = array();
             if ($data['assign_radio_button'] == 'multiple_students') {
-                $array_of_discount_student = AppDiscountStudent::where('discount_id', $data['discount_id'])->get();
+                $array_of_discount_student = AppDiscountStudent::where(['discount_id' => $data['discount_id'], 'fee_name_id' => $data['fee_name_id']])->get();
             } else if ($data['assign_radio_button'] == 'multiple_discounts') {
-                $array_of_discount_student = AppDiscountStudent::where('student_id', $data['student_id'])->get();
+                $array_of_discount_student = AppDiscountStudent::where(['student_id' => $data['student_id'], 'fee_name_id' => $data['fee_name_id']])->get();
             }
 
             if (sizeof($array_of_discount_student) > 0) {
@@ -118,7 +124,6 @@ switch ($action) {
                             $value->delete();
                         }
                     }
-
                 } else if ($data['assign_radio_button'] == 'multiple_discounts') {
 
                     $array_of_discount_id = array();
@@ -158,7 +163,6 @@ switch ($action) {
                             $value->delete();
                         }
                     }
-
                 }
             } else {
                 if ($data['assign_radio_button'] == 'multiple_students') {
@@ -185,7 +189,6 @@ switch ($action) {
             }
 
             echo $discount_student->id;
-
         }
         break;
 

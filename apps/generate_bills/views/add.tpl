@@ -335,76 +335,7 @@
     <script>
         $(function() {
 
-            $('#clx_datatable').dataTable({
-                responsive: true,
-                lengthChange: false,
-                dom:
-                    /*	--- Layout Structure
-                    --- Options
-                    l	-	length changing input control
-                    f	-	filtering input
-                    t	-	The table!
-                    i	-	Table information summary
-                    p	-	pagination control
-                    r	-	processing display element
-                    B	-	buttons
-                    R	-	ColReorder
-                    S	-	Select
 
-                    --- Markup
-                    < and >				- div element
-                    <"class" and >		- div with a class
-                    <"#id" and >		- div with an ID
-                    <"#id.class" and >	- div with an ID and a class
-
-                    --- Further reading
-                    https://datatables.net/reference/option/dom
-                    --------------------------------------
-                 */
-                    "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [
-                    /*{
-                	extend:    'colvis',
-                	text:      'Column Visibility',
-                	titleAttr: 'Col visibility',
-                	className: 'mr-sm-3'
-                },*/
-                    {
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        titleAttr: 'Generate PDF',
-                        className: 'btn-danger btn-sm mr-1'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        titleAttr: 'Generate Excel',
-                        className: 'btn-success btn-sm mr-1'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        titleAttr: 'Generate CSV',
-                        className: 'btn-primary btn-sm mr-1'
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        titleAttr: 'Copy to clipboard',
-                        className: 'btn-dark btn-sm mr-1'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        titleAttr: 'Print Table',
-                        className: 'btn-secondary btn-sm'
-                    }
-                ]
-            });
-
-            $('.has-tooltip').tooltip();
         });
 
         $(document).ready(function() {
@@ -611,21 +542,55 @@
                     $("#billing_master_form").serialize(),
                     function(data, status) {
                         if (data) {
-                            console.log(data);
                             let jsonData = JSON.parse(data);
+                            populateTableHead(jsonData);
+                            student_billing_section.show();
                             students = jsonData['students'];
-                            students.forEach(function(student) {
-                                console.log(student);
-                                console.log('Student Name : ' + student['name']);
+                            let tableBody = populateStudents(students);
+                            $('#clx_datatable').dataTable({
+                                responsive: true,
+                                lengthChange: false,
+                                dom:
+                                    "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                                    "<'row'<'col-sm-12'tr>>" +
+                                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                                buttons: [
+                                    {
+                                        extend: 'pdfHtml5',
+                                        text: 'PDF',
+                                        titleAttr: 'Generate PDF',
+                                        className: 'btn-danger btn-sm mr-1'
+                                    },
+                                    {
+                                        extend: 'excelHtml5',
+                                        text: 'Excel',
+                                        titleAttr: 'Generate Excel',
+                                        className: 'btn-success btn-sm mr-1'
+                                    },
+                                    {
+                                        extend: 'csvHtml5',
+                                        text: 'CSV',
+                                        titleAttr: 'Generate CSV',
+                                        className: 'btn-primary btn-sm mr-1'
+                                    },
+                                    {
+                                        extend: 'copyHtml5',
+                                        text: 'Copy',
+                                        titleAttr: 'Copy to clipboard',
+                                        className: 'btn-dark btn-sm mr-1'
+                                    },
+                                    {
+                                        extend: 'print',
+                                        text: 'Print',
+                                        titleAttr: 'Print Table',
+                                        className: 'btn-secondary btn-sm'
+                                    }
+                                ]
                             });
-                            fines = jsonData['fines'];
-                            fines.forEach(function(fine) {
-                                console.log(fine);
-                            });
-                            fees = jsonData['fees'];
-                            fees.forEach(function(fee) {
-                                console.log(fee);
-                            });
+
+                            $('.has-tooltip').tooltip();
+                            var table = $("#clx_datatable").DataTable();
+                            table.rows.add($(tableBody)).draw();
                             /*let students = JSON.parse(data);
                         if (students.length > 0) {
                             let tableBody = populateStudents(students);
@@ -649,62 +614,129 @@
 
             });
 
-            /*function populateTableHead(students) {
-            let tableHead = '';
-            <tr class="heading">
-                                                    <th>Student Name</th>
-                                                    <th>Fees</th>
-                                                    <th>Fines</th>
-                                                    <th>Discounts</th>
-                                                    <th>Scholarships</th>
-                                                    <th>Total Fees</th>
-                                                    <th>Action</th>
-                                                </tr>
-        }*/
+            function populateTableHead(jsonData) {
+                let tableHead = '';
+                tableHead += '<tr class="heading">';
+                tableHead += '<th>Student Name</th>';
+                fees = jsonData['fees'];
+                if (fees.length > 0) {
+                    fees.forEach(function(fee) {
+                        tableHead += '<th>' + fee['name'] + '</th>';
+                    });
+                }
+
+                fines = jsonData['fines'];
+                if (fines.length > 0) {
+                    fines.forEach(function(fine) {
+                        tableHead += '<th>' + fine['name'] + '</th>';
+                    });
+                }
+
+                discounts = jsonData['discounts'];
+                if (discounts.length > 0) {
+                    discounts.forEach(function(discount) {
+                        tableHead += '<th>' + discount['name'] + '</th>';
+                    });
+                }
+
+                scholarships = jsonData['scholarships'];
+                if (scholarships.length > 0) {
+                    scholarships.forEach(function(scholarship) {
+                        tableHead += '<th>' + scholarship['name'] + '</th>';
+                    });
+                }
+
+                tableHead += '<th>Total Fees</th>';
+                tableHead += '<th>Action</th>';
+                tableHead += '</tr>';
+
+                $("#student_billing_table_head").html(tableHead);
+            }
 
             function populateStudents(students) {
                 let tableBody = '';
-                let count = 0;
                 students.forEach(function(student) {
-                    let student_fee_ids = student['fee_ids'].length > 0 ? student['fee_ids'] : 0;
-                    let student_fine_ids = student['fine_ids'].length > 0 ? student['fine_ids'] : 0;
-                    let student_discount_ids = student['discount_ids'].length > 0 ? student[
-                        'discount_ids'] : 0;
-                    let student_scholarship_ids = student['scholarship_ids'].length > 0 ? student[
-                        'scholarship_ids'] : 0;
                     tableBody += '<tr>';
-                    tableBody += '<td>' + student['name'] + '</td><input type="hidden" name="student_id[' +
-                        count + ']" value="' + student['id'] + '"/>';
-                    tableBody += '<td>' + student['fee'] + '</td><input type="hidden" name="student_fee[' +
-                        student['id'] + ']" value="' + student['fee'] +
-                        '"/><input type="hidden" id="student_fee_id" name="student_fee_id[' + student[
-                            'id'] + ']" value="' + student_fee_ids + '"/>';
-                    tableBody += '<td>' + student['fine'] +
-                        '</td><input type="hidden" name="student_fine[' + student['id'] + ']" value="' +
-                        student['fine'] +
-                        '"/><input type="hidden" id="student_fine_id" name="student_fine_id[' + student[
-                            'id'] + ']" value="' + student_fine_ids + '"/>';
-                    tableBody += '<td>' + student['discount'] +
-                        '</td><input type="hidden" name="student_discount[' + student['id'] + ']" value="' +
-                        student['discount'] +
-                        '"/><input type="hidden" id="student_discount_id" name="student_discount_id[' +
-                        student['id'] + ']" value="' + student_discount_ids + '"/>';
-                    tableBody += '<td>' + student['scholarship'] +
-                        '</td><input type="hidden" name="student_scholarship[' + student['id'] +
-                        ']" value="' + student['scholarship'] +
-                        '"/><input type="hidden" id="student_scholarship_id" name="student_scholarship_id[' +
-                        student['id'] + ']" value="' + student_scholarship_ids + '"/>';
-                    tableBody += '<td class="item_total_fee">' + student['total_fee'] +
-                        '</td><input type="hidden" id="hidden_total_fee" name="student_total_fee[' +
-                        student['id'] + ']" value="' + student['total_fee'] + '"/>';
-                    tableBody += '<td>' +
-                        '<a data-toggle="modal" href="#modal_add_item" class="btn btn-success mb-md" id="edit_button" onclick="fill_modal(' +
-                        student["id"] + ');">Edit</a>' + '</td>';
+                    tableBody += '<td>' + student['name'] + '</td>';
+
+                    let studentFees = student['fee_names'];
+                    if (studentFees.length > 0) {
+                        for (let i = 0; i < studentFees.length; i++) {
+                            tableBody += '<td>' + studentFees[i] + '</td>';
+                        }
+                    }
+
+                    let studentFines = student['fines'];
+                    if (studentFines.length > 0) {
+                        for (let i = 0; i < studentFines.length; i++) {
+                            tableBody += '<td>' + studentFines[i] + '</td>';
+                        }
+                    }
+
+                    let studentDiscounts = student['discounts'];
+                    if (studentDiscounts.length > 0) {
+                        for (let i = 0; i < studentDiscounts.length; i++) {
+                            tableBody += '<td>' + studentDiscounts[i] + '</td>';
+                        }
+                    }
+
+                    let studentScholarships = student['scholarships'];
+                    if (studentScholarships.length > 0) {
+                        for (let i = 0; i < studentScholarships.length; i++) {
+                            tableBody += '<td>' + studentScholarships[i] + '</td>';
+                        }
+                    }
+
+                    tableBody += '<td>' + student['total_fee_for_student'] + '</td>';
+                    tableBody += '<td><button>Save</button></td>';
                     tableBody += '</tr>';
-                    count++;
                 });
                 return tableBody;
             }
+
+            /*function populateStudents(students) {
+            let tableBody = '';
+            let count = 0;
+            students.forEach(function(student) {
+                let student_fee_ids = student['fee_ids'].length > 0 ? student['fee_ids'] : 0;
+                let student_fine_ids = student['fine_ids'].length > 0 ? student['fine_ids'] : 0;
+                let student_discount_ids = student['discount_ids'].length > 0 ? student[
+                    'discount_ids'] : 0;
+                let student_scholarship_ids = student['scholarship_ids'].length > 0 ? student[
+                    'scholarship_ids'] : 0;
+                tableBody += '<tr>';
+                tableBody += '<td>' + student['name'] + '</td><input type="hidden" name="student_id[' +
+                    count + ']" value="' + student['id'] + '"/>';
+                tableBody += '<td>' + student['fee'] + '</td><input type="hidden" name="student_fee[' +
+                    student['id'] + ']" value="' + student['fee'] +
+                    '"/><input type="hidden" id="student_fee_id" name="student_fee_id[' + student[
+                        'id'] + ']" value="' + student_fee_ids + '"/>';
+                tableBody += '<td>' + student['fine'] +
+                    '</td><input type="hidden" name="student_fine[' + student['id'] + ']" value="' +
+                    student['fine'] +
+                    '"/><input type="hidden" id="student_fine_id" name="student_fine_id[' + student[
+                        'id'] + ']" value="' + student_fine_ids + '"/>';
+                tableBody += '<td>' + student['discount'] +
+                    '</td><input type="hidden" name="student_discount[' + student['id'] + ']" value="' +
+                    student['discount'] +
+                    '"/><input type="hidden" id="student_discount_id" name="student_discount_id[' +
+                    student['id'] + ']" value="' + student_discount_ids + '"/>';
+                tableBody += '<td>' + student['scholarship'] +
+                    '</td><input type="hidden" name="student_scholarship[' + student['id'] +
+                    ']" value="' + student['scholarship'] +
+                    '"/><input type="hidden" id="student_scholarship_id" name="student_scholarship_id[' +
+                    student['id'] + ']" value="' + student_scholarship_ids + '"/>';
+                tableBody += '<td class="item_total_fee">' + student['total_fee'] +
+                    '</td><input type="hidden" id="hidden_total_fee" name="student_total_fee[' +
+                    student['id'] + ']" value="' + student['total_fee'] + '"/>';
+                tableBody += '<td>' +
+                    '<a data-toggle="modal" href="#modal_add_item" class="btn btn-success mb-md" id="edit_button" onclick="fill_modal(' +
+                    student["id"] + ');">Edit</a>' + '</td>';
+                tableBody += '</tr>';
+                count++;
+            });
+            return tableBody;
+        }*/
 
         });
 
