@@ -139,14 +139,11 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group row">
+                                    <div class="form-group row" id="section_section">
                                         <label for="remarks" class="col-sm-4"><span class="h6">Section</span></label>
                                         <div class="col-sm-8">
                                             <select id="section_id" name="section_id" class="custom-select">
                                                 <option value="0">--</option>
-                                                {foreach $sections as $section}
-                                                    <option value="{$section->id}">{$section->name}</option>
-                                                {/foreach}
                                             </select>
                                         </div>
                                     </div>
@@ -423,15 +420,19 @@
             let is_class_chosen = false;
             let is_billing_period_chosen = false;
             let is_faculty_populated = false;
+            let is_section_populated = false;
             let is_faculty_chosen = false;
+            let is_section_chosen = false;
             let is_category_chosen = false;
             const btn_generate = $("#btn_generate");
             const student_billing_section = $("#student_billing_section");
             const faculty_section = $("#faculty_section");
+            const section_section = $("#section_section");
             const sub_category_section = $("#sub_category_section");
 
             student_billing_section.hide();
             faculty_section.hide();
+            section_section.hide();
             sub_category_section.hide();
             $(".progress").hide();
             $("#emsg").hide();
@@ -444,6 +445,7 @@
                 is_class_chosen = class_id[0].value != 0;
                 if (is_class_chosen) {
                     getFacultyForClass(class_id[0].value);
+                    getSectionForClass(class_id[0].value);
                 }
                 checkToRemoveDisabled();
             });
@@ -551,10 +553,35 @@
                     });
             }
 
+            function getSectionForClass(class_id) {
+                $.post(base_url + 'generate_bills/app/getSectionForClass/', { class_id: class_id },
+                    function(data, status) {
+                        let sections = JSON.parse(data);
+                        if (sections.length > 0) {
+                            populateSectionSelectList(sections);
+                            is_section_populated = true;
+                            section_section.show();
+                        } else {
+                            section_id.html('<option value="0">--</option>');
+                            is_section_populated = false;
+                            section_section.hide();
+                        }
+                        checkToRemoveDisabled();
+                    });
+            }
+
             function populateFacultySelectList(faculties) {
                 faculty_id.html('<option value="0">--</option>');
                 faculties.forEach(function(faculty) {
                     faculty_id.append('<option value="' + faculty['id'] + '">' + faculty['name'] +
+                        '</option>');
+                });
+            }
+
+            function populateSectionSelectList(sections) {
+                section_id.html('<option value="0">--</option>');
+                sections.forEach(function(section) {
+                    section_id.append('<option value="' + section['id'] + '">' + section['name'] +
                         '</option>');
                 });
             }

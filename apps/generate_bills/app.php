@@ -146,6 +146,12 @@ switch ($action) {
         echo json_encode($sub_categories);
         break;
 
+    case 'getSectionForClass':
+        $data = $request->all();
+        $sections = AppSection::where('class_id', $data['class_id'])->get();
+        echo json_encode($sections);
+        break;
+
     case 'updateTotalFee':
         $data = $request->all();
         $billing_update = new BillingUpdate;
