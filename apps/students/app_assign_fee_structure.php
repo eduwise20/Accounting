@@ -22,13 +22,11 @@ switch ($action) {
     case 'add':
         $classes = AppClass::all();
         $student_types = AppStudentType::all();
-        $sections = AppSection::all();
         $categories = Category::all();
         view('app_wrapper', [
             '_include' => 'assign_fee/add',
             'classes' => $classes,
             'student_types' => $student_types,
-            'sections' => $sections,
             'categories' => $categories,
         ]);
         break;
@@ -37,14 +35,17 @@ switch ($action) {
         $validator = new Validator();
         $data = $request->all();
 
-        $validation = $validator->validate($data, [
-            'class_id' => 'required|not_in:0',
-            'student_type_id' => 'required|not_in:0'
-        ],
+        $validation = $validator->validate(
+            $data,
+            [
+                'class_id' => 'required|not_in:0',
+                'student_type_id' => 'required|not_in:0'
+            ],
             [
                 'class_id:not_in' => 'The Class is required',
                 'student_type_id:not_in' => 'The Student type is required'
-            ]);
+            ]
+        );
 
         if ($validation->fails()) {
             $errors = $validation->errors();
@@ -98,7 +99,6 @@ switch ($action) {
                             $value->delete();
                         }
                     }
-
                 } else if ($data['assign_radio_button'] == 'multiple_fees') {
 
                     $array_of_fee_name_id = array();
@@ -135,7 +135,6 @@ switch ($action) {
                             $value->delete();
                         }
                     }
-
                 }
             } else {
                 if ($data['assign_radio_button'] == 'multiple_students') {
@@ -156,7 +155,6 @@ switch ($action) {
             }
 
             echo $fee_name_student->id;
-
         }
         break;
 
@@ -164,6 +162,12 @@ switch ($action) {
         $data = $request->all();
         $faculties = AppFaculty::where('class_id', $data['class_id'])->get();
         echo json_encode($faculties);
+        break;
+
+    case 'getSectionForClass':
+        $data = $request->all();
+        $sections = AppSection::where('class_id', $data['class_id'])->get();
+        echo json_encode($sections);
         break;
 
     case 'getSubCategoriesForCategory':
@@ -181,6 +185,9 @@ switch ($action) {
         ];
         if ($data['faculty_id'] != 0) {
             $where['faculty_id'] = $data['faculty_id'];
+        }
+        if ($data['section_id'] != 0) {
+            $where['section_id'] = $data['section_id'];
         }
         if ($data['category_id'] != 0) {
             $where['category_id'] = $data['category_id'];

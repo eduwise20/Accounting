@@ -78,6 +78,15 @@
                                         </div>
                                     </div>
 
+                                    <div class="form-group row" id="section_section">
+                                        <label for="section_id" class="col-sm-4"><span class="h6">Section</span><span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <select id="section_id" name="section_id" class="custom-select">
+                                                <option value="0">--</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="form-group row" id="faculty_section">
                                         <label for="faculty_id" class="col-sm-4"><span class="h6">Faculty</span><span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
@@ -287,24 +296,29 @@
             const class_id = $("#class_id");
             const student_type_id = $("#student_type_id");
             const faculty_id = $("#faculty_id");
+            const section_id = $("#section_id");
             const category_id = $("#category_id");
             const sub_category_id = $("#sub_category_id");
             const billing_period_id = $("#billing_period_id");
             let is_class_chosen = false;
             let is_student_type_chosen = false;
             let is_faculty_populated = false;
+            let is_section_populated = false;
             let is_faculty_chosen = false;
+            let is_section_chosen = false;
             let is_category_chosen = false;
             let is_billing_period_chosen = false;
             const btn_assign = $("#btn_assign");
             const student_fine_section = $("#student_fine_section");
             const faculty_section = $("#faculty_section");
+            const section_section = $("#section_section");
             const sub_category_section = $("#sub_category_section");
             const student_and_fine_dropdown = $("#student_and_fine_dropdown");
             const submit_button_section = $("#submit_button_section");
 
             student_fine_section.hide();
             faculty_section.hide();
+            section_section.hide();
             sub_category_section.hide();
             submit_button_section.hide();
             $(".progress").hide();
@@ -319,6 +333,7 @@
                 is_class_chosen = class_id[0].value != 0;
                 if (is_class_chosen) {
                     getFacultyForClass(class_id[0].value);
+                    getSectionForClass(class_id[0].value);
                 }
                 checkToRemoveDisabled();
             });
@@ -330,6 +345,11 @@
 
             faculty_id.change(function(){
                 is_faculty_chosen = faculty_id[0].value != 0;
+                checkToRemoveDisabled();
+            });
+
+            section_id.change(function(){
+                is_section_chosen = section_id[0].value != 0;
                 checkToRemoveDisabled();
             });
 
@@ -407,6 +427,24 @@
                     });
             }
 
+            function getSectionForClass(class_id) {
+                $.post(base_url + 'fines/app_assign_fine/getSectionForClass/',
+                    { class_id : class_id },
+                    function (data, status){
+                        let sections = JSON.parse(data);
+                        if (sections.length > 0) {
+                            populateSectionSelectList(sections);
+                            is_section_populated = true;
+                            section_section.show();
+                        } else {
+                            $("#section_id").html('<option value="0">--</option>');
+                            is_section_populated = false;
+                            section_section.hide();
+                        }
+                        checkToRemoveDisabled();
+                    });
+            }
+
             function getSubCategoriesForCategory(category_id) {
                 $.post(base_url + 'fines/app_assign_fine/getSubCategoriesForCategory/',
                     { category_id : category_id },
@@ -427,6 +465,13 @@
                 $("#faculty_id").html('<option value="0">--</option>');
                 faculties.forEach(function(faculty) {
                     $("#faculty_id").append('<option value="' + faculty['id'] + '">' + faculty['name'] + '</option>');
+                });
+            }
+
+            function populateSectionSelectList(sections) {
+                $("#section_id").html('<option value="0">--</option>');
+                sections.forEach(function(section) {
+                    $("#section_id").append('<option value="' + section['id'] + '">' + section['name'] + '</option>');
                 });
             }
 
@@ -461,6 +506,7 @@
                     class_id : class_id[0].value,
                     student_type_id : student_type_id[0].value,
                     faculty_id : faculty_id[0].value,
+                    section_id : section_id[0].value,
                 };
                 if (category_id.length > 0) {
                     postValue.category_id = category_id[0].value;
