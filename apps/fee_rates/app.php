@@ -31,7 +31,7 @@ switch ($action) {
             '_include' => 'add',
             'fee_names' => $fee_names,
             'classes' => $classes,
-            'fiscal_year' => $fiscal_years[0],
+            'fiscal_year' => count($fiscal_years) > 0 ? $fiscal_years[0] : 0,
             'student_types' => $student_types,
             'categories' => $categories,
             'sub_categories' => $sub_categories,
