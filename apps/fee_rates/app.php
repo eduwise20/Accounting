@@ -169,8 +169,10 @@ switch ($action) {
             }
         }
         $fee_rate = AppFeeRate::where($where)->get();
-        $fee_structures = AppFeeStructure::where('fee_rate_id', $fee_rate[0]->id)->get();
-        echo json_encode($fee_structures);
+        if(count($fee_rate) > 0) {
+            $fee_structures = AppFeeStructure::where('fee_rate_id', $fee_rate[0]->id)->get();
+            echo json_encode($fee_structures);
+        }
         break;
 
     case 'getSubCategoriesForCategory':
