@@ -49,13 +49,17 @@
                             <div class="row">
                                 <div class="col-md-12 col-sm-12">
 
-                                    <div class="form-group row">
-                                        <label for="remarks" class="col-sm-4"><span class="h6">Fiscal Year</span><span class="text-danger">*</span></label>
-                                        <div class="col-sm-8">
-                                            <input type="hidden" id="fiscal_year_id" name="fiscal_year_id" value="{$fiscal_year->id}"/>
-                                            <p>{$fiscal_year->name}</p>
+                                        <div class="form-group row">
+                                            <label for="remarks" class="col-sm-4"><span class="h6">Fiscal Year</span><span class="text-danger">*</span></label>
+                                            <div class="col-sm-8">
+                                                {if !isset($fiscal_year->id)} 
+                                                    <p>No Fiscal Year Selected or Active.</p>
+                                                {else}
+                                                    <input type="hidden" id="fiscal_year_id" name="fiscal_year_id" value="{$fiscal_year->id}"/>
+                                                    <p>{$fiscal_year->name}</p> 
+                                                {/if}
+                                            </div>
                                         </div>
-                                    </div>
 
                                     <div class="form-group row">
                                         <label for="remarks" class="col-sm-4"><span class="h6">Class</span><span class="text-danger">*</span></label>
