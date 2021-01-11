@@ -426,7 +426,6 @@
 
             function checkToRemoveDisabled() {
                 student_billing_section.hide();
-                $("#fee_rate_info_form").trigger("reset");
                 if (is_class_chosen && is_billing_period_chosen) {
                     if (is_faculty_populated) {
                         if (is_faculty_chosen) {
@@ -545,17 +544,16 @@
                             let jsonData = JSON.parse(data);
                             populateTableHead(jsonData);
                             student_billing_section.show();
-                            students = jsonData['students'];
-                            let tableBody = populateStudents(students);
+                            let students = jsonData['students'];
+                            let fees = jsonData['fees'];
+                            let tableBody = populateStudents(students, fees);
                             $('#clx_datatable').dataTable({
                                 responsive: true,
                                 lengthChange: false,
-                                dom:
-                                    "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
                                     "<'row'<'col-sm-12'tr>>" +
                                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                                buttons: [
-                                    {
+                                buttons: [{
                                         extend: 'pdfHtml5',
                                         text: 'PDF',
                                         titleAttr: 'Generate PDF',
@@ -587,28 +585,11 @@
                                     }
                                 ]
                             });
-
                             $('.has-tooltip').tooltip();
+
                             var table = $("#clx_datatable").DataTable();
+                            table.clear().draw();
                             table.rows.add($(tableBody)).draw();
-                            /*let students = JSON.parse(data);
-                        if (students.length > 0) {
-                            let tableBody = populateStudents(students);
-                            student_billing_section.show();
-                            var table = $("#clx_datatable").DataTable();
-                            table.rows.add($(tableBody)).draw();
-                            $('#ibox_form').unblock();
-                            var body = $("html, body");
-                            body.animate({ scrollTop: 0 }, '1000', 'swing');
-                            $("#emsgbody").html("");
-                            $("#emsg").hide("slow");
-                        } else {
-                            $('#ibox_form').unblock();
-                            var body = $("html, body");
-                            body.animate({ scrollTop: 0 }, '1000', 'swing');
-                            $("#emsgbody").html('No student found!');
-                            $("#emsg").show("slow");
-                        }*/
                         }
                     });
 
@@ -653,90 +634,60 @@
                 $("#student_billing_table_head").html(tableHead);
             }
 
-            function populateStudents(students) {
+            function populateStudents(students, fees) {
                 let tableBody = '';
                 students.forEach(function(student) {
                     tableBody += '<tr>';
                     tableBody += '<td>' + student['name'] + '</td>';
 
-                    let studentFees = student['fee_names'];
-                    if (studentFees.length > 0) {
-                        for (let i = 0; i < studentFees.length; i++) {
-                            tableBody += '<td>' + studentFees[i] + '</td>';
-                        }
+                    if (fees.length > 0) {
+                        fees.forEach(function(fee) {
+
+                            let studentFees = student['fee_names'];
+                            let studentFeesCount = Object.keys(studentFees).length;
+                            if (studentFeesCount > 0) {
+                                tableBody += '<td><input type="text" class="form-control" value="' +
+                                    studentFees[fee['id']] + '" /></td>';
+                            }
+                        });
+                        fees.forEach(function(fee) {
+                            let studentFines = student['fines'];
+                            let studentFinesCount = Object.keys(studentFines).length;
+                            if (studentFinesCount > 0) {
+                                tableBody +=
+                                    '<td><input type="text" class="form-control" value="' +
+                                    studentFines[fee['id']] + '" /></td>';
+                            }
+                        });
+                        fees.forEach(function(fee) {
+                            let studentDiscounts = student['discounts'];
+                            let studentDiscountsCount = Object.keys(studentDiscounts).length;
+                            if (studentDiscounts > 0) {
+                                tableBody +=
+                                    '<td><input type="text" class="form-control" value="' +
+                                    studentDiscounts[fee['id']] + '" /></td>';
+
+                            }
+                        });
+                        fees.forEach(function(fee) {
+                            let studentScholarships = student['scholarships'];
+                            let studentScholarshipsCount = Object.keys(studentScholarships).length;
+                            if (studentScholarshipsCount > 0) {
+                                tableBody +=
+                                    '<td><input type="text" class="form-control" value="' +
+                                    studentScholarships[fee['id']] + '" /></td>';
+
+                            }
+                        });
                     }
 
-                    let studentFines = student['fines'];
-                    if (studentFines.length > 0) {
-                        for (let i = 0; i < studentFines.length; i++) {
-                            tableBody += '<td>' + studentFines[i] + '</td>';
-                        }
-                    }
-
-                    let studentDiscounts = student['discounts'];
-                    if (studentDiscounts.length > 0) {
-                        for (let i = 0; i < studentDiscounts.length; i++) {
-                            tableBody += '<td>' + studentDiscounts[i] + '</td>';
-                        }
-                    }
-
-                    let studentScholarships = student['scholarships'];
-                    if (studentScholarships.length > 0) {
-                        for (let i = 0; i < studentScholarships.length; i++) {
-                            tableBody += '<td>' + studentScholarships[i] + '</td>';
-                        }
-                    }
-
-                    tableBody += '<td>' + student['total_fee_for_student'] + '</td>';
-                    tableBody += '<td><button>Save</button></td>';
+                    tableBody += '<td><input type="text" class="form-control" value="' + student[
+                        'actual_fee_amount'] + '" /></td>';
+                    tableBody += '<td><button class="btn btn-success">Save</button></td>';
                     tableBody += '</tr>';
                 });
                 return tableBody;
             }
-
-            /*function populateStudents(students) {
-            let tableBody = '';
-            let count = 0;
-            students.forEach(function(student) {
-                let student_fee_ids = student['fee_ids'].length > 0 ? student['fee_ids'] : 0;
-                let student_fine_ids = student['fine_ids'].length > 0 ? student['fine_ids'] : 0;
-                let student_discount_ids = student['discount_ids'].length > 0 ? student[
-                    'discount_ids'] : 0;
-                let student_scholarship_ids = student['scholarship_ids'].length > 0 ? student[
-                    'scholarship_ids'] : 0;
-                tableBody += '<tr>';
-                tableBody += '<td>' + student['name'] + '</td><input type="hidden" name="student_id[' +
-                    count + ']" value="' + student['id'] + '"/>';
-                tableBody += '<td>' + student['fee'] + '</td><input type="hidden" name="student_fee[' +
-                    student['id'] + ']" value="' + student['fee'] +
-                    '"/><input type="hidden" id="student_fee_id" name="student_fee_id[' + student[
-                        'id'] + ']" value="' + student_fee_ids + '"/>';
-                tableBody += '<td>' + student['fine'] +
-                    '</td><input type="hidden" name="student_fine[' + student['id'] + ']" value="' +
-                    student['fine'] +
-                    '"/><input type="hidden" id="student_fine_id" name="student_fine_id[' + student[
-                        'id'] + ']" value="' + student_fine_ids + '"/>';
-                tableBody += '<td>' + student['discount'] +
-                    '</td><input type="hidden" name="student_discount[' + student['id'] + ']" value="' +
-                    student['discount'] +
-                    '"/><input type="hidden" id="student_discount_id" name="student_discount_id[' +
-                    student['id'] + ']" value="' + student_discount_ids + '"/>';
-                tableBody += '<td>' + student['scholarship'] +
-                    '</td><input type="hidden" name="student_scholarship[' + student['id'] +
-                    ']" value="' + student['scholarship'] +
-                    '"/><input type="hidden" id="student_scholarship_id" name="student_scholarship_id[' +
-                    student['id'] + ']" value="' + student_scholarship_ids + '"/>';
-                tableBody += '<td class="item_total_fee">' + student['total_fee'] +
-                    '</td><input type="hidden" id="hidden_total_fee" name="student_total_fee[' +
-                    student['id'] + ']" value="' + student['total_fee'] + '"/>';
-                tableBody += '<td>' +
-                    '<a data-toggle="modal" href="#modal_add_item" class="btn btn-success mb-md" id="edit_button" onclick="fill_modal(' +
-                    student["id"] + ');">Edit</a>' + '</td>';
-                tableBody += '</tr>';
-                count++;
-            });
-            return tableBody;
-        }*/
 
         });
 
