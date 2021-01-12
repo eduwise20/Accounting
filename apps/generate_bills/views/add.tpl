@@ -333,10 +333,6 @@
 
 
     <script>
-        $(function() {
-
-
-        });
 
         $(document).ready(function() {
 
@@ -542,14 +538,15 @@
                     function(data, status) {
                         if (data) {
                             let jsonData = JSON.parse(data);
-                            populateTableHead(jsonData);
+                            let tableHead = populateTableHead(jsonData);
                             student_billing_section.show();
                             let students = jsonData['students'];
                             let fees = jsonData['fees'];
                             let tableBody = populateStudents(students, fees);
-                            $('#clx_datatable').dataTable({
+                            var table = $('#clx_datatable').DataTable({
                                 responsive: true,
-                                lengthChange: false,
+                                lengthChange: true,
+                                bDestroy: true, 
                                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
                                     "<'row'<'col-sm-12'tr>>" +
                                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
@@ -586,8 +583,6 @@
                                 ]
                             });
                             $('.has-tooltip').tooltip();
-
-                            var table = $("#clx_datatable").DataTable();
                             table.clear().draw();
                             table.rows.add($(tableBody)).draw();
                         }
@@ -632,6 +627,7 @@
                 tableHead += '</tr>';
 
                 $("#student_billing_table_head").html(tableHead);
+                return tableHead;
             }
 
             function populateStudents(students, fees) {
