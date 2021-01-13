@@ -269,8 +269,8 @@
             sub_category_id.change(function(){
                 if(sub_category_id[0].value != 0){
                     enableAssignButton();
-                    checkToRemoveDisabled();
                 }
+                checkToRemoveDisabled();
             });
 
             function checkToRemoveDisabled() {

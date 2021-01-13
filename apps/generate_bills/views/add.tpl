@@ -333,7 +333,7 @@
 
 
     <script>
-
+        var table;
         $(document).ready(function() {
 
             const fiscal_year_id = $("#fiscal_year_id");
@@ -416,8 +416,8 @@
             sub_category_id.change(function() {
                 if (sub_category_id[0].value != 0) {
                     enableGenerateButton();
-                    checkToRemoveDisabled();
                 }
+                checkToRemoveDisabled();
             });
 
             function checkToRemoveDisabled() {
@@ -542,11 +542,15 @@
                             student_billing_section.show();
                             let students = jsonData['students'];
                             let fees = jsonData['fees'];
-                            let tableBody = populateStudents(students, fees);
-                            var table = $('#clx_datatable').DataTable({
+                            let discounts = jsonData['discounts'];
+                            let scholarships = jsonData['scholarships'];
+                            let fines = jsonData['fines'];
+                            let tableBody = populateStudents(students, fees, discounts, scholarships,
+                                fines);
+                            table = $('#clx_datatable').DataTable({
                                 responsive: true,
                                 lengthChange: true,
-                                bDestroy: true, 
+                                bDestroy: true,
                                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
                                     "<'row'<'col-sm-12'tr>>" +
                                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
@@ -630,56 +634,65 @@
                 return tableHead;
             }
 
-            function populateStudents(students, fees) {
+            function populateStudents(students, fees, discounts, scholarships, fines) {
                 let tableBody = '';
                 students.forEach(function(student) {
-                    tableBody += '<tr>';
-                    tableBody += '<td>' + student['name'] + '</td>';
+                    tableBody += '<tr id="row[' + student['id'] + ']">';
+                    tableBody += '<td class="sorting_1 dtr-control row-data">' + student['name'] + '</td>';
 
                     if (fees.length > 0) {
                         fees.forEach(function(fee) {
-
                             let studentFees = student['fee_names'];
                             let studentFeesCount = Object.keys(studentFees).length;
                             if (studentFeesCount > 0) {
-                                tableBody += '<td><input type="text" class="form-control" value="' +
+                                tableBody +=
+                                    '<td class="row-data"><input type="text" class="form-control" value="' +
                                     studentFees[fee['id']] + '" /></td>';
-                            }
-                        });
-                        fees.forEach(function(fee) {
-                            let studentFines = student['fines'];
-                            let studentFinesCount = Object.keys(studentFines).length;
-                            if (studentFinesCount > 0) {
-                                tableBody +=
-                                    '<td><input type="text" class="form-control" value="' +
-                                    studentFines[fee['id']] + '" /></td>';
-                            }
-                        });
-                        fees.forEach(function(fee) {
-                            let studentDiscounts = student['discounts'];
-                            let studentDiscountsCount = Object.keys(studentDiscounts).length;
-                            if (studentDiscounts > 0) {
-                                tableBody +=
-                                    '<td><input type="text" class="form-control" value="' +
-                                    studentDiscounts[fee['id']] + '" /></td>';
-
-                            }
-                        });
-                        fees.forEach(function(fee) {
-                            let studentScholarships = student['scholarships'];
-                            let studentScholarshipsCount = Object.keys(studentScholarships).length;
-                            if (studentScholarshipsCount > 0) {
-                                tableBody +=
-                                    '<td><input type="text" class="form-control" value="' +
-                                    studentScholarships[fee['id']] + '" /></td>';
-
                             }
                         });
                     }
 
-                    tableBody += '<td><input type="text" class="form-control" value="' + student[
-                        'actual_fee_amount'] + '" /></td>';
-                    tableBody += '<td><button class="btn btn-success">Save</button></td>';
+                    if (fines.length > 0) {
+                        fines.forEach(function(fine) {
+                            let studentFines = student['fines'];
+                            let studentFinesCount = Object.keys(studentFines).length;
+                            if (studentFinesCount > 0) {
+                                tableBody +=
+                                    '<td class="row-data"><input type="text" class="form-control" value="' +
+                                    studentFines[fine['id']] + '" /></td>';
+                            }
+                        });
+                    }
+                    if (discounts.length > 0) {
+                        discounts.forEach(function(discount) {
+                            let studentDiscounts = student['discounts'];
+                            let studentDiscountsCount = Object.keys(studentDiscounts).length;
+                            if (studentDiscountsCount > 0) {
+                                tableBody +=
+                                    '<td class="row-data"><input type="text" class="form-control" value="' +
+                                    studentDiscounts[discount['id']] + '" /></td>';
+                            }
+                        });
+                    }
+
+                    if (scholarships.length > 0) {
+                        scholarships.forEach(function(scholarship) {
+                            let studentScholarships = student['scholarships'];
+                            let studentScholarshipsCount = Object.keys(studentScholarships).length;
+                            if (studentScholarshipsCount > 0) {
+                                tableBody +=
+                                    '<td class="row-data"><input type="text" class="form-control" value="' +
+                                    studentScholarships[scholarship['id']] + '" /></td>';
+                            }
+                        });
+                    }
+
+
+                    tableBody += '<td class="row-data"><input type="text" class="form-control" value="' +
+                        student['actual_fee_amount'].toFixed(2) + '" /></td>';
+                    tableBody +=
+                        '<td><button type="button" class="btn btn-success btn_save_bill" id="' +
+                        student['id'] + '"/>Save</button></td>';
                     tableBody += '</tr>';
                 });
                 return tableBody;
@@ -731,5 +744,26 @@
                     }
                 });
         });
+
+        /*$("#btn_save_bill").click(function(e){
+        e.preventDefault();
+        let rowId = $(this).closest("tr").attr("id");
+        console.log("Row Id : " + rowId);
+    });*/
+
+        $(document).on('click', '.btn_save_bill', function(e) {
+            //let rowId = e.target.parentNode.parentNode.id;
+            let row = $("#row[" + e.target.id + "]");
+            debugger;
+            console.log("Here teset");
+            
+        })
+
+        /*function updateBill() {
+        let rowId = event.target.parentNode.parentNode.parentNode.id;
+        console.log("Row Id : " + rowId);
+        let data = document.getElementById(rowId).querySelectorAll(".row-data");
+        console.log("Data : " + data);
+    }*/
     </script>
 {/block}

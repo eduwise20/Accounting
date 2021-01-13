@@ -165,39 +165,30 @@ switch ($action) {
         echo $billing_update->id;
         break;
 
+    case 'updateBill':
+        $data = $request->all();
+        print_r($data);
+        break;
+
     case 'get_students_with_bill_detail':
         $data = $request->all();
         $where = [
             'class_id' => $data['class_id'],
-            'student_type_id' => $data['student_type_id']
+            'student_type_id' => $data['student_type_id'],
+            'faculty_id' => $data['faculty_id'],
+            'section_id' => $data['section_id'],
+            'category_id' => $data['category_id'],
+            'sub_category_id' => $data['sub_category_id'],
         ];
-        if ($data['faculty_id'] != 0) {
-            $where['faculty_id'] = $data['faculty_id'];
-        }
-        if ($data['section_id'] != 0) {
-            $where['section_id'] = $data['section_id'];
-        }
-        if ($data['category_id'] != 0) {
-            $where['category_id'] = $data['category_id'];
-            if ($data['sub_category_id'] != 0) {
-                $where['sub_category_id'] = $data['sub_category_id'];
-            }
-        }
         $students = AppStudent::where($where)->get();
 
         $fee_rate_where = [
             'class_id' => $data['class_id'],
-            'student_type_id' => $data['student_type_id']
+            'student_type_id' => $data['student_type_id'],
+            'faculty_id' => $data['faculty_id'],
+            'category_id' => $data['category_id'],
+            'sub_category_id' => $data['sub_category_id'],
         ];
-        if ($data['faculty_id'] != 0) {
-            $fee_rate_where['faculty_id'] = $data['faculty_id'];
-        }
-        if ($data['category_id'] != 0) {
-            $fee_rate_where['category_id'] = $data['category_id'];
-            if ($data['sub_category_id'] != 0) {
-                $fee_rate_where['sub_category_id'] = $data['sub_category_id'];
-            }
-        }
         $fee_rates = AppFeeRate::where($fee_rate_where)->get();
 
         $all_fees = AppFeeName::all();
@@ -206,16 +197,6 @@ switch ($action) {
         $all_scholarships = AppScholarship::all();
 
         if (sizeof($students) > 0) {
-            foreach ($students as $student) {
-                $billing_update = BillingUpdate::where([
-                    'student_id' => $student->id,
-                    'billing_period_id' => $data['billing_period_id'],
-                    'fiscal_year_id' => $data['fiscal_year_id']
-                ])->orderBy('created_at', 'desc')->first();
-                if ($billing_update != null) {
-                    $student->total_fee = $billing_update->to_fee;
-                }
-            }
             $fee_names_for_student = array();
             foreach ($students as $student) {
                 $student->fee_names = array();
@@ -244,15 +225,69 @@ switch ($action) {
                         }
                     }
                 }
-                $student->fee_names = $student_fee_names;
 
                 $total_fee_for_student = 0;
 
                 if (sizeof($student_fee_names) > 0) {
-                    foreach ($student_fee_names as $student_fee_name) {
-                        $total_fee_for_student += $student_fee_name;
+                    foreach ($student_fee_names as $fee_id => $student_fee_name) {
+                        $billing_fee_saved = BillingFee::where([
+                            'class_id' => $data['class_id'],
+                            'section_id' => $data['section_id'],
+                            'faculty_id' => $data['faculty_id'],
+                            'student_type_id' => $data['student_type_id'],
+                            'category_id' => $data['category_id'],
+                            'sub_category_id' => $data['sub_category_id'],
+                            'billing_period_id' => $data['billing_period_id'],
+                            'fee_id' => $fee_id,
+                            'student_id' => $student->id,
+                            'is_saved' => 1,
+                        ])->orderBy('created_at', 'desc')->first();
+
+                        if ($billing_fee_saved) {
+                            $student_fee_names[$fee_id] = $billing_fee_saved->to_fee;
+                            $total_fee_for_student += $billing_fee_saved->to_fee;
+                        } else {
+                            $total_fee_for_student += $student_fee_name;
+                            $billing_fee_not_saved = BillingFee::where([
+                                'class_id' => $data['class_id'],
+                                'section_id' => $data['section_id'],
+                                'faculty_id' => $data['faculty_id'],
+                                'student_type_id' => $data['student_type_id'],
+                                'category_id' => $data['category_id'],
+                                'sub_category_id' => $data['sub_category_id'],
+                                'billing_period_id' => $data['billing_period_id'],
+                                'fee_id' => $fee_id,
+                                'student_id' => $student->id,
+                                'is_saved' => 0,
+                            ])->orderBy('created_at', 'desc')->first();
+
+                            if ($billing_fee_not_saved) {
+                                $billing_fee_not_saved->from_fee = 0;
+                                $billing_fee_not_saved->to_fee = $student_fee_name;
+                                $billing_fee_not_saved->creator_id = $user->id;
+                                $billing_fee_not_saved->save();
+                            } else {
+                                $billing_fee = new BillingFee;
+                                $billing_fee->class_id = $data['class_id'];
+                                $billing_fee->section_id = $data['section_id'];
+                                $billing_fee->faculty_id = $data['faculty_id'];
+                                $billing_fee->student_type_id = $data['student_type_id'];
+                                $billing_fee->category_id = $data['category_id'];
+                                $billing_fee->sub_category_id = $data['sub_category_id'];
+                                $billing_fee->billing_period_id = $data['billing_period_id'];
+                                $billing_fee->fee_id = $fee_id;
+                                $billing_fee->student_id = $student->id;
+                                $billing_fee->from_fee = 0;
+                                $billing_fee->to_fee = $student_fee_name;
+                                $billing_fee->creator_id = $user->id;
+                                $billing_fee->is_saved = 0;
+                                $billing_fee->save();
+                            }
+                        }
                     }
                 }
+                $student->fee_names = $student_fee_names;
+
                 $student->total_fee_for_student = $total_fee_for_student;
                 $student->actual_fee_amount = $total_fee_for_student;
 
@@ -297,12 +332,66 @@ switch ($action) {
                         }
                     }
                 }
-                $student->discounts = $student_discounts;
+
                 if (sizeof($student_discounts)) {
-                    foreach ($student_discounts as $student_discount) {
-                        $student->actual_fee_amount -= $student_discount;
+                    foreach ($student_discounts as $discount_id => $student_discount) {
+                        $billing_discount_saved = BillingDiscount::where([
+                            'class_id' => $data['class_id'],
+                            'section_id' => $data['section_id'],
+                            'faculty_id' => $data['faculty_id'],
+                            'student_type_id' => $data['student_type_id'],
+                            'category_id' => $data['category_id'],
+                            'sub_category_id' => $data['sub_category_id'],
+                            'billing_period_id' => $data['billing_period_id'],
+                            'discount_id' => $discount_id,
+                            'student_id' => $student->id,
+                            'is_saved' => 1,
+                        ])->orderBy('created_at', 'desc')->first();
+
+                        if ($billing_discount_saved) {
+                            $student_discounts[$discount_id] = $billing_discount_saved->to_discount;
+                            $student->actual_fee_amount -= $billing_discount_saved->to_discount;
+                        } else {
+                            $student->actual_fee_amount -= $student_discount;
+                            $billing_discount_not_saved = BillingDiscount::where([
+                                'class_id' => $data['class_id'],
+                                'section_id' => $data['section_id'],
+                                'faculty_id' => $data['faculty_id'],
+                                'student_type_id' => $data['student_type_id'],
+                                'category_id' => $data['category_id'],
+                                'sub_category_id' => $data['sub_category_id'],
+                                'billing_period_id' => $data['billing_period_id'],
+                                'discount_id' => $discount_id,
+                                'student_id' => $student->id,
+                                'is_saved' => 0,
+                            ])->orderBy('created_at', 'desc')->first();
+
+                            if ($billing_discount_not_saved) {
+                                $billing_discount_not_saved->from_discount = 0;
+                                $billing_discount_not_saved->to_discount = $student_discount;
+                                $billing_discount_not_saved->creator_id = $user->id;
+                                $billing_discount_not_saved->save();
+                            } else {
+                                $billing_discount = new BillingDiscount;
+                                $billing_discount->class_id = $data['class_id'];
+                                $billing_discount->section_id = $data['section_id'];
+                                $billing_discount->faculty_id = $data['faculty_id'];
+                                $billing_discount->student_type_id = $data['student_type_id'];
+                                $billing_discount->category_id = $data['category_id'];
+                                $billing_discount->sub_category_id = $data['sub_category_id'];
+                                $billing_discount->billing_period_id = $data['billing_period_id'];
+                                $billing_discount->discount_id = $discount_id;
+                                $billing_discount->student_id = $student->id;
+                                $billing_discount->from_discount = 0;
+                                $billing_discount->to_discount = $student_discount;
+                                $billing_discount->creator_id = $user->id;
+                                $billing_discount->is_saved = 0;
+                                $billing_discount->save();
+                            }
+                        }
                     }
                 }
+                $student->discounts = $student_discounts;
 
                 $student->scholarships = array();
                 $student_scholarships = $student->scholarships;
@@ -345,13 +434,66 @@ switch ($action) {
                         }
                     }
                 }
-                $student->scholarships = $student_scholarships;
 
                 if (sizeof($student_scholarships)) {
-                    foreach ($student_scholarships as $student_scholarship) {
-                        $student->actual_fee_amount -= $student_scholarship;
+                    foreach ($student_scholarships as $scholarship_id => $student_scholarship) {
+                        $billing_scholarship_saved = BillingScholarship::where([
+                            'class_id' => $data['class_id'],
+                            'section_id' => $data['section_id'],
+                            'faculty_id' => $data['faculty_id'],
+                            'student_type_id' => $data['student_type_id'],
+                            'category_id' => $data['category_id'],
+                            'sub_category_id' => $data['sub_category_id'],
+                            'billing_period_id' => $data['billing_period_id'],
+                            'scholarship_id' => $scholarship_id,
+                            'student_id' => $student->id,
+                            'is_saved' => 1,
+                        ])->orderBy('created_at', 'desc')->first();
+
+                        if ($billing_scholarship_saved) {
+                            $student_scholarships[$scholarship_id] = $billing_scholarship_saved->to_scholarship;
+                            $student->actual_fee_amount -= $billing_scholarship_saved->to_scholarship;
+                        } else {
+                            $student->actual_fee_amount -= $student_scholarship;
+                            $billing_scholarship_not_saved = BillingScholarship::where([
+                                'class_id' => $data['class_id'],
+                                'section_id' => $data['section_id'],
+                                'faculty_id' => $data['faculty_id'],
+                                'student_type_id' => $data['student_type_id'],
+                                'category_id' => $data['category_id'],
+                                'sub_category_id' => $data['sub_category_id'],
+                                'billing_period_id' => $data['billing_period_id'],
+                                'scholarship_id' => $scholarship_id,
+                                'student_id' => $student->id,
+                                'is_saved' => 0,
+                            ])->orderBy('created_at', 'desc')->first();
+
+                            if ($billing_scholarship_not_saved) {
+                                $billing_scholarship_not_saved->from_scholarship = 0;
+                                $billing_scholarship_not_saved->to_scholarship = $student_scholarship;
+                                $billing_scholarship_not_saved->creator_id = $user->id;
+                                $billing_scholarship_not_saved->save();
+                            } else {
+                                $billing_scholarship = new BillingScholarship;
+                                $billing_scholarship->class_id = $data['class_id'];
+                                $billing_scholarship->section_id = $data['section_id'];
+                                $billing_scholarship->faculty_id = $data['faculty_id'];
+                                $billing_scholarship->student_type_id = $data['student_type_id'];
+                                $billing_scholarship->category_id = $data['category_id'];
+                                $billing_scholarship->sub_category_id = $data['sub_category_id'];
+                                $billing_scholarship->billing_period_id = $data['billing_period_id'];
+                                $billing_scholarship->scholarship_id = $scholarship_id;
+                                $billing_scholarship->student_id = $student->id;
+                                $billing_scholarship->from_scholarship = 0;
+                                $billing_scholarship->to_scholarship = $student_scholarship;
+                                $billing_scholarship->creator_id = $user->id;
+                                $billing_scholarship->is_saved = 0;
+                                $billing_scholarship->save();
+                            }
+                        }
                     }
                 }
+                $student->scholarships = $student_scholarships;
 
                 $student->fines = array();
                 $student_fines = $student->fines;
@@ -372,11 +514,114 @@ switch ($action) {
                         }
                     }
                 }
-                $student->fines = $student_fines;
 
                 if (sizeof($student_fines)) {
-                    foreach ($student_fines as $student_fine) {
-                        $student->actual_fee_amount += $student_fine;
+                    foreach ($student_fines as $fine_id => $student_fine) {
+                        $billing_fine_saved = BillingFine::where([
+                            'class_id' => $data['class_id'],
+                            'section_id' => $data['section_id'],
+                            'faculty_id' => $data['faculty_id'],
+                            'student_type_id' => $data['student_type_id'],
+                            'category_id' => $data['category_id'],
+                            'sub_category_id' => $data['sub_category_id'],
+                            'billing_period_id' => $data['billing_period_id'],
+                            'fine_id' => $fine_id,
+                            'student_id' => $student->id,
+                            'is_saved' => 1,
+                        ])->orderBy('created_at', 'desc')->first();
+
+                        if ($billing_fine_saved) {
+                            $student_fines[$fine_id] = $billing_fine_saved->to_fine;
+                            $student->actual_fee_amount -= $billing_fine_saved->to_fine;
+                        } else {
+                            $student->actual_fee_amount += $student_fine;
+                            $billing_fine_not_saved = BillingFine::where([
+                                'class_id' => $data['class_id'],
+                                'section_id' => $data['section_id'],
+                                'faculty_id' => $data['faculty_id'],
+                                'student_type_id' => $data['student_type_id'],
+                                'category_id' => $data['category_id'],
+                                'sub_category_id' => $data['sub_category_id'],
+                                'billing_period_id' => $data['billing_period_id'],
+                                'fine_id' => $fine_id,
+                                'student_id' => $student->id,
+                                'is_saved' => 0,
+                            ])->orderBy('created_at', 'desc')->first();
+
+                            if ($billing_fine_not_saved) {
+                                $billing_fine_not_saved->from_fine = 0;
+                                $billing_fine_not_saved->to_fine = $student_fine;
+                                $billing_fine_not_saved->creator_id = $user->id;
+                                $billing_fine_not_saved->save();
+                            } else {
+                                $billing_fine = new BillingFine;
+                                $billing_fine->class_id = $data['class_id'];
+                                $billing_fine->section_id = $data['section_id'];
+                                $billing_fine->faculty_id = $data['faculty_id'];
+                                $billing_fine->student_type_id = $data['student_type_id'];
+                                $billing_fine->category_id = $data['category_id'];
+                                $billing_fine->sub_category_id = $data['sub_category_id'];
+                                $billing_fine->billing_period_id = $data['billing_period_id'];
+                                $billing_fine->fine_id = $fine_id;
+                                $billing_fine->student_id = $student->id;
+                                $billing_fine->from_fine = 0;
+                                $billing_fine->to_fine = $student_fine;
+                                $billing_fine->creator_id = $user->id;
+                                $billing_fine->is_saved = 0;
+                                $billing_fine->save();
+                            }
+                        }
+                    }
+                }
+                $student->fines = $student_fines;
+
+                $billing_update_saved = BillingUpdate::where([
+                    'class_id' => $data['class_id'],
+                    'section_id' => $data['section_id'],
+                    'faculty_id' => $data['faculty_id'],
+                    'student_type_id' => $data['student_type_id'],
+                    'category_id' => $data['category_id'],
+                    'sub_category_id' => $data['sub_category_id'],
+                    'billing_period_id' => $data['billing_period_id'],
+                    'student_id' => $student->id,
+                    'is_saved' => 1,
+                ])->orderBy('created_at', 'desc')->first();
+
+                if ($billing_update_saved) {
+                    $student->actual_fee_amount = $billing_update_saved->to_total_fee;
+                } else {
+                    $billing_update_not_saved = BillingUpdate::where([
+                        'class_id' => $data['class_id'],
+                        'section_id' => $data['section_id'],
+                        'faculty_id' => $data['faculty_id'],
+                        'student_type_id' => $data['student_type_id'],
+                        'category_id' => $data['category_id'],
+                        'sub_category_id' => $data['sub_category_id'],
+                        'billing_period_id' => $data['billing_period_id'],
+                        'student_id' => $student->id,
+                        'is_saved' => 0,
+                    ])->orderBy('created_at', 'desc')->first();
+
+                    if ($billing_update_not_saved) {
+                        $billing_update_not_saved->from_total_fee = 0;
+                        $billing_update_not_saved->to_total_fee = $student->actual_fee_amount;
+                        $billing_update_not_saved->creator_id = $user->id;
+                        $billing_update_not_saved->save();
+                    } else {
+                        $billing_update = new BillingUpdate;
+                        $billing_update->class_id = $data['class_id'];
+                        $billing_update->section_id = $data['section_id'];
+                        $billing_update->faculty_id = $data['faculty_id'];
+                        $billing_update->student_type_id = $data['student_type_id'];
+                        $billing_update->category_id = $data['category_id'];
+                        $billing_update->sub_category_id = $data['sub_category_id'];
+                        $billing_update->billing_period_id = $data['billing_period_id'];
+                        $billing_update->student_id = $student->id;
+                        $billing_update->from_total_fee = 0;
+                        $billing_update->to_total_fee = $student->actual_fee_amount;
+                        $billing_update->creator_id = $user->id;
+                        $billing_update->is_saved = 0;
+                        $billing_update->save();
                     }
                 }
             }
