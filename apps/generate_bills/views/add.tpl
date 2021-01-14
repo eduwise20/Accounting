@@ -273,54 +273,6 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal_add_item" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Update Total Fee</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
-                    </button>
-                </div>
-                <div class="modal-body" id="ibox_form_modal">
-                    <div class="alert alert-danger" id="emsgmodal">
-                        <span id="emsgbodymodal"></span>
-                    </div>
-                    <form id="fee_change_form">
-
-                        <div class="row">
-                            <div class="col-md-12 col-sm-12">
-                                <div class="form-group row">
-                                    <label for="name" class="col-sm-5"><span class="h6">Current Fee</span><span
-                                            class="text-danger">*</span></label>
-                                    <div class="col-sm-7">
-                                        <p id="current_fee_id"></p>
-                                        <input type="hidden" id="current_fee_id_input" name="old_fee" />
-                                    </div>
-                                </div>
-                                <input type="hidden" id="student_id" name="student_id" />
-                                <div class="form-group row">
-                                    <label for="order" class="col-sm-5"><span class="h6">New Fee</span><span
-                                            class="text-danger">*</span></label>
-                                    <div class="col-sm-7">
-                                        <input type="text" id="new_fee" name="new_fee" class="form-control">
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" id="btn_modal_action" class="btn btn-primary">Save</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
 {/block}
 
 {block name="script"}
@@ -638,7 +590,8 @@
                 let tableBody = '';
                 students.forEach(function(student) {
                     tableBody += '<tr id="row[' + student['id'] + ']">';
-                    tableBody += '<td class="sorting_1 dtr-control row-data">' + student['name'] + '</td>';
+                    tableBody += '<td class="sorting_1 dtr-control" id="student_name[' + student['id'] +
+                        ']">' + student['name'] + '</td>';
 
                     if (fees.length > 0) {
                         fees.forEach(function(fee) {
@@ -646,7 +599,10 @@
                             let studentFeesCount = Object.keys(studentFees).length;
                             if (studentFeesCount > 0) {
                                 tableBody +=
-                                    '<td class="row-data"><input type="text" class="form-control" value="' +
+                                    '<td class=""><input type="text" class="form-control studentFees[' +
+                                    student['id'] + ']" id="studentFees[' +
+                                    student['id'] + '][' + fee['id'] + ']" name="studentFees[' +
+                                    student['id'] + '][' + fee['id'] + ']" value="' +
                                     studentFees[fee['id']] + '" /></td>';
                             }
                         });
@@ -658,8 +614,11 @@
                             let studentFinesCount = Object.keys(studentFines).length;
                             if (studentFinesCount > 0) {
                                 tableBody +=
-                                    '<td class="row-data"><input type="text" class="form-control" value="' +
-                                    studentFines[fine['id']] + '" /></td>';
+                                    '<td class=""><input type="text" class="form-control studentFines[' +
+                                    student['id'] + ']" id="studentFines[' +
+                                    student['id'] + '][' + fine['id'] + ']" name="studentFines[' +
+                                    student['id'] + '][' + fine['id'] + ']" value="' + studentFines[
+                                        fine['id']] + '"/></td>';
                             }
                         });
                     }
@@ -669,7 +628,10 @@
                             let studentDiscountsCount = Object.keys(studentDiscounts).length;
                             if (studentDiscountsCount > 0) {
                                 tableBody +=
-                                    '<td class="row-data"><input type="text" class="form-control" value="' +
+                                    '<td class=""><input type="text" class="form-control studentDiscounts[' +
+                                    student['id'] + ']" id="studentDiscounts[' +
+                                    student['id'] + '][' + discount['id'] + ']" name="studentDiscounts[' +
+                                    student['id'] + '][' + discount['id'] + ']" value="' +
                                     studentDiscounts[discount['id']] + '" /></td>';
                             }
                         });
@@ -681,15 +643,22 @@
                             let studentScholarshipsCount = Object.keys(studentScholarships).length;
                             if (studentScholarshipsCount > 0) {
                                 tableBody +=
-                                    '<td class="row-data"><input type="text" class="form-control" value="' +
-                                    studentScholarships[scholarship['id']] + '" /></td>';
+                                    '<td class=""><input type="text" class="form-control studentScholarships[' +
+                                    student['id'] + ']" id="studentScholarships[' +
+                                    student['id'] + '][' + scholarship['id'] + ']" name="studentScholarships[' +
+                                    student['id'] + '][' + scholarship['id'] + ']" value="' +
+                                    studentScholarships[scholarship['id']] +
+                                    '" /></td>';
                             }
                         });
                     }
 
-
-                    tableBody += '<td class="row-data"><input type="text" class="form-control" value="' +
-                        student['actual_fee_amount'].toFixed(2) + '" /></td>';
+                    tableBody +=
+                        '<td class="row-data"><input type="text" class="form-control total_fee[' +
+                        student['id'] + ']" id="total_fee[' +
+                        student['id'] + ']" name="total_fee[' +
+                        student['id'] + ']" value="' +
+                        parseFloat(student['actual_fee_amount']).toFixed(2) + '" /></td>';
                     tableBody +=
                         '<td><button type="button" class="btn btn-success btn_save_bill" id="' +
                         student['id'] + '"/>Save</button></td>';
@@ -700,39 +669,13 @@
 
         });
 
-        let total_fee;
-        let total_fee_hidden;
-
-        function fill_modal(student_id) {
-            $(document).on('click', '#edit_button', function() {
-                total_fee = $(this).closest('tr').find('.item_total_fee');
-                total_fee_hidden = $(this).closest('tr').find('#hidden_total_fee');
-                let total_fee_text = total_fee.text();
-                $("#current_fee_id").html(total_fee_text);
-                $("#current_fee_id_input").val(total_fee_text);
-                $("#student_id").val(student_id);
-                $("#new_fee").val('');
-            });
-        }
-
-        $("#btn_modal_action").click(function(e) {
-            e.preventDefault();
-            let new_fee = $("#new_fee")[0].value;
-            total_fee.html(new_fee);
-            total_fee_hidden.val(new_fee);
-            $.post(base_url + 'generate_bills/app/updateTotalFee/', $('#billing_master_form, #fee_change_form')
-                    .serialize())
-                .done(function(data) {
-                    $("#modal_add_item").modal('toggle');
-                });
-        });
-
         $("#btn_submit").click(function(e) {
             e.preventDefault();
             $('#ibox_form').block({ message: block_msg });
             $.post(base_url + 'generate_bills/app/save/', $('#billing_master_form, #student_billing_form')
                     .serialize())
                 .done(function(data) {
+                    //console.log(data);
                     if ($.isNumeric(data)) {
                         window.location = base_url + 'generate_bills/app/generate_bills';
                     } else {
@@ -745,25 +688,91 @@
                 });
         });
 
-        /*$("#btn_save_bill").click(function(e){
-        e.preventDefault();
-        let rowId = $(this).closest("tr").attr("id");
-        console.log("Row Id : " + rowId);
-    });*/
 
         $(document).on('click', '.btn_save_bill', function(e) {
-            //let rowId = e.target.parentNode.parentNode.id;
-            let row = $("#row[" + e.target.id + "]");
-            debugger;
-            console.log("Here teset");
-            
-        })
+            let feeArray = [];
+            let discountArray = [];
+            let scholarshipArray = [];
+            let fineArray = [];
+            let totalArray = [];
 
-        /*function updateBill() {
-        let rowId = event.target.parentNode.parentNode.parentNode.id;
-        console.log("Row Id : " + rowId);
-        let data = document.getElementById(rowId).querySelectorAll(".row-data");
-        console.log("Data : " + data);
-    }*/
+            let newFees = Array.from(document.getElementsByClassName("studentFees[" + e.target.id + "]"));
+            if (newFees.length > 0) {
+                newFees.forEach(function(newFee) {
+                    obj = {
+                        "id": newFee.id,
+                        "value": newFee.value
+                    }
+                    feeArray.push(obj);
+                });
+            }
+
+            let newFines = Array.from(document.getElementsByClassName("studentFines[" + e.target.id + "]"));
+            if (newFines.length > 0) {
+                newFines.forEach(function(newFine) {
+                    obj = {
+                        "id": newFine.id,
+                        "value": newFine.value
+                    }
+                    fineArray.push(obj);
+                });
+            }
+
+            let newDiscounts = Array.from(document.getElementsByClassName("studentDiscounts[" + e.target.id + "]"));
+            if (newDiscounts.length > 0) {
+                newDiscounts.forEach(function(newDiscount) {
+                    obj = {
+                        "id": newDiscount.id,
+                        "value": newDiscount.value
+                    }
+                    discountArray.push(obj);
+                });
+            }
+
+            let newScholarships = Array.from(document.getElementsByClassName("studentScholarships[" + e.target
+                .id + "]"));
+            if (newScholarships.length > 0) {
+                newScholarships.forEach(function(newScholarship) {
+                    obj = {
+                        "id": newScholarship.id,
+                        "value": newScholarship.value
+                    }
+                    scholarshipArray.push(obj);
+                });
+            }
+
+            let newTotals = Array.from(document.getElementsByClassName("total_fee[" + e.target.id + "]"));
+            if (newTotals.length > 0) {
+                newTotals.forEach(function(newTotal) {
+                    obj = {
+                        "id": newTotal.id,
+                        "value": newTotal.value
+                    }
+                    totalArray.push(obj);
+                });
+            }
+
+            let feeArraySerialized = JSON.stringify(feeArray);
+            let fineArraySerialized = JSON.stringify(fineArray);
+            let discountArraySerialized = JSON.stringify(discountArray);
+            let scholarshipArraySerialized = JSON.stringify(scholarshipArray);
+            let totalArraySerialized = JSON.stringify(totalArray);
+            let master_form = JSON.stringify($('#billing_master_form').serializeArray());
+
+            let dataToSend = {
+                feeArray: feeArraySerialized,
+                fineArray: fineArraySerialized,
+                discountArray: discountArraySerialized,
+                scholarshipArray: scholarshipArraySerialized,
+                totalArray: totalArraySerialized,
+                masterForm: master_form
+            }
+
+            $.post(base_url + 'generate_bills/app/updateBill/', dataToSend,
+                function(data, status) {
+                    console.log(data);
+                });
+
+        })
     </script>
 {/block}
