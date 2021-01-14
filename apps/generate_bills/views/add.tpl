@@ -263,6 +263,8 @@
                                     <div class="form-group">
                                         <button class="btn btn-primary mt-3 mr-3" type="button"
                                             id="btn_submit">Save</button>
+                                        <button class="btn btn-secondary mt-3 mr-3" type="button"
+                                            id="btn_print">Print</button>
                                     </div>
                                 </div>
                             </div>
@@ -630,7 +632,8 @@
                                 tableBody +=
                                     '<td class=""><input type="text" class="form-control studentDiscounts[' +
                                     student['id'] + ']" id="studentDiscounts[' +
-                                    student['id'] + '][' + discount['id'] + ']" name="studentDiscounts[' +
+                                    student['id'] + '][' + discount['id'] +
+                                    ']" name="studentDiscounts[' +
                                     student['id'] + '][' + discount['id'] + ']" value="' +
                                     studentDiscounts[discount['id']] + '" /></td>';
                             }
@@ -645,7 +648,8 @@
                                 tableBody +=
                                     '<td class=""><input type="text" class="form-control studentScholarships[' +
                                     student['id'] + ']" id="studentScholarships[' +
-                                    student['id'] + '][' + scholarship['id'] + ']" name="studentScholarships[' +
+                                    student['id'] + '][' + scholarship['id'] +
+                                    ']" name="studentScholarships[' +
                                     student['id'] + '][' + scholarship['id'] + ']" value="' +
                                     studentScholarships[scholarship['id']] +
                                     '" /></td>';
@@ -675,7 +679,6 @@
             $.post(base_url + 'generate_bills/app/save/', $('#billing_master_form, #student_billing_form')
                     .serialize())
                 .done(function(data) {
-                    //console.log(data);
                     if ($.isNumeric(data)) {
                         window.location = base_url + 'generate_bills/app/generate_bills';
                     } else {
@@ -688,6 +691,14 @@
                 });
         });
 
+        $("#btn_print").click(function(e) {
+            e.preventDefault();
+            $.post(base_url + 'generate_bills/app/print/', $('#billing_master_form, #student_billing_form')
+                    .serialize())
+                .done(function(data) {
+                    console.log(data);
+                });
+        });
 
         $(document).on('click', '.btn_save_bill', function(e) {
             let feeArray = [];

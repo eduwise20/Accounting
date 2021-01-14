@@ -9,6 +9,7 @@ require 'apps/categories/models/Subcategory.php';
 require 'apps/student_types/models/AppStudentType.php';
 require 'apps/fiscal_years/models/FiscalYear.php';
 require 'apps/students/models/AppStudent.php';
+require 'apps/students/models/AppStudentAdditionalInformation.php';
 require 'apps/fines/models/AppFineStudent.php';
 require 'apps/fines/models/AppFine.php';
 require 'apps/fee_rates/models/AppFeeStructure.php';
@@ -26,6 +27,8 @@ require 'apps/generate_bills/models/BillingDiscount.php';
 require 'apps/generate_bills/models/BillingFee.php';
 require 'apps/generate_bills/models/BillingFine.php';
 require 'apps/generate_bills/models/BillingScholarship.php';
+
+use Spipu\Html2Pdf\Html2Pdf;
 
 $action = route(2, 'list');
 _auth();
@@ -197,7 +200,7 @@ switch ($action) {
                     'scholarship_id' => $scholarship_id,
                     'student_id' => $student_id,
                 ])->orderBy('created_at', 'desc')->first();
-    
+
                 $new_billing_scholarship = new BillingScholarship;
                 $new_billing_scholarship->class_id = $data['class_id'];
                 $new_billing_scholarship->section_id = $data['section_id'];
@@ -965,4 +968,173 @@ switch ($action) {
         }
         echo json_encode(['students' => $students, 'fines' => $all_fines, 'fees' => $all_fees, 'discounts' => $all_discounts, 'scholarships' => $all_scholarships]);
         break;
+
+    case 'print':
+        $data = $request->all();
+        $student_fees = $data['studentFees'];
+        $student_fines = $data['studentFines'];
+        $student_discounts = $data['studentDiscounts'];
+        $student_scholarships = $data['studentScholarships'];
+        $total_fees = $data['total_fee'];
+        $student_ids = [];
+
+        foreach ($total_fees as $key => $total_fee) {
+            array_push($student_ids, $key);
+        }
+
+        foreach ($student_ids as $student_id) {
+            $student_fees_for_student_id = $student_fees[$student_id];
+            $student_total_fee = 0;
+            $fees = [];
+
+            foreach ($student_fees_for_student_id as $fee_id => $fee_value) {
+                $fee = AppFeeName::find($fee_id);
+                $fees[$fee->name] = $fee_value;
+                $student_total_fee += $fee_value;
+            }
+
+            $student_fines_for_student_id = $student_fines[$student_id];
+            $student_total_fine = 0;
+            $fines = [];
+
+            foreach ($student_fines_for_student_id as $fine_id => $fine_value) {
+                $fine = AppFine::find($fine_id);
+                $fines[$fine->name] = $fine_value;
+                $student_total_fine += $fine_value;
+            }
+
+            $student_discounts_for_student_id = $student_discounts[$student_id];
+            $student_total_discount = 0;
+            $discounts = [];
+
+            foreach ($student_discounts_for_student_id as $discount_id => $discount_value) {
+                $discount = AppDiscount::find($discount_id);
+                $discounts[$discount->name] = $discount_value;
+                $student_total_discount += $discount_value;
+            }
+
+            $student_scholarships_for_student_id = $student_scholarships[$student_id];
+            $student_total_scholarship = 0;
+            $scholarships = [];
+
+            foreach ($student_scholarships_for_student_id as $scholarship_id => $scholarship_value) {
+                $scholarship = AppScholarship::find($scholarship_id);
+                $scholarships[$scholarship->name] = $scholarship_value;
+                $student_total_scholarship += $scholarship_value;
+            }
+
+            $total_fee = $total_fees[$student_id];
+
+            $amount_in_words = numberTowords($total_fee);
+
+            $student = AppStudent::find($student_id);
+            $class = AppClass::find($data['class_id']);
+            $student_additional_info = AppStudentAdditionalInformation::where('student_id', $student->id)->first();
+
+            $html = view_render('app_wrapper_without_theme', [
+                '_include' => 'billing',
+                'fees' => $fees,
+                'fines' => $fines,
+                'discounts' => $discounts,
+                'scholarships' => $scholarships,
+                'total_fee' => $total_fee,
+                'student_total_fee' => $student_total_fee,
+                'student_total_fine' => $student_total_fine,
+                'student_total_scholarship' => $student_total_scholarship,
+                'student_total_discount' => $student_total_discount,
+                'student' => $student,
+                'class' => $class,
+                'student_additional_info' => $student_additional_info,
+                'date' => date("Y-m-d"),
+                'amount_in_words' => $amount_in_words
+            ]);
+
+            $html2pdf = new Html2Pdf();
+            $html2pdf->writeHTML($html);
+            $html2pdf->output($student->name.'_bill.pdf');
+        }
+
+        break;
+}
+
+function numberTowords($num)
+{
+
+    $ones = array(
+        0 => "Zero",
+        1 => "One",
+        2 => "Two",
+        3 => "Three",
+        4 => "Four",
+        5 => "Five",
+        6 => "Six",
+        7 => "Seven",
+        8 => "Eight",
+        9 => "Nine",
+        10 => "Ten",
+        11 => "Eleven",
+        12 => "Twelve",
+        13 => "Thirteen",
+        14 => "Fourteen",
+        15 => "Fifteen",
+        16 => "Sixteen",
+        17 => "Seventeen",
+        18 => "Eighteen",
+        19 => "Ninteen"
+    );
+    $tens = array(
+        0 => "Zero",
+        1 => "Ten",
+        2 => "Twenty",
+        3 => "Thirty",
+        4 => "Forty",
+        5 => "Fifty",
+        6 => "Sixty",
+        7 => "Seventy",
+        8 => "Eighty",
+        9 => "Ninety"
+    );
+    $hundreds = array(
+        "Hundred",
+        "Thousand",
+        "Million",
+        "Billion",
+        "Trillion",
+        "Quardrillion"
+    );
+    $num = number_format($num, 2, ".", ",");
+    $num_arr = explode(".", $num);
+    $wholenum = $num_arr[0];
+    $decnum = $num_arr[1];
+    $whole_arr = array_reverse(explode(",", $wholenum));
+    krsort($whole_arr, 1);
+    $rettxt = "";
+    foreach ($whole_arr as $key => $i) {
+
+        while (substr($i, 0, 1) == "0")
+            $i = substr($i, 1, 5);
+        if ($i < 20) {
+            $rettxt .= $ones[$i];
+        } elseif ($i < 100) {
+            if (substr($i, 0, 1) != "0")  $rettxt .= $tens[substr($i, 0, 1)];
+            if (substr($i, 1, 1) != "0") $rettxt .= " " . $ones[substr($i, 1, 1)];
+        } else {
+            if (substr($i, 0, 1) != "0") $rettxt .= $ones[substr($i, 0, 1)] . " " . $hundreds[0];
+            if (substr($i, 1, 1) != "0") $rettxt .= " " . $tens[substr($i, 1, 1)];
+            if (substr($i, 2, 1) != "0") $rettxt .= " " . $ones[substr($i, 2, 1)];
+        }
+        if ($key > 0) {
+            $rettxt .= " " . $hundreds[$key] . " ";
+        }
+    }
+    if ($decnum > 0) {
+        $rettxt .= " and ";
+        if ($decnum < 20) {
+            $rettxt .= $ones[$decnum];
+        } elseif ($decnum < 100) {
+            $rettxt .= $tens[substr($decnum, 0, 1)];
+            $rettxt .= " " . $ones[substr($decnum, 1, 1)];
+        }
+    }
+    return $rettxt;
 }
