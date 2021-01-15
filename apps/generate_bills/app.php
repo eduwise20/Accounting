@@ -1,5 +1,7 @@
 <?php
 
+use Dompdf\Generate_Pdf;
+
 require 'apps/classes/models/AppClass.php';
 require 'apps/billing_periods/models/BillingPeriod.php';
 require 'apps/faculties/models/AppFaculty.php';
@@ -27,8 +29,11 @@ require 'apps/generate_bills/models/BillingDiscount.php';
 require 'apps/generate_bills/models/BillingFee.php';
 require 'apps/generate_bills/models/BillingFine.php';
 require 'apps/generate_bills/models/BillingScholarship.php';
+require 'apps/generate_bills/generate_pdf.php';
 
-use Spipu\Html2Pdf\Html2Pdf;
+use Mhtml2pdf as Mhtml;
+// use Spipu\Html2Pdf\Html2Pdf;
+require 'vendor/mpdf/vendor/autoload.php';
 
 $action = route(2, 'list');
 _auth();
@@ -1049,9 +1054,20 @@ switch ($action) {
                 'amount_in_words' => $amount_in_words
             ]);
 
-            $html2pdf = new Html2Pdf();
-            $html2pdf->writeHTML($html);
-            $html2pdf->output($student->name.'_bill.pdf');
+            // print_r($html);
+
+            $mhtml2pdf = new Mhtml();
+            $mhtml2pdf->filename($student->name.'_bill');
+            $mhtml2pdf->paper('a4', 'portrait');
+            $mhtml2pdf->html($html);
+            $mhtml2pdf->create('view', 'Bill', null);
+
+            // $html2pdf = new Html2Pdf();
+            // $html2pdf->writeHTML($html);
+            // $html2pdf->output($student->name.'_bill.pdf');
+            // $generate_pdf_obj = new Generate_Pdf(); 
+            // $generate_pdf_obj->generate_pdf($html);
+            
         }
 
         break;
