@@ -1,54 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Billing</title>
-</head>
-<style>
-    * {
-        padding: 0;
-        margin: 0;
-        font-family: "Arial";
-        box-sizing: border-box;
-    }
-
-    table {
-        border-spacing: 15px;
-    }
-
-    table,
-    th,
-    td {
-        border: none;
-        padding: 10px;
-        border-collapse: collapse;
-    }
-
-    .table-container {
-        max-width: 100%;
-        margin: 0 auto;
-        width: 100%;
-    }
-
-    .table-billing,
-    .table-billing>tbody>tr>td,
-    .table-billing>tbody>tr>th {
-        border: 1px solid black;
-        padding: 0 !important;
-    }
-
-    .table-fluid {
-        width: 100%;
-    }
-
-    .table-account td:last-child {
-        text-align: right;
-    }
-</style>
-
-<body>
     <table class="table-container">
         <thead>
             <tr>
@@ -75,11 +24,11 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    <table class="table-fluid">
+                                    <table class="table-fee-receipt-section table-fluid">
                                         <tr>
-                                            <th align="left">Fee Receipt</th>
-                                            <th align="center">Receipt No. 10</th>
-                                            <th align="right">Date: {$date}</th>
+                                            <th style="width: 250px; text-align: left;">Fee Receipt</th>
+                                            <th style="width: 250px; text-align: center;">Receipt No. 10</th>
+                                            <th style="width: 250px; text-align: right;">Date: {$date}</th>
                                         </tr>
                                     </table>
                                 </td>
@@ -90,37 +39,42 @@
                                     <table class="table-fluid">
                                         <tbody>
                                             <tr>
-                                                <td align="left">
+                                                <td style="width: 570px; text-align: left;">
                                                     <table>
                                                         <tbody>
                                                             <tr>
-                                                                <td>Student Name</td>
+                                                                <td>Student Name: </td>
                                                                 <td><b>{$student->name}</b></td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Admission No</td>
+                                                                <td>Admission No: </td>
                                                                 <td>{$student->admission_no}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Finance Fee Collection</td>
+                                                                <td>Finance Fee Collection: </td>
                                                                 <td>Monthly Fee</td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
                                                 </td>
-                                                <td align="right">
+                                                <td style="text-align: right;">
                                                     <table>
                                                         <tbody>
                                                             <tr>
-                                                                <td>Class</td>
+                                                                <td>Class:</td>
                                                                 <td>{$class->name}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Parent</td>
-                                                                <td>{$student_additional_info->parent_name}</td>
+                                                                <td>Parent: </td>
+                                                                <td>{if $student_additional_info->parent_name == null}
+                                                                        N/A
+                                                                    {elseif $student_additional_info->parent_name != null}
+                                                                        {$student_additional_info->parent_name}
+                                                                    {/if}
+                                                                </td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Due Date</td>
+                                                                <td>Due Date: </td>
                                                                 <td>30/02/2021</td>
                                                             </tr>
                                                         </tbody>
@@ -137,8 +91,10 @@
                                     <table class="table-fluid table-account">
                                         <tbody>
                                             <tr>
-                                                <td><b>Particulars</b></td>
-                                                <td><b>Amount (Rs.)</b></td>
+                                                <td style="width: 675px; text-align: left;"><b>Particulars</b></td>
+                                                <td style="text-align: right;">
+                                                    <b>Amount (Rs.)</b>
+                                                </td>
                                             </tr>
                                             {$count = 1}
                                             {foreach $fees as $fee_name => $fee_value}
@@ -199,8 +155,8 @@
                                     <table class="table-fluid table-account">
                                         <tbody>
                                             <tr>
-                                                <td><b>Summary</b></td>
-                                                <td width="300"><b>Amount (Rs.)</b></td>
+                                                <td style="width: 675px; text-align: left;"><b>Summary</b></td>
+                                                <td style="text-align: right;"><b>Amount (Rs.)</b></td>
                                             </tr>
                                             <tr>
                                                 <td>1. Total Fees</td>
@@ -237,7 +193,7 @@
                                                         </tbody>
                                                     </table>
                                                 </td>
-                                                <td align="right">
+                                                <td class="alnright">
                                                     <table>
                                                         <tbody>
                                                             <tr>
@@ -258,7 +214,7 @@
                                     <table class="table-fluid">
                                         <tbody>
                                             <tr>
-                                                <td>
+                                                <td style="width: 575px; text-align: left;">
                                                     <table>
                                                         <tbody>
                                                             <tr>
@@ -270,7 +226,7 @@
                                                         </tbody>
                                                     </table>
                                                 </td>
-                                                <td align="right">
+                                                <td style="text-align: right;">
                                                     <table>
                                                         <tbody>
                                                             <tr>
@@ -296,6 +252,3 @@
             </tr>
         </tfoot>
     </table>
-</body>
-
-</html>

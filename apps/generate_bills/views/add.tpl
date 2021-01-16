@@ -696,6 +696,8 @@
             $.post(base_url + 'generate_bills/app/print/', $('#billing_master_form, #student_billing_form')
                     .serialize())
                 .done(function(data) {
+                    window.open(data, '_blank');
+                    window.focus();
                 });
         });
 

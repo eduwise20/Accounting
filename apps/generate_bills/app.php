@@ -67,11 +67,11 @@ switch ($action) {
 
     case 'save':
         $data = $request->all();
-        $student_fees = $data['studentFees'];
-        $student_fines = $data['studentFines'];
-        $student_discounts = $data['studentDiscounts'];
-        $student_scholarships = $data['studentScholarships'];
-        $total_fees = $data['total_fee'];
+        $student_fees = isset($data['studentFees']) ? $data['studentFees'] : [];
+        $student_fines = isset($data['studentFines']) ? $data['studentFines'] : [];
+        $student_discounts = isset($data['studentDiscounts']) ? $data['studentDiscounts'] : [];
+        $student_scholarships = isset($data['studentScholarships']) ? $data['studentScholarships'] : [];
+        $total_fees = isset($data['total_fee']) ? $data['total_fee'] : [];
         $student_ids = [];
 
         foreach ($total_fees as $key => $total_fee) {
@@ -520,32 +520,46 @@ switch ($action) {
         $where = [
             'class_id' => $data['class_id'],
             'student_type_id' => $data['student_type_id'],
-            'faculty_id' => $data['faculty_id'],
-            'section_id' => $data['section_id'],
-            'category_id' => $data['category_id'],
-            'sub_category_id' => $data['sub_category_id'],
         ];
+        if ($data['faculty_id'] != 0) {
+            $where['faculty_id'] = $data['faculty_id'];
+        }
+        if ($data['section_id'] != 0) {
+            $where['section_id'] = $data['section_id'];
+        }
+        if ($data['category_id'] != 0) {
+            $where['category_id'] = $data['category_id'];
+            if ($data['sub_category_id'] != 0) {
+                $where['sub_category_id'] = $data['sub_category_id'];
+            }
+        }
         $students = AppStudent::where($where)->get();
 
-        $fee_rate_where = [
-            'class_id' => $data['class_id'],
-            'student_type_id' => $data['student_type_id'],
-            'faculty_id' => $data['faculty_id'],
-            'category_id' => $data['category_id'],
-            'sub_category_id' => $data['sub_category_id'],
-        ];
-        $fee_rates = AppFeeRate::where($fee_rate_where)->get();
+        $student_ids = AppStudent::where($where)->pluck('id');
 
-        $all_fees = AppFeeName::all();
-        $all_fines = AppFine::all();
-        $all_discounts = AppDiscount::all();
-        $all_scholarships = AppScholarship::all();
+        $fee_name_ids = collect(AppFeeNameStudent::whereIn('student_id', $student_ids)->pluck('fee_name_id'))->unique();
+        $fine_ids = collect(AppFineStudent::whereIn('student_id', $student_ids)->pluck('fine_id'))->unique();
+        $discount_ids = collect(AppDiscountStudent::whereIn('student_id', $student_ids)->pluck('discount_id'))->unique();
+        $scholarship_ids = collect(AppScholarshipStudent::whereIn('student_id', $student_ids)->pluck('scholarship_id'))->unique();
+
+        $all_fees = AppFeeName::whereIn('id', $fee_name_ids)->orWhere('is_compulsary', 1)->get();
+        $all_fines = AppFine::whereIn('id', $fine_ids)->get();
+        $all_discounts = AppDiscount::whereIn('id', $discount_ids)->get();
+        $all_scholarships = AppScholarship::whereIn('id', $scholarship_ids)->get();
 
         if (sizeof($students) > 0) {
             $fee_names_for_student = array();
             foreach ($students as $student) {
                 $student->fee_names = array();
                 $student_fee_names = $student->fee_names;
+                $fee_rate_where = [
+                    'class_id' => $student->class_id,
+                    'student_type_id' => $student->student_type_id,
+                    'faculty_id' => $student->faculty_id,
+                    'category_id' => $student->category_id,
+                    'sub_category_id' => $student->sub_category_id
+                ];
+                $fee_rates = AppFeeRate::where($fee_rate_where)->get();
                 foreach ($all_fees as $all_fee) {
                     foreach ($fee_rates as $fee_rate) {
                         if ($all_fee->is_compulsary != 1) {
@@ -976,57 +990,103 @@ switch ($action) {
 
     case 'print':
         $data = $request->all();
-        $student_fees = $data['studentFees'];
-        $student_fines = $data['studentFines'];
-        $student_discounts = $data['studentDiscounts'];
-        $student_scholarships = $data['studentScholarships'];
-        $total_fees = $data['total_fee'];
+        $student_fees = isset($data['studentFees']) ? $data['studentFees'] : [];
+        $student_fines = isset($data['studentFines']) ? $data['studentFines'] : [];
+        $student_discounts = isset($data['studentDiscounts']) ? $data['studentDiscounts'] : [];
+        $student_scholarships = isset($data['studentScholarships']) ? $data['studentScholarships'] : [];
+        $total_fees = isset($data['total_fee']) ? $data['total_fee'] : [];
         $student_ids = [];
 
         foreach ($total_fees as $key => $total_fee) {
             array_push($student_ids, $key);
         }
 
+        $html_name_array = [];
+        $student_list_count = sizeof($student_ids);
+
+        $html = '<!DOCTYPE html>
+        <html lang="en">
+        
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Billing</title>
+        </head>
+        <style>
+            * {
+                padding: 0;
+                margin: 0;
+                font-family: "Arial";
+                box-sizing: border-box;
+            }
+        
+            table {
+                border-spacing: 15px;
+            }
+        
+            .table-billing,
+            .table-billing>tbody>tr>td,
+            .table-billing>tbody>tr>th {
+                border: 1px solid black;
+                padding: 0 !important;
+            }
+        
+            .table-account td:last-child {
+                text-align: right;
+            }
+        </style>
+        
+        <body>';
+
         foreach ($student_ids as $student_id) {
-            $student_fees_for_student_id = $student_fees[$student_id];
             $student_total_fee = 0;
             $fees = [];
+            if (sizeof($student_fees)) {
+                $student_fees_for_student_id = $student_fees[$student_id];
 
-            foreach ($student_fees_for_student_id as $fee_id => $fee_value) {
-                $fee = AppFeeName::find($fee_id);
-                $fees[$fee->name] = $fee_value;
-                $student_total_fee += $fee_value;
+                foreach ($student_fees_for_student_id as $fee_id => $fee_value) {
+                    $fee = AppFeeName::find($fee_id);
+                    $fees[$fee->name] = $fee_value;
+                    $student_total_fee += $fee_value;
+                }
             }
 
-            $student_fines_for_student_id = $student_fines[$student_id];
             $student_total_fine = 0;
             $fines = [];
+            if (sizeof($student_fines)) {
+                $student_fines_for_student_id = $student_fines[$student_id];
 
-            foreach ($student_fines_for_student_id as $fine_id => $fine_value) {
-                $fine = AppFine::find($fine_id);
-                $fines[$fine->name] = $fine_value;
-                $student_total_fine += $fine_value;
+                foreach ($student_fines_for_student_id as $fine_id => $fine_value) {
+                    $fine = AppFine::find($fine_id);
+                    $fines[$fine->name] = $fine_value;
+                    $student_total_fine += $fine_value;
+                }
             }
 
-            $student_discounts_for_student_id = $student_discounts[$student_id];
             $student_total_discount = 0;
             $discounts = [];
+            if (sizeof($student_discounts) > 0) {
+                $student_discounts_for_student_id = $student_discounts[$student_id];
 
-            foreach ($student_discounts_for_student_id as $discount_id => $discount_value) {
-                $discount = AppDiscount::find($discount_id);
-                $discounts[$discount->name] = $discount_value;
-                $student_total_discount += $discount_value;
+                foreach ($student_discounts_for_student_id as $discount_id => $discount_value) {
+                    $discount = AppDiscount::find($discount_id);
+                    $discounts[$discount->name] = $discount_value;
+                    $student_total_discount += $discount_value;
+                }
             }
 
-            $student_scholarships_for_student_id = $student_scholarships[$student_id];
             $student_total_scholarship = 0;
             $scholarships = [];
+            if (sizeof($student_scholarships) > 0) {
+                $student_scholarships_for_student_id = $student_scholarships[$student_id];
 
-            foreach ($student_scholarships_for_student_id as $scholarship_id => $scholarship_value) {
-                $scholarship = AppScholarship::find($scholarship_id);
-                $scholarships[$scholarship->name] = $scholarship_value;
-                $student_total_scholarship += $scholarship_value;
+                foreach ($student_scholarships_for_student_id as $scholarship_id => $scholarship_value) {
+                    $scholarship = AppScholarship::find($scholarship_id);
+                    $scholarships[$scholarship->name] = $scholarship_value;
+                    $student_total_scholarship += $scholarship_value;
+                }
             }
+
 
             $total_fee = $total_fees[$student_id];
 
@@ -1036,7 +1096,9 @@ switch ($action) {
             $class = AppClass::find($data['class_id']);
             $student_additional_info = AppStudentAdditionalInformation::where('student_id', $student->id)->first();
 
-            $html = view_render('app_wrapper_without_theme', [
+            $student_list_count--;
+
+            $html .= view_render('app_wrapper_without_theme', [
                 '_include' => 'billing',
                 'fees' => $fees,
                 'fines' => $fines,
@@ -1051,58 +1113,22 @@ switch ($action) {
                 'class' => $class,
                 'student_additional_info' => $student_additional_info,
                 'date' => date("Y-m-d"),
-                'amount_in_words' => $amount_in_words
+                'amount_in_words' => $amount_in_words,
+                'student_list_count' => $student_list_count
             ]);
-
-            //$stylesheet = file_get_contents(__DIR__ . '/stylesheet.css');
-
-            // $dompdf = new Dompdf();
-            // $dompdf->setPaper("A4");
-            // $dompdf->loadHtml($html);
-            // $dompdf->render();
-            // $canvas = $dompdf->getCanvas();
-            // $canvas->page_text(16, 800, "Page: {PAGE_NUM} of {PAGE_COUNT}", null, 8, array(0, 0, 0));
-            // $dompdf->stream("sample.pdf", array("Attachment" => true));
-
-            // $file_to_save = __DIR__ . '/output/'.$student->name.'_bill.pdf';
-            // //save the pdf file on the server
-            // file_put_contents($file_to_save, $dompdf->output());
-            // //print the pdf file to the screen for saving
-            // header('Content-type: application/pdf');
-            // header('Content-Disposition: inline; filename="file.pdf"');
-            // header('Content-Transfer-Encoding: binary');
-            // header('Content-Length: ' . filesize($file_to_save));
-            // header('Accept-Ranges: bytes');
-            // readfile($file_to_save);
-            
-            header("Content-Disposition: attachment; filename=sample.pdf");
-
-            $html2pdf = new Html2Pdf();
-            $html2pdf->setTestTdInOnePage(false);
-            // $html2pdf->writeHTML($stylesheet,1);
-            $html2pdf->writeHTML($html);
-            // $html2pdf->output(__DIR__ . '/output/'.$student->name.'_bill.pdf', 'F');
-            $html2pdf->output($student->name.'_bill.pdf', 'D');
-
-            // $mhtml2pdf = new Mhtml2pdf();
-
-            // $mhtml2pdf->folder(__DIR__ . '/output/');
-            // $mhtml2pdf->filename($student->name.'_bill.pdf');
-            // $mhtml2pdf->paper('a4', 'portrait');
-            // $mhtml2pdf->html($html);
-
-            // $mhtml2pdf->create('view', 'Test', $stylesheet);
-
-            // $mpdf = new Mpdf();
-
-            // $mpdf->SetTitle('Document Title');
-            // $mpdf->SetAuthor('John Doe');
-            // $mpdf->SetCreator('Creator');
-            // $mpdf->SetSubject('Demo');
-
-            // $mpdf->WriteHTML($html);
-            // $mpdf->Output();
         }
+
+        $html .= '</body>
+
+        </html>';
+
+        $html2pdf = new Html2Pdf();
+        $html2pdf->setTestTdInOnePage(false);
+        $html2pdf->writeHTML($html);
+        $date = new DateTime();
+        $bill_name = 'bill_' . $date->getTimestamp() . '.pdf';
+        $html2pdf->output(__DIR__ . '/output/' . $bill_name, 'F');
+        echo '/accounting/apps/generate_bills/output/' . $bill_name;
 
         break;
 }
