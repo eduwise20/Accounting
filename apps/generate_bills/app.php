@@ -1,7 +1,5 @@
 <?php
 
-use Dompdf\Generate_Pdf;
-
 require 'apps/classes/models/AppClass.php';
 require 'apps/billing_periods/models/BillingPeriod.php';
 require 'apps/faculties/models/AppFaculty.php';
@@ -29,11 +27,13 @@ require 'apps/generate_bills/models/BillingDiscount.php';
 require 'apps/generate_bills/models/BillingFee.php';
 require 'apps/generate_bills/models/BillingFine.php';
 require 'apps/generate_bills/models/BillingScholarship.php';
-require 'apps/generate_bills/generate_pdf.php';
+require 'vendor/Mhtml2pdf.php';
 
-use Mhtml2pdf as Mhtml;
-// use Spipu\Html2Pdf\Html2Pdf;
-require 'vendor/mpdf/vendor/autoload.php';
+use Spipu\Html2Pdf\Html2Pdf;
+
+use Dompdf\Dompdf;
+
+use Mpdf\Mpdf;
 
 $action = route(2, 'list');
 _auth();
@@ -1054,20 +1054,54 @@ switch ($action) {
                 'amount_in_words' => $amount_in_words
             ]);
 
-            // print_r($html);
+            //$stylesheet = file_get_contents(__DIR__ . '/stylesheet.css');
 
-            $mhtml2pdf = new Mhtml();
-            $mhtml2pdf->filename($student->name.'_bill');
-            $mhtml2pdf->paper('a4', 'portrait');
-            $mhtml2pdf->html($html);
-            $mhtml2pdf->create('view', 'Bill', null);
+            // $dompdf = new Dompdf();
+            // $dompdf->setPaper("A4");
+            // $dompdf->loadHtml($html);
+            // $dompdf->render();
+            // $canvas = $dompdf->getCanvas();
+            // $canvas->page_text(16, 800, "Page: {PAGE_NUM} of {PAGE_COUNT}", null, 8, array(0, 0, 0));
+            // $dompdf->stream("sample.pdf", array("Attachment" => true));
 
-            // $html2pdf = new Html2Pdf();
-            // $html2pdf->writeHTML($html);
-            // $html2pdf->output($student->name.'_bill.pdf');
-            // $generate_pdf_obj = new Generate_Pdf(); 
-            // $generate_pdf_obj->generate_pdf($html);
+            // $file_to_save = __DIR__ . '/output/'.$student->name.'_bill.pdf';
+            // //save the pdf file on the server
+            // file_put_contents($file_to_save, $dompdf->output());
+            // //print the pdf file to the screen for saving
+            // header('Content-type: application/pdf');
+            // header('Content-Disposition: inline; filename="file.pdf"');
+            // header('Content-Transfer-Encoding: binary');
+            // header('Content-Length: ' . filesize($file_to_save));
+            // header('Accept-Ranges: bytes');
+            // readfile($file_to_save);
             
+            header("Content-Disposition: attachment; filename=sample.pdf");
+
+            $html2pdf = new Html2Pdf();
+            $html2pdf->setTestTdInOnePage(false);
+            // $html2pdf->writeHTML($stylesheet,1);
+            $html2pdf->writeHTML($html);
+            // $html2pdf->output(__DIR__ . '/output/'.$student->name.'_bill.pdf', 'F');
+            $html2pdf->output($student->name.'_bill.pdf', 'D');
+
+            // $mhtml2pdf = new Mhtml2pdf();
+
+            // $mhtml2pdf->folder(__DIR__ . '/output/');
+            // $mhtml2pdf->filename($student->name.'_bill.pdf');
+            // $mhtml2pdf->paper('a4', 'portrait');
+            // $mhtml2pdf->html($html);
+
+            // $mhtml2pdf->create('view', 'Test', $stylesheet);
+
+            // $mpdf = new Mpdf();
+
+            // $mpdf->SetTitle('Document Title');
+            // $mpdf->SetAuthor('John Doe');
+            // $mpdf->SetCreator('Creator');
+            // $mpdf->SetSubject('Demo');
+
+            // $mpdf->WriteHTML($html);
+            // $mpdf->Output();
         }
 
         break;
