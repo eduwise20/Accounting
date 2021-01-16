@@ -27,13 +27,8 @@ require 'apps/generate_bills/models/BillingDiscount.php';
 require 'apps/generate_bills/models/BillingFee.php';
 require 'apps/generate_bills/models/BillingFine.php';
 require 'apps/generate_bills/models/BillingScholarship.php';
-require 'vendor/Mhtml2pdf.php';
 
 use Spipu\Html2Pdf\Html2Pdf;
-
-use Dompdf\Dompdf;
-
-use Mpdf\Mpdf;
 
 $action = route(2, 'list');
 _auth();
