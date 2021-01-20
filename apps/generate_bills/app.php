@@ -1130,7 +1130,7 @@ switch ($action) {
         $date = new DateTime();
         $bill_name = 'bill_' . $date->getTimestamp() . '.pdf';
         $html2pdf->output(__DIR__ . '/output/' . $bill_name, 'F');
-        echo '/accounting/apps/generate_bills/output/' . $bill_name;
+        echo '/apps/generate_bills/output/' . $bill_name;
 
         break;
 }
