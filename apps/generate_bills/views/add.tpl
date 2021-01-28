@@ -90,6 +90,11 @@
         .text-primary {
             color: #10CDEF !important;
         }
+
+        #loader{
+            margin-left: -134px;
+            margin-top: 21px;
+        }
     </style>
 
 
@@ -109,6 +114,9 @@
 
                         <div class="alert alert-danger" id="emsg">
                             <span id="emsgbody"></span>
+                        </div>
+                         <div class="alert alert-success" id="success_msg">
+                            <span id="success_msg_info"></span>
                         </div>
 
                         <form id="billing_master_form">
@@ -211,12 +219,15 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <button class="btn btn-primary mt-3 mr-3 disabled" type="button"
                                             id="btn_generate">Generate Bill</button>
                                     </div>
                                 </div>
+                                 <div id="loader" class="col-md-3">
+                                       <img src="{$app_url}ui/lib/img/loading.gif" />
+                                 </div>
                             </div>
                         </form>
                     </div>
@@ -236,6 +247,7 @@
                         <div class="alert alert-danger" id="emsg_fee_rate_info">
                             <span id="emsgbody_fee_rate_info"></span>
                         </div>
+                       
 
                         <form id="student_billing_form">
 
@@ -265,7 +277,9 @@
                                             id="btn_submit">Save</button>
                                         <button class="btn btn-secondary mt-3 mr-3" type="button"
                                             id="btn_print">Print</button>
+                                            <img id="loader1" src="{$app_url}ui/lib/img/loading.gif" style="margin-top: 14px;"/>
                                     </div>
+                                    
                                 </div>
                             </div>
                         </form>
@@ -484,14 +498,20 @@
 
             $cid.select2();
 
+            $('#loader').hide();
+            $('#loader1').hide();
+
             btn_generate.click(function(e) {
                 disableGenerateButton();
+                $('#success_msg').hide();
+                 $('#loader').show();
                 e.preventDefault();
                 $.post(base_url + 'generate_bills/app/get_students_with_bill_detail/',
                     $("#billing_master_form").serialize(),
                     function(data, status) {
                         if (data) {
                             let jsonData = JSON.parse(data);
+                            if(jsonData['status'] == 1){
                             let tableHead = populateTableHead(jsonData);
                             student_billing_section.show();
                             let students = jsonData['students'];
@@ -543,7 +563,56 @@
                             $('.has-tooltip').tooltip();
                             table.clear().draw();
                             table.rows.add($(tableBody)).draw();
+                             $('#loader').hide();
+
+                                     $("#btn_submit").click(function(e) {
+                                            e.preventDefault();
+                                            $('#loader1').show();
+                                             table.rows().nodes().page.len(-1).draw();
+                                            $('#ibox_form').block({ message: block_msg });
+                                            $.post(base_url + 'generate_bills/app/save/', $('#billing_master_form, #student_billing_form')
+                                                    .serialize())
+                                                .done(function(data) {
+                                                    if ($.isNumeric(data)) {
+                                                        $('#loader1').hide();$('#ibox_form').unblock();
+                                                        var body = $("html, body");
+                                                        body.animate({ scrollTop: 0 }, '1000', 'swing');
+                                                        $('#success_msg').show();
+                                                        $('#success_msg_info').html('Bill saved.');
+                                                    } else {
+                                                        $('#loader1').hide();
+                                                        $('#ibox_form').unblock();
+                                                        var body = $("html, body");
+                                                        body.animate({ scrollTop: 0 }, '1000', 'swing');
+                                                        $("#emsgbody").html(data);
+                                                        $("#emsg").show("slow");
+                                                    }
+                                                });
+                                        });
+
+
+                             $("#btn_print").click(function(e) {
+                                e.preventDefault();
+                                $('#loader1').show();
+                                table.rows().nodes().page.len(-1).draw();
+                                $.post(base_url + 'generate_bills/app/print/', $('#billing_master_form, #student_billing_form')
+                                        .serialize())
+                                    .done(function(data) {
+                                        $('#loader1').hide();
+                                        window.open(data, '_blank');
+                                        window.focus();
+                                    });
+                            });
+
+                            }else{
+                                 $('#loader').hide();
+                                $("#emsgbody").html(jsonData['message']);
+                                $("#emsg").show("slow");
+                                 enableGenerateButton();
+                            }
                         }
+
+
                     });
 
             });
@@ -673,33 +742,9 @@
 
         });
 
-        $("#btn_submit").click(function(e) {
-            e.preventDefault();
-            $('#ibox_form').block({ message: block_msg });
-            $.post(base_url + 'generate_bills/app/save/', $('#billing_master_form, #student_billing_form')
-                    .serialize())
-                .done(function(data) {
-                    if ($.isNumeric(data)) {
-                        window.location = base_url + 'generate_bills/app/generate_bills';
-                    } else {
-                        $('#ibox_form').unblock();
-                        var body = $("html, body");
-                        body.animate({ scrollTop: 0 }, '1000', 'swing');
-                        $("#emsgbody").html(data);
-                        $("#emsg").show("slow");
-                    }
-                });
-        });
 
-        $("#btn_print").click(function(e) {
-            e.preventDefault();
-            $.post(base_url + 'generate_bills/app/print/', $('#billing_master_form, #student_billing_form')
-                    .serialize())
-                .done(function(data) {
-                    window.open(data, '_blank');
-                    window.focus();
-                });
-        });
+
+        
 
         $(document).on('click', '.btn_save_bill', function(e) {
             let feeArray = [];
