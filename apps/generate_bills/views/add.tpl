@@ -226,7 +226,7 @@
                                     </div>
                                 </div>
                                  <div id="loader" class="col-md-3">
-                                       <img src="{$app_url}ui/lib/img/loading.gif" />
+                                       <img src="{$app_url}/ui/lib/img/loading.gif" />
                                  </div>
                             </div>
                         </form>
@@ -277,7 +277,7 @@
                                             id="btn_submit">Save</button>
                                         <button class="btn btn-secondary mt-3 mr-3" type="button"
                                             id="btn_print">Save & Print</button>
-                                            <img id="loader1" src="{$app_url}ui/lib/img/loading.gif" style="margin-top: 14px;"/>
+                                            <img id="loader1" src="{$app_url}/ui/lib/img/loading.gif" style="margin-top: 14px;"/>
                                     </div>
                                     
                                 </div>

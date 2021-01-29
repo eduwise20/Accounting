@@ -5,7 +5,7 @@
                     <table>
                         <tr>
                             <td width="150" style="padding-right:10px;">
-                                <img src="{$app_url}ui/lib/img/trust-1-1.png" width="150" alt="trust-1-1"
+                                <img src="{$app_url}/ui/lib/img/trust-1-1.png" width="150" alt="trust-1-1"
                                     border="0" />
                             </td>
                             <td>
