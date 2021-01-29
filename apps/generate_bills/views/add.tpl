@@ -276,7 +276,7 @@
                                         <button class="btn btn-primary mt-3 mr-3" type="button"
                                             id="btn_submit">Save</button>
                                         <button class="btn btn-secondary mt-3 mr-3" type="button"
-                                            id="btn_print">Print</button>
+                                            id="btn_print">Save & Print</button>
                                             <img id="loader1" src="{$app_url}ui/lib/img/loading.gif" style="margin-top: 14px;"/>
                                     </div>
                                     
@@ -565,45 +565,6 @@
                             table.rows.add($(tableBody)).draw();
                              $('#loader').hide();
 
-                                     $("#btn_submit").click(function(e) {
-                                            e.preventDefault();
-                                            $('#loader1').show();
-                                             table.rows().nodes().page.len(-1).draw();
-                                            $('#ibox_form').block({ message: block_msg });
-                                            $.post(base_url + 'generate_bills/app/save/', $('#billing_master_form, #student_billing_form')
-                                                    .serialize())
-                                                .done(function(data) {
-                                                    if ($.isNumeric(data)) {
-                                                        $('#loader1').hide();$('#ibox_form').unblock();
-                                                        var body = $("html, body");
-                                                        body.animate({ scrollTop: 0 }, '1000', 'swing');
-                                                        $('#success_msg').show();
-                                                        $('#success_msg_info').html('Bill saved.');
-                                                    } else {
-                                                        $('#loader1').hide();
-                                                        $('#ibox_form').unblock();
-                                                        var body = $("html, body");
-                                                        body.animate({ scrollTop: 0 }, '1000', 'swing');
-                                                        $("#emsgbody").html(data);
-                                                        $("#emsg").show("slow");
-                                                    }
-                                                });
-                                        });
-
-
-                             $("#btn_print").click(function(e) {
-                                e.preventDefault();
-                                $('#loader1').show();
-                                table.rows().nodes().page.len(-1).draw();
-                                $.post(base_url + 'generate_bills/app/print/', $('#billing_master_form, #student_billing_form')
-                                        .serialize())
-                                    .done(function(data) {
-                                        $('#loader1').hide();
-                                        window.open(data, '_blank');
-                                        window.focus();
-                                    });
-                            });
-
                             }else{
                                  $('#loader').hide();
                                 $("#emsgbody").html(jsonData['message']);
@@ -670,7 +631,7 @@
                             let studentFeesCount = Object.keys(studentFees).length;
                             if (studentFeesCount > 0) {
                                 tableBody +=
-                                    '<td class=""><input type="text" class="form-control studentFees[' +
+                                    '<td class=""><input type="text"  class="form-control studentFees[' +
                                     student['id'] + ']" id="studentFees[' +
                                     student['id'] + '][' + fee['id'] + ']" name="studentFees[' +
                                     student['id'] + '][' + fee['id'] + ']" value="' +
@@ -685,7 +646,7 @@
                             let studentFinesCount = Object.keys(studentFines).length;
                             if (studentFinesCount > 0) {
                                 tableBody +=
-                                    '<td class=""><input type="text" class="form-control studentFines[' +
+                                    '<td class=""><input type="text"  class="form-control studentFines[' +
                                     student['id'] + ']" id="studentFines[' +
                                     student['id'] + '][' + fine['id'] + ']" name="studentFines[' +
                                     student['id'] + '][' + fine['id'] + ']" value="' + studentFines[
@@ -727,7 +688,7 @@
                     }
 
                     tableBody +=
-                        '<td class="row-data"><input type="text" class="form-control total_fee[' +
+                        '<td class="row-data"><input type="text" data-sid="'+student['id']+'"  class="form-control total_fee[' +
                         student['id'] + ']" id="total_fee[' +
                         student['id'] + ']" name="total_fee[' +
                         student['id'] + ']" value="' +
@@ -740,13 +701,81 @@
                 return tableBody;
             }
 
-        });
 
+                                                      
+
+     });
 
 
         
 
+ $("#btn_submit").click(function(e) {
+                                            e.preventDefault();
+                                            $('#loader1').show();
+                                             table.rows().nodes().page.len(-1).draw();
+                                            $('#ibox_form').block({ message: block_msg });
+                                             saveData('onlysave');
+                                            
+                                        });
+
+        $("#btn_print").click(function(e) {
+                                            e.preventDefault();
+                                            $('#loader1').show();
+                                            table.rows().nodes().page.len(-1).draw();
+                                            $('#ibox_form').block({ message: block_msg });
+                                            saveData('saveandprint');
+                                           
+                                        });   
+
+        function saveData(type){
+
+                                        $.post(base_url + 'generate_bills/app/save/', $('#billing_master_form, #student_billing_form')
+                                                    .serialize())
+                                                .done(function(data) {
+                                                    if ($.isNumeric(data)) {
+                                                        if(type == 'saveandprint'){
+                                                            printData();
+                                                        }
+                                                        $('#loader1').hide();
+                                                        table.rows().nodes().page.len(10).draw();
+                                                        $('#ibox_form').unblock();
+                                                        var body = $("html, body");
+                                                        body.animate({ scrollTop: 0 }, '1000', 'swing');
+                                                        $('#success_msg').show();
+                                                        $('#success_msg_info').html('Bill saved.');
+                                                    } else {
+                                                        $('#loader1').hide();
+                                                        $('#ibox_form').unblock();
+                                                        var body = $("html, body");
+                                                        body.animate({ scrollTop: 0 }, '1000', 'swing');
+                                                        $("#emsgbody").html(data);
+                                                        $("#emsg").show("slow");
+                                                    }
+                                                });
+
+        }
+
+        function printData(){
+             $.post(base_url + 'generate_bills/app/print/', $('#billing_master_form, #student_billing_form')
+                                                    .serialize())
+                                                .done(function(data) {
+                                                       $('#loader1').hide();
+                                                       table.rows().nodes().page.len(10).draw();
+                                                        $('#ibox_form').unblock();
+                                                        var body = $("html, body");
+                                                        body.animate({ scrollTop: 0 }, '1000', 'swing');
+                                                        $('#success_msg').show();
+                                                        $('#success_msg_info').html('Bill saved.');
+                                                         window.open(data, '_blank');
+                                                         window.focus();
+                                                });
+        }                     
+
+        
+
         $(document).on('click', '.btn_save_bill', function(e) {
+
+           
             let feeArray = [];
             let discountArray = [];
             let scholarshipArray = [];
@@ -799,6 +828,7 @@
             }
 
             let newTotals = Array.from(document.getElementsByClassName("total_fee[" + e.target.id + "]"));
+            
             if (newTotals.length > 0) {
                 newTotals.forEach(function(newTotal) {
                     obj = {
@@ -814,6 +844,7 @@
             let discountArraySerialized = JSON.stringify(discountArray);
             let scholarshipArraySerialized = JSON.stringify(scholarshipArray);
             let totalArraySerialized = JSON.stringify(totalArray);
+           
             let master_form = JSON.stringify($('#billing_master_form').serializeArray());
 
             let dataToSend = {
@@ -827,7 +858,7 @@
 
             $.post(base_url + 'generate_bills/app/updateBill/', dataToSend,
                 function(data, status) {
-                    console.log(data);
+                     $('.btn_save_bill').html('saved');
                 });
 
         })

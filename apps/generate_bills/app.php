@@ -71,7 +71,7 @@ switch ($action) {
         $student_scholarships = isset($data['studentScholarships']) ? $data['studentScholarships'] : [];
         $total_fees = isset($data['total_fee']) ? $data['total_fee'] : [];
         $student_ids = [];
-
+         
         foreach ($total_fees as $key => $total_fee) {
             array_push($student_ids, $key);
         }
@@ -273,6 +273,7 @@ switch ($action) {
 
             $bID = 1;
             if ($billing_queried) {
+
                 if($billing_queried->total_fee != $total_fee){
 
                     $print_no += $billing_queried->print_no;
@@ -330,7 +331,9 @@ switch ($action) {
         break;
 
     case 'updateBill':
+
         $data = $request->all();
+       
         $fee_array = json_decode($data['feeArray']);
         $fine_array = json_decode($data['fineArray']);
         $discount_array = json_decode($data['discountArray']);
@@ -339,10 +342,16 @@ switch ($action) {
         $master_form = json_decode($data['masterForm']);
         $master_form_array = [];
 
+        
+
+
+
         foreach ($master_form as $m) {
             $master_form_array[$m->name] = $m->value;
         }
 
+       
+      
         $reduced_fee_array = [];
         $reduced_fine_array = [];
         $reduced_discount_array = [];
@@ -365,144 +374,207 @@ switch ($action) {
             $reduced_total_array[$total->id] = $total->value;
         }
 
+        $student_total_fee = 0;
         foreach ($reduced_fee_array as $key => $fee) {
             $exploded_fees = str_replace("]", "", explode("[", $key));
 
             $student_id = $exploded_fees[1];
             $fee_id = $exploded_fees[2];
 
-            $billing_fee = BillingFee::where([
-                'class_id' => $master_form_array['class_id'],
-                'section_id' => $master_form_array['section_id'],
-                'faculty_id' => $master_form_array['faculty_id'],
-                'student_type_id' => $master_form_array['student_type_id'],
-                'category_id' => $master_form_array['category_id'],
-                'sub_category_id' => $master_form_array['sub_category_id'],
+            $student_total_fee += $fee;
+
+            $student = AppStudent::find($student_id);
+
+            $old_billing_fee = BillingFee::where([
+                'class_id' => $student->class_id,
+                'section_id' => $student->section_id,
+                'faculty_id' => $student->faculty_id,
+                'student_type_id' => $student->student_type_id,
+                'category_id' => $student->category_id,
+                'sub_category_id' => $student->sub_category_id,
                 'billing_period_id' => $master_form_array['billing_period_id'],
                 'fee_id' => $fee_id,
                 'student_id' => $student_id,
             ])->orderBy('created_at', 'desc')->first();
 
-            $new_billing_fee = new BillingFee;
-            $new_billing_fee->class_id = $master_form_array['class_id'];
-            $new_billing_fee->section_id = $master_form_array['section_id'];
-            $new_billing_fee->faculty_id = $master_form_array['faculty_id'];
-            $new_billing_fee->student_type_id = $master_form_array['student_type_id'];
-            $new_billing_fee->category_id = $master_form_array['category_id'];
-            $new_billing_fee->sub_category_id = $master_form_array['sub_category_id'];
-            $new_billing_fee->billing_period_id = $master_form_array['billing_period_id'];
-            $new_billing_fee->fee_id = $fee_id;
-            $new_billing_fee->student_id = $student_id;
-            $new_billing_fee->from_fee = $billing_fee->to_fee;
-            $new_billing_fee->to_fee = $fee;
-            $new_billing_fee->creator_id = $user->id;
-            $new_billing_fee->is_saved = 1;
-            $new_billing_fee->save();
+            if($old_billing_fee){
+                if($old_billing_fee->to_fee != $fee){
+                    $new_billing_fee = $old_billing_fee->replicate();
+                            $new_billing_fee->from_fee = $old_billing_fee->to_fee; 
+                            $new_billing_fee->to_fee = $fee;
+                            $new_billing_fee->creator_id = $user->id; 
+                            $new_billing_fee->save();
+                }
+
+            }else{
+                $new_billing_fee = new BillingFee;
+                $new_billing_fee->class_id = $student->class_id;
+                $new_billing_fee->section_id = $student->section_id;
+                $new_billing_fee->faculty_id = $student->faculty_id;
+                $new_billing_fee->student_type_id = $student->student_type_id;
+                $new_billing_fee->category_id = $student->category_id;
+                $new_billing_fee->sub_category_id = $student->sub_category_id;
+                $new_billing_fee->billing_period_id = $master_form_array['billing_period_id'];
+                $new_billing_fee->fee_id = $fee_id;
+                $new_billing_fee->student_id = $student_id;
+                $new_billing_fee->to_fee = $fee;
+                $new_billing_fee->creator_id = $user->id;
+                $new_billing_fee->is_saved = 1;
+                $new_billing_fee->save();
+            }
+
+            
         }
 
+        $student_total_fine = 0;
         foreach ($reduced_fine_array as $key => $fine) {
             $exploded_fines = str_replace("]", "", explode("[", $key));
 
             $student_id = $exploded_fines[1];
             $fine_id = $exploded_fines[2];
 
-            $billing_fine = BillingFine::where([
-                'class_id' => $master_form_array['class_id'],
-                'section_id' => $master_form_array['section_id'],
-                'faculty_id' => $master_form_array['faculty_id'],
-                'student_type_id' => $master_form_array['student_type_id'],
-                'category_id' => $master_form_array['category_id'],
-                'sub_category_id' => $master_form_array['sub_category_id'],
+            $student_total_fine += $fine;
+
+            $student = AppStudent::find($student_id);
+
+            $old_billing_fine = BillingFine::where([
+                'class_id' => $student->class_id,
+                'section_id' => $student->section_id,
+                'faculty_id' => $student->faculty_id,
+                'student_type_id' => $student->student_type_id,
+                'category_id' => $student->category_id,
+                'sub_category_id' => $student->sub_category_id,
                 'billing_period_id' => $master_form_array['billing_period_id'],
                 'fine_id' => $fine_id,
                 'student_id' => $student_id,
             ])->orderBy('created_at', 'desc')->first();
 
+            if($old_billing_fine){
+                if($old_billing_fine->to_fine != $fine){
+                    $new_billing_fine = $old_billing_fine->replicate();
+                    $new_billing_fine->from_fine = $old_billing_fine->to_fine; 
+                    $new_billing_fine->to_fine = $fine;
+                    $new_billing_fine->creator_id = $user->id; 
+                    $new_billing_fine->save();
+                }
+            }else{
+
             $new_billing_fine = new BillingFine;
-            $new_billing_fine->class_id = $master_form_array['class_id'];
-            $new_billing_fine->section_id = $master_form_array['section_id'];
-            $new_billing_fine->faculty_id = $master_form_array['faculty_id'];
-            $new_billing_fine->student_type_id = $master_form_array['student_type_id'];
-            $new_billing_fine->category_id = $master_form_array['category_id'];
-            $new_billing_fine->sub_category_id = $master_form_array['sub_category_id'];
+            $new_billing_fine->class_id = $student->class_id;
+            $new_billing_fine->section_id = $student->section_id;
+            $new_billing_fine->faculty_id = $student->faculty_id;
+            $new_billing_fine->student_type_id = $student->student_type_id;
+            $new_billing_fine->category_id = $student->category_id;
+            $new_billing_fine->sub_category_id = $student->sub_category_id;
             $new_billing_fine->billing_period_id = $master_form_array['billing_period_id'];
             $new_billing_fine->fine_id = $fine_id;
             $new_billing_fine->student_id = $student_id;
-            $new_billing_fine->from_fine = $billing_fine->to_fine;
             $new_billing_fine->to_fine = $fine;
             $new_billing_fine->creator_id = $user->id;
             $new_billing_fine->is_saved = 1;
             $new_billing_fine->save();
+
+            }
         }
 
+        $student_total_discount = 0;
         foreach ($reduced_discount_array as $key => $discount) {
             $exploded_discounts = str_replace("]", "", explode("[", $key));
 
             $student_id = $exploded_discounts[1];
             $discount_id = $exploded_discounts[2];
 
-            $billing_discount = BillingDiscount::where([
-                'class_id' => $master_form_array['class_id'],
-                'section_id' => $master_form_array['section_id'],
-                'faculty_id' => $master_form_array['faculty_id'],
-                'student_type_id' => $master_form_array['student_type_id'],
-                'category_id' => $master_form_array['category_id'],
-                'sub_category_id' => $master_form_array['sub_category_id'],
+            $student_total_discount += $discount;
+
+            $student = AppStudent::find($student_id);
+
+            $old_billing_discount = BillingDiscount::where([
+                'class_id' => $student->class_id,
+                'section_id' => $student->section_id,
+                'faculty_id' => $student->faculty_id,
+                'student_type_id' => $student->student_type_id,
+                'category_id' => $student->category_id,
+                'sub_category_id' => $student->sub_category_id,
                 'billing_period_id' => $master_form_array['billing_period_id'],
                 'discount_id' => $discount_id,
                 'student_id' => $student_id,
             ])->orderBy('created_at', 'desc')->first();
 
+            if($old_billing_discount){
+                if($old_billing_discount->to_discount != $discount){
+                    $new_billing_discount = $old_billing_discount->replicate();
+                    $new_billing_discount->from_discount = $old_billing_discount->to_discount; 
+                    $new_billing_discount->to_discount = $discount;
+                    $new_billing_discount->creator_id = $user->id; 
+                    $new_billing_discount->save();
+                }
+            }else{
+
             $new_billing_discount = new BillingDiscount;
-            $new_billing_discount->class_id = $master_form_array['class_id'];
-            $new_billing_discount->section_id = $master_form_array['section_id'];
-            $new_billing_discount->faculty_id = $master_form_array['faculty_id'];
-            $new_billing_discount->student_type_id = $master_form_array['student_type_id'];
-            $new_billing_discount->category_id = $master_form_array['category_id'];
-            $new_billing_discount->sub_category_id = $master_form_array['sub_category_id'];
+            $new_billing_discount->class_id = $student->class_id;
+            $new_billing_discount->section_id = $student->section_id;
+            $new_billing_discount->faculty_id = $student->faculty_id;
+            $new_billing_discount->student_type_id = $student->student_type_id;
+            $new_billing_discount->category_id = $student->category_id;
+            $new_billing_discount->sub_category_id = $student->sub_category_id;
             $new_billing_discount->billing_period_id = $master_form_array['billing_period_id'];
             $new_billing_discount->discount_id = $discount_id;
             $new_billing_discount->student_id = $student_id;
-            $new_billing_discount->from_discount = $billing_discount->to_discount;
             $new_billing_discount->to_discount = $discount;
             $new_billing_discount->creator_id = $user->id;
             $new_billing_discount->is_saved = 1;
             $new_billing_discount->save();
+            }
         }
 
+        $student_total_scholarship = 0;
         foreach ($reduced_scholarship_array as $key => $scholarship) {
             $exploded_scholarships = str_replace("]", "", explode("[", $key));
 
             $student_id = $exploded_scholarships[1];
             $scholarship_id = $exploded_scholarships[2];
 
-            $billing_scholarship = BillingScholarship::where([
-                'class_id' => $master_form_array['class_id'],
-                'section_id' => $master_form_array['section_id'],
-                'faculty_id' => $master_form_array['faculty_id'],
-                'student_type_id' => $master_form_array['student_type_id'],
-                'category_id' => $master_form_array['category_id'],
-                'sub_category_id' => $master_form_array['sub_category_id'],
+            $student_total_scholarship += $scholarship;
+
+            $student = AppStudent::find($student_id);
+
+            $old_billing_scholarship = BillingScholarship::where([
+                'class_id' => $student->class_id,
+                'section_id' => $student->section_id,
+                'faculty_id' => $student->faculty_id,
+                'student_type_id' => $student->student_type_id,
+                'category_id' => $student->category_id,
+                'sub_category_id' => $student->sub_category_id,
                 'billing_period_id' => $master_form_array['billing_period_id'],
                 'scholarship_id' => $scholarship_id,
                 'student_id' => $student_id,
             ])->orderBy('created_at', 'desc')->first();
 
+            if($old_billing_scholarship){
+                if($old_billing_scholarship->to_scholarship != $scholarship){
+                    $new_billing_scholarship = $old_billing_scholarship->replicate();
+                    $new_billing_scholarship->from_scholarship = $old_billing_scholarship->to_scholarship; 
+                    $new_billing_scholarship->to_scholarship = $scholarship;
+                    $new_billing_scholarship->creator_id = $user->id; 
+                    $new_billing_scholarship->save();
+                }
+            }else{
+
             $new_billing_scholarship = new BillingScholarship;
-            $new_billing_scholarship->class_id = $master_form_array['class_id'];
-            $new_billing_scholarship->section_id = $master_form_array['section_id'];
-            $new_billing_scholarship->faculty_id = $master_form_array['faculty_id'];
-            $new_billing_scholarship->student_type_id = $master_form_array['student_type_id'];
-            $new_billing_scholarship->category_id = $master_form_array['category_id'];
-            $new_billing_scholarship->sub_category_id = $master_form_array['sub_category_id'];
+            $new_billing_scholarship->class_id = $student->class_id;
+            $new_billing_scholarship->section_id = $student->section_id;
+            $new_billing_scholarship->faculty_id = $student->faculty_id;
+            $new_billing_scholarship->student_type_id = $student->student_type_id;
+            $new_billing_scholarship->category_id = $student->category_id;
+            $new_billing_scholarship->sub_category_id = $student->sub_category_id;
             $new_billing_scholarship->billing_period_id = $master_form_array['billing_period_id'];
             $new_billing_scholarship->scholarship_id = $scholarship_id;
             $new_billing_scholarship->student_id = $student_id;
-            $new_billing_scholarship->from_scholarship = $billing_scholarship->to_scholarship;
             $new_billing_scholarship->to_scholarship = $scholarship;
             $new_billing_scholarship->creator_id = $user->id;
             $new_billing_scholarship->is_saved = 1;
             $new_billing_scholarship->save();
+            }
         }
 
         foreach ($reduced_total_array as $key => $total) {
@@ -511,31 +583,46 @@ switch ($action) {
 
             $student_id = $exploded_total_array[1];
 
-            $billing_update = BillingUpdate::where([
-                'class_id' => $master_form_array['class_id'],
-                'section_id' => $master_form_array['section_id'],
-                'faculty_id' => $master_form_array['faculty_id'],
-                'student_type_id' => $master_form_array['student_type_id'],
-                'category_id' => $master_form_array['category_id'],
-                'sub_category_id' => $master_form_array['sub_category_id'],
-                'billing_period_id' => $master_form_array['billing_period_id'],
+            $student = AppStudent::find($student_id);
+            $print_no = 0;
+            $billing_queried = Billing::where([
                 'student_id' => $student_id,
+                'billing_period_id' => $master_form_array['billing_period_id'],
+                'fiscal_year_id' => $master_form_array['fiscal_year_id']
             ])->orderBy('created_at', 'desc')->first();
 
-            $new_billing_update = new BillingUpdate;
-            $new_billing_update->class_id = $master_form_array['class_id'];
-            $new_billing_update->section_id = $master_form_array['section_id'];
-            $new_billing_update->faculty_id = $master_form_array['faculty_id'];
-            $new_billing_update->student_type_id = $master_form_array['student_type_id'];
-            $new_billing_update->category_id = $master_form_array['category_id'];
-            $new_billing_update->sub_category_id = $master_form_array['sub_category_id'];
-            $new_billing_update->billing_period_id = $master_form_array['billing_period_id'];
-            $new_billing_update->student_id = $student_id;
-            $new_billing_update->from_total_fee = $billing_update->to_total_fee;
-            $new_billing_update->to_total_fee = $total;
-            $new_billing_update->creator_id = $user->id;
-            $new_billing_update->is_saved = 1;
-            $new_billing_update->save();
+            if ($billing_queried) {
+
+                if($billing_queried->total_fee != $total){
+
+                    $print_no += $billing_queried->print_no;
+                    $new_billing = $billing_queried->replicate();
+                    $new_billing->print_no = $print_no;
+                    $new_billing->fee = $student_total_fee;
+                    $new_billing->fine = $student_total_fine;
+                    $new_billing->discount = $student_total_discount;
+                    $new_billing->scholarship = $student_total_scholarship;
+                    $new_billing->total_fee = $total;
+                    $new_billing->save();
+
+                }
+            }else{
+                $billing = new Billing;
+                $billing->month = date('m');
+                $billing->fee = $student_total_fee;
+                $billing->fine = $student_total_fine;
+                $billing->discount = $student_total_discount;
+                $billing->scholarship = $student_total_scholarship;
+                $billing->total_fee = $total;
+                $billing->generated_by_id = $user->id;
+                $billing->billing_period_id = $master_form_array['billing_period_id'];
+                $billing->student_id = $student_id;
+                $billing->fiscal_year_id = $master_form_array['fiscal_year_id'];
+                $billing->print_no = $print_no;
+                $billing->save();
+               
+            }
+          
         }
 
         break;
