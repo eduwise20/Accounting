@@ -510,16 +510,18 @@
                     $("#billing_master_form").serialize(),
                     function(data, status) {
                         if (data) {
+                            let tableHead = '';
+                            let tableBody = '';
                             let jsonData = JSON.parse(data);
                             if(jsonData['status'] == 1){
-                            let tableHead = populateTableHead(jsonData);
+                            tableHead = populateTableHead(jsonData);
                             student_billing_section.show();
                             let students = jsonData['students'];
                             let fees = jsonData['fees'];
                             let discounts = jsonData['discounts'];
                             let scholarships = jsonData['scholarships'];
                             let fines = jsonData['fines'];
-                            let tableBody = populateStudents(students, fees, discounts, scholarships,
+                            tableBody = populateStudents(students, fees, discounts, scholarships,
                                 fines);
                             table = $('#clx_datatable').DataTable({
                                 responsive: true,
@@ -563,12 +565,14 @@
                             $('.has-tooltip').tooltip();
                             table.clear().draw();
                             table.rows.add($(tableBody)).draw();
+                             $("#emsg").hide("slow");
                              $('#loader').hide();
+
 
                             }else{
                                  $('#loader').hide();
-                                $("#emsgbody").html(jsonData['message']);
-                                $("#emsg").show("slow");
+                                 $("#emsgbody").html(jsonData['message']);
+                                 $("#emsg").show("slow");
                                  enableGenerateButton();
                             }
                         }

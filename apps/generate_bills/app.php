@@ -651,6 +651,14 @@ switch ($action) {
                 }
             }
             $students = AppStudent::where($where)->get();
+
+            if($students->count() == 0){
+                echo json_encode([
+                    'status' => 0,
+                    'message' => 'Student data not available.'
+                ]);
+                exit;
+            }
     
             $student_ids = AppStudent::where($where)->pluck('id');
     
@@ -946,9 +954,8 @@ switch ($action) {
         ';
          $count = 1;
         foreach ($student_ids as $student_id) {
-
-            // if($count ==  1){
-           
+            
+                    
             $student_total_fee = 0;
             $fees = [];
             if (sizeof($student_fees)) {
@@ -1027,8 +1034,8 @@ switch ($action) {
                 'student_list_count' => $count,
                 'app_url' => APP_URL
             ]);
-            // }
-        
+            
+
             $count++;
         }
 
