@@ -501,6 +501,7 @@
             $('#loader').hide();
             $('#loader1').hide();
 
+            let prevTable = '';
             btn_generate.click(function(e) {
                 disableGenerateButton();
                 $('#success_msg').hide();
@@ -509,6 +510,10 @@
                 $.post(base_url + 'generate_bills/app/get_students_with_bill_detail/',
                     $("#billing_master_form").serialize(),
                     function(data, status) {
+                        if(prevTable != ''){
+                             prevTable.clear(); 
+                            prevTable.destroy(); 
+                        }
                         if (data) {
                             let tableHead = '';
                             let tableBody = '';
@@ -523,10 +528,11 @@
                             let fines = jsonData['fines'];
                             tableBody = populateStudents(students, fees, discounts, scholarships,
                                 fines);
+                                
                             table = $('#clx_datatable').DataTable({
                                 responsive: true,
-                                lengthChange: true,
-                                bDestroy: true,
+                                lengthChange: false,
+                                aaSorting: [[1, 'asc']],
                                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
                                     "<'row'<'col-sm-12'tr>>" +
                                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
@@ -562,8 +568,9 @@
                                     }
                                 ]
                             });
+                            prevTable = table;
                             $('.has-tooltip').tooltip();
-                            table.clear().draw();
+                           
                             table.rows.add($(tableBody)).draw();
                              $("#emsg").hide("slow");
                              $('#loader').hide();

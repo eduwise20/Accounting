@@ -631,7 +631,8 @@ switch ($action) {
             $data = $request->all();
             
             $where = [
-                'class_id' => $data['class_id']
+                'class_id' => $data['class_id'],
+                'status' => 'active'
             ];
 
             if ($data['student_type_id'] != 0) {
