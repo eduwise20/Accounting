@@ -228,7 +228,8 @@ switch ($action) {
             $fee_names[] = [
                 'id'   => $all_fee->id,
                 'name' => $all_fee->name,
-                'rate' => $rate
+                'rate' => $rate,
+                'is_compulsary' => $all_fee->is_compulsary,
             ];
             
         }
