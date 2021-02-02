@@ -156,6 +156,15 @@
                                         </div>
                                     </div>
 
+                                    <div class="form-group row" id="student_section">
+                                        <label for="students" class="col-sm-4"><span class="h6">Student</span></label>
+                                        <div class="col-sm-8">
+                                            <select id="student_id" name="student_id" class="custom-select">
+                                                <option value="0">--</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="form-group row" id="faculty_section">
                                         <label for="remarks" class="col-sm-4"><span class="h6">Faculty</span><span
                                                 class="text-danger">*</span></label>
@@ -312,6 +321,8 @@
             const category_id = $("#category_id");
             const sub_category_id = $("#sub_category_id");
             const section_id = $("#section_id");
+            const student_id = $("#student_id");
+
             let is_class_chosen = false;
             let is_billing_period_chosen = false;
             let is_faculty_populated = false;
@@ -319,15 +330,19 @@
             let is_faculty_chosen = false;
             let is_section_chosen = false;
             let is_category_chosen = false;
+            let is_student_chosen = false;
+
             const btn_generate = $("#btn_generate");
             const student_billing_section = $("#student_billing_section");
             const faculty_section = $("#faculty_section");
             const section_section = $("#section_section");
             const sub_category_section = $("#sub_category_section");
+            const student_section = $("#student_section");
 
             student_billing_section.hide();
             faculty_section.hide();
             section_section.hide();
+            student_section.hide();
             sub_category_section.hide();
             $(".progress").hide();
             $("#emsg").hide();
@@ -341,12 +356,20 @@
                 if (is_class_chosen) {
                     getFacultyForClass(class_id[0].value);
                     getSectionForClass(class_id[0].value);
+                    getStudentForClass(class_id[0].value);
                 }
                 checkToRemoveDisabled();
             });
 
             student_type_id.change(function() {
                 if (student_type_id[0].value != 0) {
+                    enableGenerateButton();
+                    checkToRemoveDisabled();
+                }
+            });
+
+             student_id.change(function() {
+                if (student_id[0].value != 0 || student_id[0].value == 0) {
                     enableGenerateButton();
                     checkToRemoveDisabled();
                 }
@@ -464,6 +487,23 @@
                     });
             }
 
+            function getStudentForClass(class_id) {
+                $.post(base_url + 'generate_bills/app/getStudentForClass/', { class_id: class_id },
+                    function(data, status) {
+                        let students = JSON.parse(data);
+                        if (students.length > 0) {
+                            populateStudentSelectList(students);
+                            is_student_populated = true;
+                            student_section.show();
+                        } else {
+                            student_id.html('<option value="0">--</option>');
+                            is_student_populated = false;
+                            student_student.hide();
+                        }
+                        checkToRemoveDisabled();
+                    });
+            }
+
             function populateFacultySelectList(faculties) {
                 faculty_id.html('<option value="0">--</option>');
                 faculties.forEach(function(faculty) {
@@ -476,6 +516,14 @@
                 section_id.html('<option value="0">--</option>');
                 sections.forEach(function(section) {
                     section_id.append('<option value="' + section['id'] + '">' + section['name'] +
+                        '</option>');
+                });
+            }
+
+            function populateStudentSelectList(students) {
+                student_id.html('<option value="0">--</option>');
+                students.forEach(function(student) {
+                    student_id.append('<option value="' + student['id'] + '">' + student['name'] +
                         '</option>');
                 });
             }
@@ -530,43 +578,13 @@
                                 fines);
                                 
                             table = $('#clx_datatable').DataTable({
-                                responsive: true,
+                                responsive: false,
                                 lengthChange: false,
                                 aaSorting: [[1, 'asc']],
                                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
                                     "<'row'<'col-sm-12'tr>>" +
                                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                                buttons: [{
-                                        extend: 'pdfHtml5',
-                                        text: 'PDF',
-                                        titleAttr: 'Generate PDF',
-                                        className: 'btn-danger btn-sm mr-1'
-                                    },
-                                    {
-                                        extend: 'excelHtml5',
-                                        text: 'Excel',
-                                        titleAttr: 'Generate Excel',
-                                        className: 'btn-success btn-sm mr-1'
-                                    },
-                                    {
-                                        extend: 'csvHtml5',
-                                        text: 'CSV',
-                                        titleAttr: 'Generate CSV',
-                                        className: 'btn-primary btn-sm mr-1'
-                                    },
-                                    {
-                                        extend: 'copyHtml5',
-                                        text: 'Copy',
-                                        titleAttr: 'Copy to clipboard',
-                                        className: 'btn-dark btn-sm mr-1'
-                                    },
-                                    {
-                                        extend: 'print',
-                                        text: 'Print',
-                                        titleAttr: 'Print Table',
-                                        className: 'btn-secondary btn-sm'
-                                    }
-                                ]
+                                buttons: []
                             });
                             prevTable = table;
                             $('.has-tooltip').tooltip();
@@ -699,7 +717,7 @@
                     }
 
                     tableBody +=
-                        '<td class="row-data"><input type="text" data-sid="'+student['id']+'"  class="form-control total_fee[' +
+                        '<td style="width:120px" class="row-data"><input  type="text" data-sid="'+student['id']+'"  class="form-control total_fee[' +
                         student['id'] + ']" id="total_fee[' +
                         student['id'] + ']" name="total_fee[' +
                         student['id'] + ']" value="' +
@@ -724,7 +742,7 @@
                                             e.preventDefault();
                                             $('#loader1').show();
                                              table.rows().nodes().page.len(-1).draw();
-                                            $('#ibox_form').block({ message: block_msg });
+                                           
                                              saveData('onlysave');
                                             
                                         });

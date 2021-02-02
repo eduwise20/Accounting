@@ -71,7 +71,7 @@ switch ($action) {
         $student_scholarships = isset($data['studentScholarships']) ? $data['studentScholarships'] : [];
         $total_fees = isset($data['total_fee']) ? $data['total_fee'] : [];
         $student_ids = [];
-         
+
         foreach ($total_fees as $key => $total_fee) {
             array_push($student_ids, $key);
         }
@@ -276,9 +276,9 @@ switch ($action) {
 
                 if($billing_queried->total_fee != $total_fee){
 
-                    $print_no += $billing_queried->print_no;
+                    // $print_no += $billing_queried->print_no;
                     $new_billing = $billing_queried->replicate();
-                    $new_billing->print_no = $print_no;
+                    // $new_billing->print_no = $print_no;
                     $new_billing->fee = $student_total_fee;
                     $new_billing->fine = $student_total_fine;
                     $new_billing->discount = $student_total_discount;
@@ -330,6 +330,12 @@ switch ($action) {
         echo json_encode($sections);
         break;
 
+    case 'getStudentForClass':
+        $data = $request->all();
+        $students = AppStudent::where(['class_id' => $data['class_id'],'status' => 'active'])->get();
+        echo json_encode($students);
+        break;    
+
     case 'updateBill':
 
         $data = $request->all();
@@ -342,15 +348,9 @@ switch ($action) {
         $master_form = json_decode($data['masterForm']);
         $master_form_array = [];
 
-        
-
-
-
         foreach ($master_form as $m) {
             $master_form_array[$m->name] = $m->value;
         }
-
-       
       
         $reduced_fee_array = [];
         $reduced_fine_array = [];
@@ -595,9 +595,9 @@ switch ($action) {
 
                 if($billing_queried->total_fee != $total){
 
-                    $print_no += $billing_queried->print_no;
+                    // $print_no += $billing_queried->print_no;
                     $new_billing = $billing_queried->replicate();
-                    $new_billing->print_no = $print_no;
+                    // $new_billing->print_no = $print_no;
                     $new_billing->fee = $student_total_fee;
                     $new_billing->fine = $student_total_fine;
                     $new_billing->discount = $student_total_discount;
@@ -635,8 +635,13 @@ switch ($action) {
                 'status' => 'active'
             ];
 
+            
             if ($data['student_type_id'] != 0) {
                 $where['student_type_id'] = $data['student_type_id'];
+            }
+
+            if ($data['student_id'] != 0) {
+                $where['id'] = $data['student_id'];
             }
 
             if ($data['faculty_id'] != 0) {
@@ -903,8 +908,8 @@ switch ($action) {
             break;
 
     case 'print':
+
         $data = $request->all();
-      
         $student_fees = isset($data['studentFees']) ? $data['studentFees'] : [];
         $student_fines = isset($data['studentFines']) ? $data['studentFines'] : [];
         $student_discounts = isset($data['studentDiscounts']) ? $data['studentDiscounts'] : [];
@@ -955,7 +960,17 @@ switch ($action) {
         ';
          $count = 1;
         foreach ($student_ids as $student_id) {
-            
+
+            // print log
+            $billing_queried = Billing::where([
+                'student_id' => $student_id,
+                'billing_period_id' => $data['billing_period_id'],
+                'fiscal_year_id' => $data['fiscal_year_id']
+            ])->orderBy('created_at', 'desc')->first();
+
+            $old_print_no = $billing_queried->print_no + 1;
+            $billing_queried->print_no = $old_print_no;
+            $billing_queried->save();
                     
             $student_total_fee = 0;
             $fees = [];
