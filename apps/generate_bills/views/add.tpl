@@ -37,6 +37,10 @@
         .text-danger {
             color: #F6365B !important;
         }
+
+        #clx_datatable tr td input{
+            width:150px;
+        }
     </style>
 
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.6.2/css/buttons.dataTables.min.css" />
@@ -120,7 +124,7 @@
                         </div>
 
                         <form id="billing_master_form">
-
+                       
                             <div class="row">
                                 <div class="col-md-6 col-sm-6">
 
@@ -307,7 +311,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
-
+   
 
     <script>
         var table;
@@ -593,6 +597,8 @@
                              $("#emsg").hide("slow");
                              $('#loader').hide();
 
+                           
+
 
                             }else{
                                  $('#loader').hide();
@@ -660,7 +666,8 @@
                             let studentFeesCount = Object.keys(studentFees).length;
                             if (studentFeesCount > 0) {
                                 tableBody +=
-                                    '<td class=""><input type="text"  class="form-control studentFees[' +
+                                    '<td class=""><input type="text"  class="student' +
+                                    student['id'] + ' form-control studentFees[' +
                                     student['id'] + ']" id="studentFees[' +
                                     student['id'] + '][' + fee['id'] + ']" name="studentFees[' +
                                     student['id'] + '][' + fee['id'] + ']" value="' +
@@ -675,7 +682,8 @@
                             let studentFinesCount = Object.keys(studentFines).length;
                             if (studentFinesCount > 0) {
                                 tableBody +=
-                                    '<td class=""><input type="text"  class="form-control studentFines[' +
+                                    '<td class=""><input type="text"  class="student' +
+                                    student['id'] + ' form-control studentFines[' +
                                     student['id'] + ']" id="studentFines[' +
                                     student['id'] + '][' + fine['id'] + ']" name="studentFines[' +
                                     student['id'] + '][' + fine['id'] + ']" value="' + studentFines[
@@ -689,7 +697,8 @@
                             let studentDiscountsCount = Object.keys(studentDiscounts).length;
                             if (studentDiscountsCount > 0) {
                                 tableBody +=
-                                    '<td class=""><input type="text" class="form-control studentDiscounts[' +
+                                    '<td class=""><input type="text" class="student' +
+                                    student['id'] + ' form-control studentDiscounts[' +
                                     student['id'] + ']" id="studentDiscounts[' +
                                     student['id'] + '][' + discount['id'] +
                                     ']" name="studentDiscounts[' +
@@ -705,7 +714,8 @@
                             let studentScholarshipsCount = Object.keys(studentScholarships).length;
                             if (studentScholarshipsCount > 0) {
                                 tableBody +=
-                                    '<td class=""><input type="text" class="form-control studentScholarships[' +
+                                    '<td class=""><input type="text" class="student' +
+                                    student['id'] + ' form-control studentScholarships[' +
                                     student['id'] + ']" id="studentScholarships[' +
                                     student['id'] + '][' + scholarship['id'] +
                                     ']" name="studentScholarships[' +
@@ -717,7 +727,7 @@
                     }
 
                     tableBody +=
-                        '<td style="width:120px" class="row-data"><input  type="text" data-sid="'+student['id']+'"  class="form-control total_fee[' +
+                        '<td class="row-data"><input readonly type="text" data-sid="'+student['id']+'"  class="result form-control total_fee[' +
                         student['id'] + ']" id="total_fee[' +
                         student['id'] + ']" name="total_fee[' +
                         student['id'] + ']" value="' +
@@ -890,6 +900,24 @@
                      $('.btn_save_bill').html('saved');
                 });
 
-        })
+        });
+
+
+        $(document).on("input", "input:text", function () {
+            var strClass = $(this).prop("class");
+            var spliteddata = strClass.split(' ');
+            var newClass = spliteddata[0];
+            var intTotal = 0;
+            $.each($("input:text." + newClass), function () {
+                var intInputValue = parseFloat($(this).val());
+                if (!isNaN(intInputValue))
+                {
+                    intTotal = intTotal + intInputValue;
+                }
+            });
+            $(this).parent("td").siblings("td").find('.result').val(intTotal);
+        });
+
+
     </script>
 {/block}
