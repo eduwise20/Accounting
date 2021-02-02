@@ -527,7 +527,7 @@
                     tableBody += '<td><input type="checkbox" id="selectOne[' + fees[i].id + ']" class="selectOne" name="fee_ids[' + fees[i].id + ']" /></td>';
                 }
                 tableBody += '<td>' + fees[i].name + '</td>';
-                tableBody += '<td>' + fees[i].code + '</td>';
+                tableBody += '<td>' + fees[i].rate + '</td>';
                 tableBody += '</tr>';
             });
             $("#table_body").html(tableBody);
@@ -584,7 +584,7 @@
             tableHead += '<tr class="heading" >';
             tableHead += '<th><input type="checkbox" id="selectAllCheckbox"/></th>';
             tableHead += '<th>Fee Name</th>';
-            tableHead += '<th>Fee Code</th>';
+            tableHead += '<th>Fee Rate</th>';
             tableHead += '</tr>';
             $("#table_head").html(tableHead);
         }

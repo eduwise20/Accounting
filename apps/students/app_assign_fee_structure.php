@@ -9,6 +9,8 @@ require 'apps/categories/models/Category.php';
 require 'apps/categories/models/Subcategory.php';
 require 'apps/fee_names/models/AppFeeName.php';
 require 'apps/students/models/AppFeeNameStudent.php';
+require 'apps/fee_rates/models/AppFeeRate.php';
+require 'apps/fee_rates/models/AppFeeStructure.php';
 
 $action = route(2, 'list');
 _auth();
@@ -182,11 +184,22 @@ switch ($action) {
         $where = [
             'class_id' => $data['class_id'],
             'student_type_id' => $data['student_type_id'],
-            'faculty_id' => $data['faculty_id'],
-            'section_id' => $data['section_id'],
-            'category_id' => $data['category_id'],
-            'sub_category_id' => $data['sub_category_id'],
         ];
+
+        if ($data['faculty_id'] != 0) {
+            $where['faculty_id'] = $data['faculty_id'];
+        }
+        if ($data['section_id'] != 0) {
+            $where['section_id'] = $data['section_id'];
+        }
+        if ($data['category_id'] != 0) {
+            $where['category_id'] = $data['category_id'];
+            if ($data['sub_category_id'] != 0) {
+                $where['sub_category_id'] = $data['sub_category_id'];
+            }
+        }
+
+
         $students = AppStudent::where($where)->get();
         $r['students'] = $students;
         $r['fee_names'] = $fee_names;
@@ -201,7 +214,25 @@ switch ($action) {
             foreach ($array_of_fee_name_student as $fee_name_student)
                 array_push($selected_fees, $fee_name_student->fee_name_id);
         }
-        $fee_names = AppFeeName::all();
+        $student = AppStudent::find($data['student_id']);
+        $fee_rate = getStudentFeeRate($student);
+        $all_fees = AppFeeName::all();
+        $fee_names = [];
+        foreach($all_fees as $all_fee){
+            $fee_structure_queried = AppFeeStructure::where(['fee_names_id' => $all_fee->id, 'fee_rate_id' => $fee_rate->id])->first();
+            if ($fee_structure_queried) {
+                $rate = $fee_structure_queried->amount;
+            } else {
+                $rate = 0;
+            }
+            $fee_names[] = [
+                'id'   => $all_fee->id,
+                'name' => $all_fee->name,
+                'rate' => $rate
+            ];
+            
+        }
+
         $r['student_id'] = $data['student_id'];
         $r['fees'] = $fee_names;
         $r['selectedFees'] = $selected_fees;
@@ -238,3 +269,39 @@ switch ($action) {
         echo json_encode($r);
         break;
 }
+
+function getStudentFeeRate($student){
+
+    $fee_rate_where = [
+        'class_id' => $student->class_id,
+        'student_type_id' => $student->student_type_id,
+        'faculty_id' => $student->faculty_id,
+        'category_id' => $student->category_id,
+        'sub_category_id' => $student->sub_category_id
+    ];
+    $fee_rate = AppFeeRate::where($fee_rate_where)->first();
+    $feeRate = $fee_rate;
+
+    if(!$fee_rate){
+        $fee_rate_where1 = [
+            'class_id' => $student->class_id,
+            'student_type_id' => $student->student_type_id,
+            'faculty_id' => $student->faculty_id,
+            'category_id' => $student->category_id,
+        ];
+        $fee_rate1 = AppFeeRate::where($fee_rate_where1)->first();
+        $feeRate = $fee_rate1;
+
+        if(!$fee_rate1){
+            $fee_rate_where2 = [
+                'class_id' => $student->class_id,
+                'student_type_id' => $student->student_type_id,
+                'faculty_id' => $student->faculty_id,
+            ];
+            $fee_rate2 = AppFeeRate::where($fee_rate_where2)->first();
+            $feeRate = $fee_rate2;
+        }
+    }
+    return $feeRate;
+}
+
