@@ -625,6 +625,8 @@ switch ($action) {
           
         }
 
+        echo 'updated';
+
         break;
 
         case 'get_students_with_bill_detail':

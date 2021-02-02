@@ -897,7 +897,10 @@
 
             $.post(base_url + 'generate_bills/app/updateBill/', dataToSend,
                 function(data, status) {
-                     $('.btn_save_bill').html('saved');
+                     if(data == 'updated'){
+                        $('.btn_save_bill').html('saved');
+                     }
+                    
                 });
 
         });
