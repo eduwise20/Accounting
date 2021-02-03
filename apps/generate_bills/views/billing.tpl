@@ -1,4 +1,4 @@
-<table class="table-container">
+    <page><table class="table-container">
         <thead>
             <tr>
                 <td>
@@ -269,4 +269,4 @@
             </tr>
         </tfoot>
     </table>
-   
+    </page>

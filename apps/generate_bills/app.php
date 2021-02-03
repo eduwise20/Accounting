@@ -768,7 +768,7 @@ switch ($action) {
                                         foreach ($fee_structure_student_discounts as $fee_structure_student_discount) {
                                             if ($fee_structure_student_discount->billing_period_id == $data['billing_period_id'] || $fee_structure_student_discount->yearly_applicable == 1) {
                                                 $discount = AppDiscount::find($fee_structure_student_discount->discount_id);
-                                                foreach ($fee_rates as $fee_rate) {
+                                                // foreach ($fee_rates as $fee_rate) {
                                                     $fee_structure = AppFeeStructure::where(['fee_names_id' => $all_fee->id, 'fee_rate_id' => $fee_rate->id])->first();
                                                     if ($fee_structure) {
                                                         if ($discount->type == "Amount") {
@@ -781,7 +781,7 @@ switch ($action) {
                                                     } else {
                                                         $student_discounts[$all_discount->id] += 0;
                                                     }
-                                                }
+                                                // }
                                             } else {
                                                 $student_discounts[$all_discount->id] += 0;
                                             }
@@ -827,7 +827,7 @@ switch ($action) {
                                         foreach ($fee_structure_student_scholarships as $fee_structure_student_scholarship) {
                                             if ($fee_structure_student_scholarship->billing_period_id == $data['billing_period_id'] || $fee_structure_student_scholarship->yearly_applicable == 1) {
                                                 $scholarship = AppScholarship::find($fee_structure_student_scholarship->scholarship_id);
-                                                foreach ($fee_rates as $fee_rate) {
+                                                // foreach ($fee_rates as $fee_rate) {
                                                     $fee_structure = AppFeeStructure::where(['fee_names_id' => $all_fee->id, 'fee_rate_id' => $fee_rate->id])->first();
                                                     if ($fee_structure) {
                                                         if ($scholarship->type == "Amount") {
@@ -840,7 +840,7 @@ switch ($action) {
                                                     } else {
                                                         $student_scholarships[$all_scholarship->id] += 0;
                                                     }
-                                                }
+                                                // }
                                             } else {
                                                 $student_scholarships[$all_scholarship->id] += 0;
                                             }
