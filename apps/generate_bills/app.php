@@ -29,7 +29,6 @@ require 'apps/generate_bills/models/BillingFine.php';
 require 'apps/generate_bills/models/BillingScholarship.php';
 
 use Spipu\Html2Pdf\Html2Pdf;
-
 use function Clue\StreamFilter\fun;
 
 $action = route(2, 'list');
@@ -276,6 +275,8 @@ switch ($action) {
 
                 if($billing_queried->total_fee != $total_fee){
 
+                    $prev_total_fee = $billing_queried->total_fee;
+
                     // $print_no += $billing_queried->print_no;
                     $new_billing = $billing_queried->replicate();
                     // $new_billing->print_no = $print_no;
@@ -288,6 +289,8 @@ switch ($action) {
                     $new_billing->save();
 
                     $bID = $new_billing->id;
+
+                    updateStudentDueAmount($student_id,$total_fee,$prev_total_fee);
 
                 }
             }else{
@@ -305,6 +308,8 @@ switch ($action) {
                 $billing->print_no = $print_no;
                 $billing->save();
                 $bID = $billing->id;
+
+                updateStudentDueAmount($student_id,$total_fee,0);
             }
         }
             
@@ -596,6 +601,8 @@ switch ($action) {
 
                 if($billing_queried->total_fee != $total){
 
+                    $prev_total_fee = $billing_queried->total_fee;
+
                     // $print_no += $billing_queried->print_no;
                     $new_billing = $billing_queried->replicate();
                     // $new_billing->print_no = $print_no;
@@ -606,6 +613,8 @@ switch ($action) {
                     $new_billing->total_fee = $total;
                     $new_billing->prev_total_fee = $billing_queried->total_fee;
                     $new_billing->save();
+
+                    updateStudentDueAmount($student_id,$total,$prev_total_fee);
 
                 }
                 
@@ -623,6 +632,8 @@ switch ($action) {
                 $billing->fiscal_year_id = $master_form_array['fiscal_year_id'];
                 $billing->print_no = $print_no;
                 $billing->save();
+
+                updateStudentDueAmount($student_id,$total,0);
                
             }
           
@@ -976,20 +987,7 @@ switch ($action) {
             $new_print_no = $billing_queried->print_no + 1;
             $billing_queried->print_no = $new_print_no;
             $billing_queried->save();
-
-
-            // if($new_print_no == 1){
-
-            //     $student_additional_info = AppStudentAdditionalInformation::where('student_id', $student->id)->first();
-            //     $due_amount = $student_additional_info->prev_amount;
-            //     $advance_amount = $student_additional_info->advance_amount;
-            //     $newDueAmount = (floatval($total_fees[$student_id]) + floatval($due_amount ));
-
-            //     $student_additional_info->prev_amount = $newDueAmount;
-            //     $student_additional_info->save();
-
-            // }
-                   
+                             
             $student_total_fee = 0;
             $fees = [];
             if (sizeof($student_fees)) {
@@ -1073,6 +1071,8 @@ switch ($action) {
 
             $count++;
         }
+        
+        $content1 = "<page><a>Sample PDF file</a></page>";
 
         $html2pdf = new Html2Pdf();
         $html2pdf->setTestTdInOnePage(false);
@@ -1200,6 +1200,50 @@ function numberTowords($num)
             }
         }
         return $feeRate;
+    }
+
+    function updateStudentDueAmount($student_id,$total_fee,$prev_total_fee){
+
+            $student_additional_info = AppStudentAdditionalInformation::where('student_id', $student_id)->first();
+           
+            $prev_due_amount = $student_additional_info->previous_due;
+            $prev_advance_amount = $student_additional_info->previous_advance;
+
+            if($prev_total_fee != 0){
+                $prev_due_amount = floatval($prev_due_amount) - floatval($prev_total_fee);
+            }
+            
+            if($prev_due_amount != null){
+                $newDueAmount = (floatval($total_fee) + floatval($prev_due_amount ));
+            }else{
+                $newDueAmount = floatval($total_fee);
+            }
+
+            if($prev_advance_amount != null && $prev_advance_amount != 0){
+                if($prev_advance_amount > $newDueAmount){
+
+                    $diff = floatval($prev_advance_amount) - floatval($newDueAmount);
+                    $new_due_amount = 0.00;
+                    $new_advance_amount = $diff;
+
+                }elseif($prev_advance_amount == $newDueAmount){
+                    $new_due_amount = 0.00;
+                    $new_advance_amount = 0.00;
+                }else{
+                    $diff = floatval($newDueAmount) - floatval($prev_advance_amount);
+                    $new_due_amount = $diff;
+                    $new_advance_amount = 0.00;
+                }
+            }else{
+                $new_due_amount = $newDueAmount;
+                $new_advance_amount = 0.00;
+            }    
+
+            $student_additional_info->previous_due = $new_due_amount;
+            $student_additional_info->previous_advance = $new_advance_amount;
+            $student_additional_info->save();
+
+    
     }
 
 

@@ -5,6 +5,7 @@ $table_billings->add('month', 'varchar', 256);
 $table_billings->add('fine', 'decimal', '20,2');
 $table_billings->add('discount', 'decimal', '20,2');
 $table_billings->add('scholarship', 'decimal', '20,2');
+$table_billings->add('prev_total_fee', 'decimal', '20,2');
 $table_billings->add('total_fee', 'decimal', '20,2');
 $table_billings->add('generated_by_id', 'int', 11);
 $table_billings->add('billing_period_id', 'int', 11);
