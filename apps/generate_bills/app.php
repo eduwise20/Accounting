@@ -1205,9 +1205,7 @@ function numberTowords($num)
     function updateStudentDueAmount($student_id,$total_fee,$prev_total_fee){
 
             $student_additional_info = AppStudentAdditionalInformation::where('student_id', $student_id)->first();
-           
             $prev_due_amount = $student_additional_info->previous_due;
-            $prev_advance_amount = $student_additional_info->previous_advance;
 
             if($prev_total_fee != 0){
                 $prev_due_amount = floatval($prev_due_amount) - floatval($prev_total_fee);
@@ -1219,30 +1217,28 @@ function numberTowords($num)
                 $newDueAmount = floatval($total_fee);
             }
 
-            if($prev_advance_amount != null && $prev_advance_amount != 0){
-                if($prev_advance_amount > $newDueAmount){
+            // if($prev_advance_amount != null && $prev_advance_amount != 0){
+            //     if($prev_advance_amount > $newDueAmount){
 
-                    $diff = floatval($prev_advance_amount) - floatval($newDueAmount);
-                    $new_due_amount = 0.00;
-                    $new_advance_amount = $diff;
+            //         $diff = floatval($prev_advance_amount) - floatval($newDueAmount);
+            //         $new_due_amount = 0.00;
+            //         $new_advance_amount = $diff;
 
-                }elseif($prev_advance_amount == $newDueAmount){
-                    $new_due_amount = 0.00;
-                    $new_advance_amount = 0.00;
-                }else{
-                    $diff = floatval($newDueAmount) - floatval($prev_advance_amount);
-                    $new_due_amount = $diff;
-                    $new_advance_amount = 0.00;
-                }
-            }else{
-                $new_due_amount = $newDueAmount;
-                $new_advance_amount = 0.00;
-            }    
+            //     }elseif($prev_advance_amount == $newDueAmount){
+            //         $new_due_amount = 0.00;
+            //         $new_advance_amount = 0.00;
+            //     }else{
+            //         $diff = floatval($newDueAmount) - floatval($prev_advance_amount);
+            //         $new_due_amount = $diff;
+            //         $new_advance_amount = 0.00;
+            //     }
+            // }else{
+            //     $new_due_amount = $newDueAmount;
+            //     $new_advance_amount = 0.00;
+            // }    
 
-            $student_additional_info->previous_due = $new_due_amount;
-            $student_additional_info->previous_advance = $new_advance_amount;
+            $student_additional_info->previous_due = $newDueAmount;
             $student_additional_info->save();
-
     
     }
 
