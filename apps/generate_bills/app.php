@@ -284,6 +284,7 @@ switch ($action) {
                     $new_billing->discount = $student_total_discount;
                     $new_billing->scholarship = $student_total_scholarship;
                     $new_billing->total_fee = $total_fee;
+                    $new_billing->prev_total_fee = $billing_queried->total_fee;
                     $new_billing->save();
 
                     $bID = $new_billing->id;
@@ -603,9 +604,11 @@ switch ($action) {
                     $new_billing->discount = $student_total_discount;
                     $new_billing->scholarship = $student_total_scholarship;
                     $new_billing->total_fee = $total;
+                    $new_billing->prev_total_fee = $billing_queried->total_fee;
                     $new_billing->save();
 
                 }
+                
             }else{
                 $billing = new Billing;
                 $billing->month = date('m');
@@ -970,10 +973,23 @@ switch ($action) {
                 'fiscal_year_id' => $data['fiscal_year_id']
             ])->orderBy('created_at', 'desc')->first();
 
-            $old_print_no = $billing_queried->print_no + 1;
-            $billing_queried->print_no = $old_print_no;
+            $new_print_no = $billing_queried->print_no + 1;
+            $billing_queried->print_no = $new_print_no;
             $billing_queried->save();
-                    
+
+
+            // if($new_print_no == 1){
+
+            //     $student_additional_info = AppStudentAdditionalInformation::where('student_id', $student->id)->first();
+            //     $due_amount = $student_additional_info->prev_amount;
+            //     $advance_amount = $student_additional_info->advance_amount;
+            //     $newDueAmount = (floatval($total_fees[$student_id]) + floatval($due_amount ));
+
+            //     $student_additional_info->prev_amount = $newDueAmount;
+            //     $student_additional_info->save();
+
+            // }
+                   
             $student_total_fee = 0;
             $fees = [];
             if (sizeof($student_fees)) {
@@ -996,6 +1012,7 @@ switch ($action) {
                     $fines[$fine->name] = $fine_value;
                     $student_total_fine += $fine_value;
                 }
+
             }
 
             $student_total_discount = 0;
@@ -1058,7 +1075,7 @@ switch ($action) {
         }
 
         $html2pdf = new Html2Pdf();
-        // $html2pdf->setTestTdInOnePage(false);
+        $html2pdf->setTestTdInOnePage(false);
         $html2pdf->writeHTML($html);
         $date = new DateTime();
         $bill_name = 'bill_' . $date->getTimestamp() . '.pdf';
