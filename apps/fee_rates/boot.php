@@ -9,6 +9,10 @@ $admin_fee_rates_sub_menus = [
     [
         'name' => 'Add Fee Rate',
         'link' => U.'fee_rates/app/add/'
+    ],
+    [
+        'name' => 'Fee Rates',
+        'link' => U.'fee_rates/app_fee_rates/list/'
     ]
 ];
 
