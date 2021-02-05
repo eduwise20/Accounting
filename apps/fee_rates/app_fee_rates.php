@@ -29,6 +29,17 @@ switch ($action) {
         $student_types = AppStudentType::all();
         $categories = Category::all();
         $sub_categories = Subcategory::all();
+        $currentFiscalYear = FiscalYear::where('is_running',1)->first();
+        $where = [
+            'fiscal_year_id' => $currentFiscalYear->id,
+        ];
+        $fee_rates = AppFeeRate::where($where)->get();
+        if(count($fee_rates) > 0) {
+            $feeNamesWithRates = getFeeRates($fee_rates);
+       }else{
+            $feeNamesWithRates = '';
+       }
+
 
         view('app_wrapper', [
             '_include' => 'list',
@@ -38,6 +49,7 @@ switch ($action) {
             'student_types' => $student_types,
             'categories' => $categories,
             'sub_categories' => $sub_categories,
+            'feeNamesWithRates' => $feeNamesWithRates
         ]);
         break;
 
@@ -57,42 +69,12 @@ switch ($action) {
             'category_id' => $data['category_id'],
             'sub_category_id' => $data['sub_category_id'],
         ];
-       
-           $filterArray = [];
-           $class = AppClass::find($data['class_id']);
-           $filterArray['class'] = $class->name;
-
-           $studentType = AppStudentType::find($data['student_type_id']);
-           $filterArray['student_type'] = $studentType->name;
-
-           if($data['faculty_id'] != 0){
-                $faculty = AppFaculty::find($data['faculty_id']);
-                $filterArray['faculty'] = $faculty->name;
-           }else{
-                $filterArray['faculty'] = '-';
-           }
-
-            if($data['category_id'] != 0){
-                 $category = Category::find($data['category_id']);
-                 $filterArray['category'] = $category->name;
-            }else{
-                $filterArray['category'] = '-';
-            }
-
-            if($data['sub_category_id'] != 0){
-                $subCategory = Subcategory::find($data['sub_category_id']);
-                $filterArray['sub_category'] = $subCategory->name;
-            }else{
-               $filterArray['sub_category'] = '-';
-            }
           
-        $fee_rate = AppFeeRate::where($where)->get();
-        if(count($fee_rate) > 0) {
-            $fee_structures = AppFeeStructure::where('fee_rate_id', $fee_rate[0]->id)->get();
-            $feeNamesWithRate = getFeeRates($fee_structures);
-            echo json_encode([
-                'status' =>true,'fee_names' => $feeNamesWithRate,'filterData' =>$filterArray 
-                ]);
+        $fee_rates = AppFeeRate::where($where)->get();
+        if(count($fee_rates) > 0) {
+             $feeNamesWithRate = getFeeRates($fee_rates);
+              echo json_encode([
+                'status' =>true,'fee_names' => $feeNamesWithRate]);
         }else{
             echo json_encode([
                 'status' =>false 
@@ -108,14 +90,53 @@ switch ($action) {
 
 }
 
- function getFeeRates($fee_structures){
+ function getFeeRates($fee_rates){
      $newArray = [];
-     foreach($fee_structures as $fee_structure){
-         $feeName = AppFeeName::find($fee_structure->fee_names_id);
-        $newArray[]=[
-            'name' => $feeName->name,
-            'amount' => $fee_structure->amount
-        ];
+     foreach($fee_rates as $fee_rate){
+      
+        $fee_structures = AppFeeStructure::where('fee_rate_id', $fee_rate->id)->get();
+        $classObj = AppClass::find($fee_rate->class_id);
+        $class = $classObj?$classObj->name:'-';
+
+        if($fee_rate->student_type_id != 0){
+            $studentType = AppStudentType::find($fee_rate->student_type_id);
+            $student_type = $studentType?$studentType->name:'-';
+        }else{
+            $student_type = '-';
+        }
+
+        if($fee_rate->faculty_id != 0){
+             $facultyObj = AppFaculty::find($fee_rate->faculty_id);
+             $faculty = $facultyObj?$facultyObj->name:'-';
+        }else{
+             $faculty = '-';
+        }
+
+         if($fee_rate->category_id != 0){
+              $categoryObj = Category::find($fee_rate->category_id);
+              $category = $categoryObj?$categoryObj->name:'-';
+         }else{
+             $category = '-';
+         }
+
+         if($fee_rate->sub_category_id != 0){
+             $subCategory = Subcategory::find($fee_rate->sub_category_id);
+             $sub_category = $subCategory?$subCategory->name:'-';
+         }else{
+            $sub_category = '-';
+         }
+        foreach($fee_structures as $fee_structure){
+            $feeName = AppFeeName::find($fee_structure->fee_names_id);
+            $newArray[]=[
+                'class' => $class,
+                'student_type' => $student_type,
+                'faculty' => $faculty,
+                'category' => $category,
+                'sub_cayegory' => $sub_category,
+                'name' =>  $feeName?$feeName->name:'-',
+                'amount' => $fee_structure->amount
+            ];
+        }
      } 
 
      return $newArray;

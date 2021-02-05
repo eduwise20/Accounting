@@ -168,6 +168,20 @@
                                                 </tr>
                                                 </thead>
                                                 <tbody>
+                                                {if $feeNamesWithRates }
+                                                {foreach $feeNamesWithRates as $feeNamesWithRate} 
+                                                   <tr>
+                                                        <td>{$feeNamesWithRate['class']}</td>
+                                                        <td>{$feeNamesWithRate['faculty']}</td>
+                                                        <td>{$feeNamesWithRate['student_type']}</td>
+                                                        <td>{$feeNamesWithRate['category']}</td>
+                                                        <td>{$feeNamesWithRate['sub_cayegory']}</td>
+                                                        <td>{$feeNamesWithRate['name']}</td>
+                                                        <td>{$feeNamesWithRate['amount']}</td>
+                                                   </tr>
+
+                                                {/foreach}
+                                                {/if}
                                                
                                                 </tbody>
 
@@ -190,6 +204,14 @@
 {/block}
 
 {block name="script"}
+
+     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
+
+   
     <script>
         $(document).ready(function () {
 
@@ -209,7 +231,7 @@
             const faculty_section = $("#faculty_section");
             const sub_category_section = $("#sub_category_section");
 
-            fee_rate_info_section.hide();
+            //fee_rate_info_section.hide();
             faculty_section.hide();
             sub_category_section.hide();
             $(".progress").hide();
@@ -341,11 +363,62 @@
 
             $cid.select2();
 
+            //initialise
+            let initialTable = '';
+            initialTable = $('#clx_datatable').dataTable(
+                {
+                    responsive: true,
+                    lengthChange: false,
+                    bDestroy: true,
+                    dom:"<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    buttons: [
+                        {
+                            extend: 'pdfHtml5',
+                            text: 'PDF',
+                            titleAttr: 'Generate PDF',
+                            className: 'btn-danger btn-sm mr-1'
+                        },
+                        {
+                            extend: 'excelHtml5',
+                            text: 'Excel',
+                            titleAttr: 'Generate Excel',
+                            className: 'btn-success btn-sm mr-1'
+                        },
+                        {
+                            extend: 'csvHtml5',
+                            text: 'CSV',
+                            titleAttr: 'Generate CSV',
+                            className: 'btn-primary btn-sm mr-1'
+                        },
+                        {
+                            extend: 'copyHtml5',
+                            text: 'Copy',
+                            titleAttr: 'Copy to clipboard',
+                            className: 'btn-dark btn-sm mr-1'
+                        },
+                        {
+                            extend: 'print',
+                            text: 'Print',
+                            titleAttr: 'Print Table',
+                            className: 'btn-secondary btn-sm'
+                        }
+                    ]
+                }
+            );
+            //initialise end
+
             let table = '';
             let prevTable = '';
             btn_assign.click(function (e) {
                 disableAssignButton();
                 e.preventDefault();
+                if(initialTable != ''){
+                     $('#clx_datatable').DataTable().clear()
+                     $('#clx_datatable').DataTable().destroy();
+                     initialTable = '';
+                }
                 let postValue = {
                     fiscal_year_id : fiscal_year_id[0].value,
                     class_id : class_id[0].value,
@@ -373,10 +446,10 @@
                             
                             let fee_names = jsonData['fee_names'];
                             let fee_structures = jsonData['fee_structures'];
-                            let filters = jsonData['filterData'];
-                            tableBody = populateFees(fee_names,filters)
+                            tableBody = populateFees(fee_names)
                                 
                                  table = $('#clx_datatable').DataTable({
+                                                    bDestroy: true,
                                                     responsive: false,
                                                     lengthChange: false,
                                                     dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
@@ -429,12 +502,11 @@
 
             });
 
-            function populateFees(fee_names,filters){
+            function populateFees(fee_names){
                let tableBody = '';
                fee_names.forEach(function(fee_name) {
                     tableBody +=
-                                    '<tr><td>'+filters['class']+'</td><td>'+filters['faculty']+'</td><td>'+filters['student_type']+'</td><td>'+filters['category']+'</td><td>'+filters['sub_category']+'</td><td>'+fee_name['name']+'</td><td>'+fee_name['amount']+'</td></tr>';
-                                   
+                        '<tr><td>'+fee_name['class']+'</td><td>'+fee_name['faculty']+'</td><td>'+fee_name['student_type']+'</td><td>'+fee_name['category']+'</td><td>'+fee_name['sub_category']+'</td><td>'+fee_name['name']+'</td><td>'+fee_name['amount']+'</td></tr>';
                });
 
                return tableBody;
@@ -491,88 +563,5 @@
         });
     </script>
 
-     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
 
-
-    <script>
-        $(function() {
-
-            $('#clx_datatable1').dataTable(
-                {
-                    responsive: true,
-                    lengthChange: false,
-                    dom:
-                    /*	--- Layout Structure
-                        --- Options
-                        l	-	length changing input control
-                        f	-	filtering input
-                        t	-	The table!
-                        i	-	Table information summary
-                        p	-	pagination control
-                        r	-	processing display element
-                        B	-	buttons
-                        R	-	ColReorder
-                        S	-	Select
-
-                        --- Markup
-                        < and >				- div element
-                        <"class" and >		- div with a class
-                        <"#id" and >		- div with an ID
-                        <"#id.class" and >	- div with an ID and a class
-
-                        --- Further reading
-                        https://datatables.net/reference/option/dom
-                        --------------------------------------
-                     */
-                        "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                        "<'row'<'col-sm-12'tr>>" +
-                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                    buttons: [
-                        /*{
-                        	extend:    'colvis',
-                        	text:      'Column Visibility',
-                        	titleAttr: 'Col visibility',
-                        	className: 'mr-sm-3'
-                        },*/
-                        {
-                            extend: 'pdfHtml5',
-                            text: 'PDF',
-                            titleAttr: 'Generate PDF',
-                            className: 'btn-danger btn-sm mr-1'
-                        },
-                        {
-                            extend: 'excelHtml5',
-                            text: 'Excel',
-                            titleAttr: 'Generate Excel',
-                            className: 'btn-success btn-sm mr-1'
-                        },
-                        {
-                            extend: 'csvHtml5',
-                            text: 'CSV',
-                            titleAttr: 'Generate CSV',
-                            className: 'btn-primary btn-sm mr-1'
-                        },
-                        {
-                            extend: 'copyHtml5',
-                            text: 'Copy',
-                            titleAttr: 'Copy to clipboard',
-                            className: 'btn-dark btn-sm mr-1'
-                        },
-                        {
-                            extend: 'print',
-                            text: 'Print',
-                            titleAttr: 'Print Table',
-                            className: 'btn-secondary btn-sm'
-                        }
-                    ]
-                }
-            );
-
-            $('.has-tooltip').tooltip();
-        });
-    </script>
 {/block}
