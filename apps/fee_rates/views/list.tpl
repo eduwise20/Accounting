@@ -50,7 +50,7 @@
                                 <div class="col-md-6 col-sm-6">
 
                                         <div class="form-group row">
-                                            <label for="remarks" class="col-sm-4"><span class="h6">Fiscal Year</span><span class="text-danger">*</span></label>
+                                            <label for="remarks" class="col-sm-4"><span class="h6">Fiscal Year</span></label>
                                             <div class="col-sm-8">
                                                 {if !isset($fiscal_year->id)} 
                                                     <p>No Fiscal Year Selected or Active.</p>
@@ -62,7 +62,7 @@
                                         </div>
 
                                     <div class="form-group row">
-                                        <label for="remarks" class="col-sm-4"><span class="h6">Class</span><span class="text-danger">*</span></label>
+                                        <label for="remarks" class="col-sm-4"><span class="h6">Class</span></label>
                                         <div class="col-sm-8">
                                             <select id="class_id" name="class_id" class="custom-select">
                                                 <option value="0">--</option>
@@ -74,7 +74,7 @@
                                     </div>
 
                                     <div class="form-group row" id="faculty_section">
-                                        <label for="remarks" class="col-sm-4"><span class="h6">Faculty</span><span class="text-danger">*</span></label>
+                                        <label for="remarks" class="col-sm-4"><span class="h6">Faculty</span></label>
                                         <div class="col-sm-8">
                                             <select id="faculty_id" name="faculty_id" class="custom-select">
                                                 <option value="0">--</option>
@@ -86,7 +86,7 @@
                                     <div class="col-md-6 col-sm-6">
 
                                     <div class="form-group row">
-                                        <label for="remarks" class="col-sm-4"><span class="h6">Student Type</span><span class="text-danger">*</span></label>
+                                        <label for="remarks" class="col-sm-4"><span class="h6">Student Type</span></label>
                                         <div class="col-sm-8">
                                             <select id="student_type_id" name="student_type_id" class="custom-select">
                                                 <option value="0">--</option>
@@ -124,7 +124,7 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <button class="btn btn-primary mt-3 mr-3 disabled" type="button" id="btn_assign">View</button>
+                                        <button class="btn btn-primary mt-3 mr-3" type="button" id="btn_assign">View</button>
                                     </div>
                                 </div>
                             </div>
@@ -243,7 +243,7 @@
             $(".progress").hide();
             $("#emsg").hide();
             $("#emsg_fee_rate_info").hide();
-            btn_assign.prop("disabled", true);
+           // btn_assign.prop("disabled", true);
             var _url = '{$_url}';
 
             class_id.change(function(){
@@ -251,36 +251,36 @@
                 if (is_class_chosen) {
                     getFacultyForClass(class_id[0].value);
                 }
-                checkToRemoveDisabled();
+                // checkToRemoveDisabled();
             });
 
             student_type_id.change(function(){
                 is_student_type_chosen = student_type_id[0].value != 0;
-                checkToRemoveDisabled();
+               // checkToRemoveDisabled();
             });
 
             faculty_id.change(function(){
                 is_faculty_chosen = faculty_id[0].value != 0;
-                checkToRemoveDisabled();
+                // checkToRemoveDisabled();
             });
 
             category_id.change(function(){
                 is_category_chosen = category_id[0].value != 0;
                 if (is_category_chosen) {
                     getSubCategoriesForCategory(category_id[0].value);
-                    enableAssignButton();
+                    //enableAssignButton();
                 } else {
                     $("#sub_category_id").html('<option value="0">--</option>');
                     sub_category_section.hide();
                 }
-                checkToRemoveDisabled();
+               // checkToRemoveDisabled();
             });
 
             sub_category_id.change(function(){
                 if(sub_category_id[0].value != 0){
-                    enableAssignButton();
+                    //enableAssignButton();
                 }
-                checkToRemoveDisabled();
+                // checkToRemoveDisabled();
             });
 
             function checkToRemoveDisabled() {
@@ -289,26 +289,26 @@
                 if (is_class_chosen && is_student_type_chosen) {
                     if (is_faculty_populated) {
                         if (is_faculty_chosen) {
-                            enableAssignButton();
+                            //enableAssignButton();
                         } else {
-                            disableAssignButton();
+                            //disableAssignButton();
                         }
                     } else {
-                        enableAssignButton();
+                       // enableAssignButton();
                     }
                 } else {
-                    disableAssignButton();
+                    //disableAssignButton();
                 }
             }
 
             function enableAssignButton() {
-                btn_assign.removeClass("disabled");
-                btn_assign.prop("disabled", false);
+                //btn_assign.removeClass("disabled");
+                //btn_assign.prop("disabled", false);
             }
 
             function disableAssignButton() {
-                btn_assign.addClass("disabled");
-                btn_assign.prop("disabled", true);
+                //btn_assign.addClass("disabled");
+                //btn_assign.prop("disabled", true);
             }
 
             function getFacultyForClass(class_id) {

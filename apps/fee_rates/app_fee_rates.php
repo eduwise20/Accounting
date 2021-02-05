@@ -60,15 +60,29 @@ switch ($action) {
         break;
 
     case 'getFeeStructuresForFeeRate':
+        
         $data = $request->all();
+
         $where = [
             'fiscal_year_id' => $data['fiscal_year_id'],
-            'class_id' => $data['class_id'],
-            'student_type_id' => $data['student_type_id'],
-            'faculty_id' => $data['faculty_id'],
-            'category_id' => $data['category_id'],
-            'sub_category_id' => $data['sub_category_id'],
-        ];
+         ];
+
+        if($data['class_id'] != 0){
+            $where['class_id'] = $data['class_id'];
+        }
+
+        if($data['student_type_id'] != 0){
+            $where['student_type_id'] = $data['student_type_id'];
+        }
+        if($data['faculty_id'] != 0){
+            $where['faculty_id'] = $data['faculty_id'];
+        }
+        if($data['category_id'] != 0){
+            $where['category_id'] = $data['category_id'];
+        }
+        if($data['sub_category_id'] != 0){
+            $where['sub_category_id'] = $data['sub_category_id'];
+        }
           
         $fee_rates = AppFeeRate::where($where)->get();
         if(count($fee_rates) > 0) {
