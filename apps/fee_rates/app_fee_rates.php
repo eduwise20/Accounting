@@ -132,9 +132,12 @@ switch ($action) {
                 'student_type' => $student_type,
                 'faculty' => $faculty,
                 'category' => $category,
-                'sub_cayegory' => $sub_category,
+                'sub_category' => $sub_category,
                 'name' =>  $feeName?$feeName->name:'-',
-                'amount' => $fee_structure->amount
+                'amount' => $fee_structure->amount,
+                'is_transportation' => $feeName?$feeName->is_transportation:'',
+                'from' => $feeName?$feeName->from:'',
+                'to' => $feeName?$feeName->to:'',
             ];
         }
      } 

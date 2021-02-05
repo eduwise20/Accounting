@@ -78,6 +78,10 @@
                                     <tr>
                                         <td>
                                             {$fee_name->name}
+                                            {if $fee_name->is_transportation eq 1}
+                                                <br/>
+                                                ({$fee_name->from} - {$fee_name->to})
+                                            {/if}
                                         </td>
                                         <td>
                                             {$fee_name->code}

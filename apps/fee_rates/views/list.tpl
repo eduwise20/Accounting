@@ -175,8 +175,14 @@
                                                         <td>{$feeNamesWithRate['faculty']}</td>
                                                         <td>{$feeNamesWithRate['student_type']}</td>
                                                         <td>{$feeNamesWithRate['category']}</td>
-                                                        <td>{$feeNamesWithRate['sub_cayegory']}</td>
-                                                        <td>{$feeNamesWithRate['name']}</td>
+                                                        <td>{$feeNamesWithRate['sub_category']}</td>
+                                                        <td>
+                                                           {$feeNamesWithRate['name']}
+                                                           {if $feeNamesWithRate['is_transportation'] eq 1}
+                                                                <br/>
+                                                                ({$feeNamesWithRate['from']} - {$feeNamesWithRate['to']})
+                                                            {/if}
+                                                        </td>
                                                         <td>{$feeNamesWithRate['amount']}</td>
                                                    </tr>
 
@@ -505,8 +511,13 @@
             function populateFees(fee_names){
                let tableBody = '';
                fee_names.forEach(function(fee_name) {
-                    tableBody +=
-                        '<tr><td>'+fee_name['class']+'</td><td>'+fee_name['faculty']+'</td><td>'+fee_name['student_type']+'</td><td>'+fee_name['category']+'</td><td>'+fee_name['sub_category']+'</td><td>'+fee_name['name']+'</td><td>'+fee_name['amount']+'</td></tr>';
+                    tableBody +='<tr><td>'+fee_name['class']+'</td><td>'+fee_name['faculty']+'</td><td>'+fee_name['student_type']+'</td><td>'+fee_name['category']+'</td><td>'+fee_name['sub_category']+'</td>';
+                        
+                    tableBody +='<td>'+fee_name['name'];
+                    if(fee_name['is_transportation'] == 1){
+                        tableBody += '</br>'+fee_name['from']+' - '+ fee_name['to'];
+                    }
+                    tableBody += '</td><td>'+fee_name['amount']+'</td></tr>';
                });
 
                return tableBody;
