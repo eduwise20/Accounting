@@ -124,7 +124,7 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <button class="btn btn-primary mt-3 mr-3 disabled" type="button" id="btn_assign">Assign</button>
+                                        <button class="btn btn-primary mt-3 mr-3 disabled" type="button" id="btn_assign">View</button>
                                     </div>
                                 </div>
                             </div>
@@ -168,38 +168,7 @@
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                {foreach $fee_names as $fee_name}
-                                                    <tr>
-                                                         <td id="class{$fee_name->id}">
-                                                           
-                                                        </td>
-                                                         <td id="faculty{$fee_name->id}">
-                                                           
-                                                        </td>
-                                                         <td id="studenttype{$fee_name->id}">
-                                                           
-                                                        </td>
-                                                         <td id="category{$fee_name->id}">
-                                                           
-                                                        </td>
-                                                        <td id="subcategory{$fee_name->id}">
-                                                           
-                                                        </td>
-
-                                                        <td>
-                                                            {$fee_name->name}
-                                                            {if $fee_name->is_transportation eq 1}
-                                                                <br/>
-                                                                ({$fee_name->from} - {$fee_name->to})
-                                                            {/if}
-                                                        </td>
-
-                                                         <td>
-                                                            <input type="text" id="amount[{$fee_name->id}]" name="amount[{$fee_name->id}]" class="form-control">
-                                                            <input type="hidden" id="fee_name_id[{$fee_name->id}]" name="fee_name_id[{$fee_name->id}]" value="{$fee_name->id}" />
-                                                        </td>
-                                                    </tr>
-                                                {/foreach}
+                                               
                                                 </tbody>
 
                                             </table>
@@ -372,6 +341,8 @@
 
             $cid.select2();
 
+            let table = '';
+            let prevTable = '';
             btn_assign.click(function (e) {
                 disableAssignButton();
                 e.preventDefault();
@@ -392,16 +363,82 @@
                     function (data, status){
                         if(data) {
                             let jsonData = JSON.parse(data);
+                            if(jsonData['status'] == true){
+                            
+                            let tableBody = '';
+                            if(prevTable != ''){
+                                prevTable.clear(); 
+                                prevTable.destroy(); 
+                             }
+                            
+                            let fee_names = jsonData['fee_names'];
                             let fee_structures = jsonData['fee_structures'];
                             let filters = jsonData['filterData'];
-                            if (fee_structures.length > 0) {
-                                populateAmount(fee_structures,filters);
-                            }
+                            tableBody = populateFees(fee_names,filters)
+                                
+                                 table = $('#clx_datatable').DataTable({
+                                                    responsive: false,
+                                                    lengthChange: false,
+                                                    dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                                                        "<'row'<'col-sm-12'tr>>" +
+                                                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                                                    buttons: [
+                                                        {
+                            extend: 'pdfHtml5',
+                            text: 'PDF',
+                            titleAttr: 'Generate PDF',
+                            className: 'btn-danger btn-sm mr-1'
+                        },
+                        {
+                            extend: 'excelHtml5',
+                            text: 'Excel',
+                            titleAttr: 'Generate Excel',
+                            className: 'btn-success btn-sm mr-1'
+                        },
+                        {
+                            extend: 'csvHtml5',
+                            text: 'CSV',
+                            titleAttr: 'Generate CSV',
+                            className: 'btn-primary btn-sm mr-1'
+                        },
+                        {
+                            extend: 'copyHtml5',
+                            text: 'Copy',
+                            titleAttr: 'Copy to clipboard',
+                            className: 'btn-dark btn-sm mr-1'
+                        },
+                        {
+                            extend: 'print',
+                            text: 'Print',
+                            titleAttr: 'Print Table',
+                            className: 'btn-secondary btn-sm'
                         }
-                        fee_rate_info_section.show();
+                                                    ]
+                                             });
+                                    prevTable = table;
+                                    table.rows.add($(tableBody)).draw();
+                                    fee_rate_info_section.show();
+                        }else{
+                            fee_rate_info_section.hide();
+                            alert('No fee rate defined yet.');
+                        }
+
+                        }
+                        
                     });
 
             });
+
+            function populateFees(fee_names,filters){
+               let tableBody = '';
+               fee_names.forEach(function(fee_name) {
+                    tableBody +=
+                                    '<tr><td>'+filters['class']+'</td><td>'+filters['faculty']+'</td><td>'+filters['student_type']+'</td><td>'+filters['category']+'</td><td>'+filters['sub_category']+'</td><td>'+fee_name['name']+'</td><td>'+fee_name['amount']+'</td></tr>';
+                                   
+               });
+
+               return tableBody;
+            }
 
             function populateAmount1(fee_structures,filters) {
                 fee_structures.forEach(function(fee_structure) {
@@ -464,7 +501,7 @@
     <script>
         $(function() {
 
-            $('#clx_datatable').dataTable(
+            $('#clx_datatable1').dataTable(
                 {
                     responsive: true,
                     lengthChange: false,

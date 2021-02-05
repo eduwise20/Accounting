@@ -1072,8 +1072,6 @@ switch ($action) {
             $count++;
         }
         
-        $content1 = "<page><a>Sample PDF file</a></page>";
-
         $html2pdf = new Html2Pdf();
         $html2pdf->setTestTdInOnePage(false);
         $html2pdf->writeHTML($html);

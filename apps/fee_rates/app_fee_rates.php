@@ -1,5 +1,7 @@
 <?php
 
+use function Clue\StreamFilter\fun;
+
 require 'apps/fee_rates/models/AppFeeRate.php';
 require 'apps/fee_rates/models/AppFeeStructure.php';
 require 'apps/fee_names/models/AppFeeName.php';
@@ -87,7 +89,14 @@ switch ($action) {
         $fee_rate = AppFeeRate::where($where)->get();
         if(count($fee_rate) > 0) {
             $fee_structures = AppFeeStructure::where('fee_rate_id', $fee_rate[0]->id)->get();
-            echo json_encode(['fee_structures' => $fee_structures,'filterData' =>$filterArray ]);
+            $feeNamesWithRate = getFeeRates($fee_structures);
+            echo json_encode([
+                'status' =>true,'fee_names' => $feeNamesWithRate,'filterData' =>$filterArray 
+                ]);
+        }else{
+            echo json_encode([
+                'status' =>false 
+                ]);
         }
         break;
 
@@ -98,3 +107,17 @@ switch ($action) {
         break;
 
 }
+
+ function getFeeRates($fee_structures){
+     $newArray = [];
+     foreach($fee_structures as $fee_structure){
+         $feeName = AppFeeName::find($fee_structure->fee_names_id);
+        $newArray[]=[
+            'name' => $feeName->name,
+            'amount' => $fee_structure->amount
+        ];
+     } 
+
+     return $newArray;
+
+ }
