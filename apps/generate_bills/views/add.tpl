@@ -775,13 +775,15 @@
                                                         if(type == 'saveandprint'){
                                                             printData();
                                                         }
-                                                        $('#loader1').hide();
-                                                        table.rows().nodes().page.len(10).draw();
-                                                        $('#ibox_form').unblock();
-                                                        var body = $("html, body");
-                                                        body.animate({ scrollTop: 0 }, '1000', 'swing');
-                                                        $('#success_msg').show();
-                                                        $('#success_msg_info').html('Bill saved.');
+                                                        if(type == 'onlysave'){
+                                                            $('#loader1').hide();
+                                                            table.rows().nodes().page.len(10).draw();
+                                                            $('#ibox_form').unblock();
+                                                            var body = $("html, body");
+                                                            body.animate({ scrollTop: 0 }, '1000', 'swing');
+                                                            $('#success_msg').show();
+                                                            $('#success_msg_info').html('Bill saved.');
+                                                        }
                                                     } else {
                                                         $('#loader1').hide();
                                                         $('#ibox_form').unblock();
@@ -798,15 +800,17 @@
              $.post(base_url + 'generate_bills/app/print/', $('#billing_master_form, #student_billing_form')
                                                     .serialize())
                                                 .done(function(data) {
-                                                       $('#loader1').hide();
-                                                       table.rows().nodes().page.len(10).draw();
-                                                        $('#ibox_form').unblock();
-                                                        var body = $("html, body");
-                                                        body.animate({ scrollTop: 0 }, '1000', 'swing');
-                                                        $('#success_msg').show();
-                                                        $('#success_msg_info').html('Bill saved.');
-                                                         window.open(data, '_blank');
-                                                         window.focus();
+                                                        if(data){
+                                                                $('#loader1').hide();
+                                                                table.rows().nodes().page.len(10).draw();
+                                                                $('#ibox_form').unblock();
+                                                                var body = $("html, body");
+                                                                body.animate({ scrollTop: 0 }, '1000', 'swing');
+                                                                $('#success_msg').show();
+                                                                $('#success_msg_info').html('Bill saved.');
+                                                                window.open(data, '_blank');
+                                                                window.focus();
+                                                         }
                                                 });
         }                     
 

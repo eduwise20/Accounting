@@ -1048,6 +1048,10 @@ switch ($action) {
 
             $student_list_count--;
 
+            if($count % 2 != 0){
+                $html .='<page>';
+            }
+
             $html .= view_render('app_wrapper_without_theme', [
                 '_include' => 'billing',
                 'fees' => $fees,
@@ -1065,13 +1069,21 @@ switch ($action) {
                 'date' => date("Y-m-d"),
                 'amount_in_words' => $amount_in_words,
                 'student_list_count' => $count,
-                'app_url' => APP_URL
+                'app_url' => APP_URL,
+                'count' => $count % 2 == 0?'even':'odd'
             ]);
-            
+
+            if($count % 2 == 0){
+                $html .='</page>';
+            }
 
             $count++;
         }
-        
+
+        if(count($student_ids) % 2 != 0 ){
+            $html .= '</page>';
+        }
+
         $html2pdf = new Html2Pdf();
         $html2pdf->setTestTdInOnePage(false);
         $html2pdf->writeHTML($html);

@@ -1,16 +1,16 @@
-    <page><table class="table-container">
+<table class="table-container">
         <thead>
             <tr>
                 <td>
                     <table>
                         <tr>
-                            <td width="150" style="padding-right:10px;">
-                                <img src="{$app_url}/ui/lib/img/trust-1-1.png" width="150" alt="trust-1-1"
+                            <td width="100" style="padding-right:10px;">
+                                <img src="{$app_url}/ui/lib/img/trust-1-1.png" width="100" alt="trust-1-1"
                                     border="0" />
                             </td>
                             <td>
-                                <h1>Eduwise School Nepal</h1>
-                                <p style="margin-top:20px;">Kathmandu, Nepal</p>
+                                <h2>Eduwise School Nepal</h2>
+                                <p style="margin-top:10px;">Kathmandu, Nepal</p>
                             </td>
                         </tr>
                     </table>
@@ -24,7 +24,7 @@
                         <tbody>
                             <tr>
                                 <td style="border-bottom:1px solid black;">
-                                    <table class="table-fee-receipt-section table-fluid" style="padding-top:5px;padding-bottom:5px;padding-left:5px;">
+                                    <table class="table-fee-receipt-section table-fluid" style="padding-top:3px;padding-bottom:3px;padding-left:5px;">
                                         <tr>
                                             <th style="width: 250px; text-align: left;">Fee Receipt</th>
                                             <th style="width: 250px; text-align: center;">Receipt No. {$student_list_count}</th>
@@ -36,13 +36,13 @@
 
                             <tr>
                                 <td style="border-bottom:1px solid black;">
-                                    <table class="table-fluid" style="padding-top:5px;padding-bottom:5px;padding-left:5px;">
+                                    <table class="table-fluid" style="padding-top:3px;padding-bottom:3px;padding-left:5px;">
                                         <tbody>
                                             <tr>
                                                 <td style="width: 400px; text-align: left;">
                                                     <table>
                                                         <tbody>
-                                                            <tr style="margin-bottom:5px;">
+                                                            <tr style="margin-bottom:3px;">
                                                                 <td style="width: 170px;">Student Name: </td>
                                                                 <td><b>{$student->name}</b></td>
                                                             </tr>
@@ -88,7 +88,7 @@
 
                             <tr>
                                 <td style="border-bottom:1px solid black;">
-                                    <table class="table-fluid table-account" style="padding-top:5px;padding-bottom:5px;padding-left:5px;">
+                                    <table class="table-fluid table-account" style="padding-top:3px;padding-bottom:3px;padding-left:5px;">
                                         <tbody>
                                             <tr>
                                                 <td style="width: 660px; text-align: left;"><b>Particulars</b></td>
@@ -161,7 +161,7 @@
                             </tr>
                             <tr>
                                 <td style="border-bottom:1px solid black;">
-                                    <table class="table-fluid table-account" style="padding-top:5px;padding-bottom:5px;padding-left:5px;">
+                                    <table class="table-fluid table-account" style="padding-top:3px;padding-bottom:3px;padding-left:5px;">
                                         <tbody>
                                             <tr>
                                                 <td style="width: 660px; text-align: left;"><b>Summary</b></td>
@@ -197,7 +197,7 @@
                             </tr>
                             <tr>
                                 <td style="border-bottom:1px solid black;">
-                                    <table class="table-fluid" style="padding-top:5px;padding-bottom:5px;padding-left:5px;">
+                                    <table class="table-fluid" style="padding-top:3px;padding-bottom:3px;padding-left:5px;">
                                         <tbody>
                                             <tr>
                                                <td style="width: 575px; text-align: left;">
@@ -228,7 +228,7 @@
 
                             <tr>
                                 <td>
-                                    <table class="table-fluid" style="padding-top:5px;padding-bottom:5px;padding-left:5px;">
+                                    <table class="table-fluid" style="padding-top:3px;padding-bottom:3px;padding-left:5px;">
                                         <tbody>
                                             <tr>
                                                 <td style="width: 575px; text-align: left;">
@@ -269,4 +269,5 @@
             </tr>
         </tfoot>
     </table>
-    </page>
+  
+    
