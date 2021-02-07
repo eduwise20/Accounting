@@ -57,7 +57,7 @@ switch ($action) {
                 $student->category = Category::find($student->category_id)->name;
             }
             if ($student->sub_category_id != 0) {
-                $student->sub_category_id = Subcategory::find($student->sub_category_id)->name;
+                $student->sub_category = Subcategory::find($student->sub_category_id)->name;
             }
             $student->student_type = AppStudentType::find($student->student_type_id)->name;
             if ($student->faculty_id != 0) {

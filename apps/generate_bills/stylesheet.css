@@ -1,0 +1,33 @@
+* {
+    padding: 0;
+    margin: 0;
+    font-family: "Arial";
+    box-sizing: border-box;
+  }
+  table {
+    border-spacing: 15px;
+  }
+  table,
+  th,
+  td {
+    border: none;
+    padding: 10px;
+    border-collapse: collapse;
+  }
+  .table-container {
+    max-width: 100%;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .table-billing,
+  .table-billing > tbody > tr > td,
+  .table-billing > tbody > tr > th {
+    border: 1px solid black;
+    padding: 0 !important;
+  }
+  .table-fluid {
+    width: 100%;
+  }
+  .table-account td:last-child {
+      text-align: right;
+  }

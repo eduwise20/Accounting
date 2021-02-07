@@ -23,6 +23,8 @@ $table_student_additional_information->add('permanent_address', 'varchar', 256);
 $table_student_additional_information->add('parent_name', 'varchar', 256);
 $table_student_additional_information->add('local_guardian_name', 'varchar', 256);
 $table_student_additional_information->add('gender', 'varchar', 256);
+$table_student_additional_information->add('previous_due', 'int', 20);
+$table_student_additional_information->add('previous_advance', 'int', 20);
 $table_student_additional_information->add('created_at', 'TIMESTAMP', '', 'null');
 $table_student_additional_information->add('updated_at', 'TIMESTAMP', '', 'null');
 $table_student_additional_information->save();
