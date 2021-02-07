@@ -1,3 +1,4 @@
 storage/compiled/
 system/config.php
 .idea/**
+apps/generate_bills/output/*
